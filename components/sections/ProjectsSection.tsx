@@ -12,9 +12,9 @@ const projects: Project[] = [
   },
   {
     id: 'server-monitor',
-    name: '홈서버 관제센터',
-    description: '현재 사이트. 홈서버 상태 모니터링 및 포트폴리오 사이트',
-    technologies: ['Next.js', 'TypeScript', 'Docker', 'Linux'],
+    name: 'ddongmy-os',
+    description: '현재 사이트. 포트폴리오와 프로젝트를 소개하는 개인 웹사이트',
+    technologies: ['Next.js', 'TypeScript', 'Docker'],
     status: 'operational',
     link: 'https://www.ddongmy.com',
   },
@@ -63,4 +63,3 @@ export default function ProjectsSection() {
     </section>
   )
 }
-
