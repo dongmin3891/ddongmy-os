@@ -50,6 +50,18 @@ docker-compose logs -f
 docker-compose down
 ```
 
+## CI/CD
+
+`main` 브랜치에 push하면 GitHub Actions가 빌드를 확인한 뒤 서버에 SSH로 접속해 Docker Compose로 재배포합니다.
+
+GitHub 저장소의 `Settings > Secrets and variables > Actions`에 아래 Secrets를 등록해야 합니다.
+
+- `DEPLOY_HOST`: 배포 서버 IP 또는 도메인
+- `DEPLOY_USER`: SSH 접속 사용자
+- `DEPLOY_SSH_KEY`: 서버 접속용 private key
+- `DEPLOY_PATH`: 서버에서 이 repo가 위치한 절대 경로
+- `DEPLOY_PORT`: SSH 포트, 생략 시 `22`
+
 ## 배포
 
 1. Docker 이미지 빌드 및 실행

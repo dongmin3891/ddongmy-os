@@ -2,9 +2,7 @@
 FROM node:20-alpine AS base
 
 # Alpine에서 필요한 기본 패키지 설치
-# - libc6-compat : 일부 Node/native 모듈 호환성
-# - docker-cli   : 컨테이너 안에서 `docker ps` 실행용
-RUN apk add --no-cache libc6-compat docker-cli
+RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 

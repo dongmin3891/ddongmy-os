@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
     www:
         build: .
@@ -9,6 +7,3 @@ services:
             - .env.production
         ports:
             - '3002:3000'
-        volumes:
-            # 호스트의 도커 소켓을 컨테이너 안으로 마운트
-            - /var/run/docker.sock:/var/run/docker.sock
