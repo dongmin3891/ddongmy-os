@@ -5,7 +5,7 @@ import SkillsSection from '@/components/sections/SkillsSection';
 import ContactSection from '@/components/sections/ContactSection';
 
 export default function Home() {
-    console.log('오신것을 횐영합니다. (배포테스트)');
+    console.log('오신것을 횐영합니다. (배포테스트)2');
     return (
         <main className="min-h-screen">
             <div className="container mx-auto px-4 py-8 lg:px-8">
