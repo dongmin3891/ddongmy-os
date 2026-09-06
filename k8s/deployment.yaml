@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: web-app
+  namespace: default
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: web
+
+  template:
+    metadata:
+      labels:
+        app: web
+
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/dongmin3891/ddongmy-os:43675e56fc1df49e80f958838400cec1b4df96e7
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
