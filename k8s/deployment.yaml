@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: ghcr.io/dongmin3891/ddongmy-os:f1a9dc1eb1a0b651d66dcc4a42b7e1e9de8382b6
+          image: ghcr.io/dongmin3891/ddongmy-os:3c837e42ea7c89d71d1a72d52b3af562fad52695
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
