@@ -42,14 +42,13 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# 실행에 필요한 파일들만 복사
-COPY --from=builder /app/package.json package-lock.json* ./
-COPY --from=builder /app/.next ./.next
-COPY --from=deps    /app/node_modules ./node_modules
+# 실행에 필요한 파일들만 복사하고 non-root node 사용자 소유로 설정
+COPY --chown=node:node --from=builder /app/package.json ./package.json
+COPY --chown=node:node --from=builder /app/package-lock.json ./package-lock.json
+COPY --chown=node:node --from=builder /app/.next ./.next
+COPY --chown=node:node --from=deps /app/node_modules ./node_modules
 
-# (선택) non-root 유저로 실행하고 싶으면 여기에 추가
-# RUN addgroup -g 1001 nodejs && adduser -S -u 1001 nextjs
-# USER nextjs
+USER node
 
 EXPOSE 3000
 
