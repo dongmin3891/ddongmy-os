@@ -42,6 +42,9 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Argo CD Web Terminal 테스트용 bash 설치
+RUN apk add --no-cache bash
+
 # 실행에 필요한 파일들만 복사하고 non-root node 사용자 소유로 설정
 COPY --chown=node:node --from=builder /app/package.json ./package.json
 COPY --chown=node:node --from=builder /app/package-lock.json ./package-lock.json
