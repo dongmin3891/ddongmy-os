@@ -29,6 +29,16 @@ spec:
         - name: web
           image: ghcr.io/dongmin3891/ddongmy-os:43a7d7b5900bafa5e3efa578bcb7e1c3c66003c0
           imagePullPolicy: Always
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 3000
           lifecycle:
