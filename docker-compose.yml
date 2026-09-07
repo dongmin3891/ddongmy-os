@@ -1,9 +1,0 @@
-services:
-    www:
-        build: .
-        container_name: ddongmy-os
-        restart: always
-        env_file:
-            - .env.production
-        ports:
-            - '3002:3000'
