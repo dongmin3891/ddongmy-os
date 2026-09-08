@@ -12,8 +12,10 @@ FROM base AS deps
 # package-lock.json이 있으면 같이 복사
 COPY package.json package-lock.json* ./
 
-# devDependencies까지 포함해서 설치 (Next.js 빌드에 필요)
-RUN npm ci
+# lockfile 기준 설치 후, 보안 패치된 Next.js 버전으로 덮어쓴다.
+# package-lock.json 정식 갱신 전까지 사용하는 긴급 패치이며 image에는 15.5.25가 설치된다.
+RUN npm ci \
+  && npm install --no-save --package-lock=false next@15.5.25
 
 # 3. 빌드 단계
 FROM base AS builder
