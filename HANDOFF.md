@@ -1,5 +1,34 @@
 # ddongmy.com Portfolio / Dev Log / Homelab Handoff
 
+## 0. 최우선 작업 — 공통 스킬 2개 추가
+
+**다음 작업자는 사이트 설계·구현과 Notion API 연동보다 먼저 아래 두 스킬을 `skills/`에 추가한다.**
+현재는 추가 예정이며, 기존 스킬팩을 보강하는 첫 작업이다.
+
+1. `skills/readable-contracts/SKILL.md`
+   - API 요청·응답, 함수 입력·결과와 컴포넌트 props의 계약을 읽기 쉽게 설계하는 기준을 담는다.
+   - 용도가 드러나는 이름, 요청·응답·편집 초안의 구분, 필수·생략·`null`의 의미,
+     성공·실패 상태 표현과 계약 원본의 단일화를 다룬다.
+   - `type` / `interface`는 기존 프로젝트 규칙을 우선하고, 과도한 generic·utility type보다
+     사용처에서 바로 이해할 수 있는 표현을 선택한다.
+2. `skills/http-client/SKILL.md`
+   - `fetch` / Axios 기반 요청 실행, 응답 처리와 통신 실패 전달의 공통 기준을 담는다.
+   - 기존 도구 우선, 의도가 드러나는 도메인 요청 함수, 공통 client의 책임, 오류 구분,
+     취소·timeout·재시도 소유자, interceptor와 서버·브라우저 경계를 다룬다.
+   - `fetch`와 Axios를 별도 스킬로 늘리지 않고 도구별 차이·예시는 `references/`로 분리한다.
+
+두 스킬 모두 **가독성을 최우선**으로 하고 다른 프로젝트에도 공통으로 사용할 수 있게 작성한다.
+특정 framework, validator, 폴더 구조나 응답 envelope를 일괄 강제하지 않는다.
+공통화는 실제로 반복되는 책임에만 적용하고 의미 없는 타입·wrapper·계층을 늘리지 않는다.
+
+역할 경계는 `readable-contracts`가 계약 설계, `http-client`가 통신 실행,
+[schema-at-boundary](skills/schema-at-boundary/SKILL.md)가 런타임 검증,
+[tanstack-query](skills/tanstack-query/SKILL.md)가 client cache·갱신·구독을 담당하도록 유지한다.
+기존 스킬에는 선택이 갈리는 위치에만 링크를 연결하고, 각 도구의 오용 방지 규칙은 유지한다.
+완료 시 스킬 형식·상대 링크·추가한 코드 예시를 검증한 뒤 아래 사이트 작업으로 진행한다.
+
+---
+
 ## 1. 프로젝트 목표
 
 `ddongmy.com`을 단순 개인 홈페이지가 아니라 아래 3가지 역할을 동시에 하는 사이트로 만든다.
@@ -440,6 +469,11 @@ MCP Server는 나중에 아래 데이터를 AI가 조회 / 조작하게 만드�
 
 ## 11. 개발 우선순위
 
+### Phase 0 — 최우선
+
+0절의 `readable-contracts`와 `http-client` 스킬 추가 및 검증.
+두 스킬을 먼저 완성한 뒤 Phase 1부터 진행한다.
+
 ### Phase 1
 
 사이트 IA 및 기본 디자인
@@ -500,9 +534,11 @@ Search Console 등록 및 실제 검색 노출 확인
 
 ## 13. 다음 작업
 
-첫 작업은 Notion API 연동부터 시작하지 않는다.
+**첫 작업은 0절의 `readable-contracts`와 `http-client` 스킬 추가다.**
 
-먼저 현재 `ddongmy-os` 프로젝트 구조를 분석하고 기존 기능을 유지한 상태에서 아래 라우트와 공통 컴포넌트 구조를 설계한다.
+두 스킬을 추가·검증한 뒤 사이트 작업을 시작한다. 사이트 작업은 Notion API 연동에 앞서
+현재 `ddongmy-os` 프로젝트 구조를 분석하고 기존 기능을 유지한 상태에서 아래 라우트와
+공통 컴포넌트 구조를 설계한다.
 
 ```text
 /
@@ -513,6 +549,6 @@ Search Console 등록 및 실제 검색 노출 확인
 /about
 ```
 
-아직 코드를 수정하지 않고 먼저 구조 / 컴포넌트 / 데이터 흐름을 제안한다.
+사이트 애플리케이션 코드는 아직 수정하지 않고 먼저 구조 / 컴포넌트 / 데이터 흐름을 제안한다.
 
 설계가 확정되면 별도 작업 브랜치에서 작은 단위로 구현한다.
