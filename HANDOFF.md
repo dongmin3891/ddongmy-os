@@ -1,9 +1,8 @@
 # ddongmy.com Portfolio / Dev Log / Homelab Handoff
 
-## 0. 최우선 작업 — 공통 스킬 2개 추가
+## 0. 완료 — 공통 스킬 2개 추가
 
-**다음 작업자는 사이트 설계·구현과 Notion API 연동보다 먼저 아래 두 스킬을 `skills/`에 추가한다.**
-현재는 추가 예정이며, 기존 스킬팩을 보강하는 첫 작업이다.
+아래 두 스킬을 `skills/`에 추가해 기존 스킬팩을 보강했다.
 
 1. `skills/readable-contracts/SKILL.md`
    - API 요청·응답, 함수 입력·결과와 컴포넌트 props의 계약을 읽기 쉽게 설계하는 기준을 담는다.
@@ -25,7 +24,14 @@
 [schema-at-boundary](skills/schema-at-boundary/SKILL.md)가 런타임 검증,
 [tanstack-query](skills/tanstack-query/SKILL.md)가 client cache·갱신·구독을 담당하도록 유지한다.
 기존 스킬에는 선택이 갈리는 위치에만 링크를 연결하고, 각 도구의 오용 방지 규칙은 유지한다.
-완료 시 스킬 형식·상대 링크·추가한 코드 예시를 검증한 뒤 아래 사이트 작업으로 진행한다.
+스킬 형식·상대 링크와 추가한 TypeScript 코드 예시를 검증했다. 다음 작업부터 아래 사이트
+설계로 진행한다.
+
+추가로 `tanstack-query`와 `zustand`도 공식 문서뿐 아니라 TanStack Query, Zustand,
+Bulletproof React, Supabase, xyflow, LobeHub의 공개 source를 비교해 보정했다. star 수는
+조사 후보를 고르는 신호로만 사용하고, 최종 채택은 호출부의 명확성·추적 거리·상태 소유권을
+기준으로 판단한다. 두 스킬 모두 작은 inline 구조에서 시작해 재사용·규모·인스턴스 수명이
+생길 때만 options, custom hook, selector module, slice와 Provider를 추가한다.
 
 ---
 
@@ -469,10 +475,9 @@ MCP Server는 나중에 아래 데이터를 AI가 조회 / 조작하게 만드�
 
 ## 11. 개발 우선순위
 
-### Phase 0 — 최우선
+### Phase 0 — 완료
 
-0절의 `readable-contracts`와 `http-client` 스킬 추가 및 검증.
-두 스킬을 먼저 완성한 뒤 Phase 1부터 진행한다.
+0절의 `readable-contracts`와 `http-client` 스킬 추가 및 검증을 완료했다.
 
 ### Phase 1
 
@@ -534,11 +539,9 @@ Search Console 등록 및 실제 검색 노출 확인
 
 ## 13. 다음 작업
 
-**첫 작업은 0절의 `readable-contracts`와 `http-client` 스킬 추가다.**
-
-두 스킬을 추가·검증한 뒤 사이트 작업을 시작한다. 사이트 작업은 Notion API 연동에 앞서
-현재 `ddongmy-os` 프로젝트 구조를 분석하고 기존 기능을 유지한 상태에서 아래 라우트와
-공통 컴포넌트 구조를 설계한다.
+0절의 두 스킬 추가·검증을 완료했다. 다음 작업은 Notion API 연동에 앞서 현재
+`ddongmy-os` 프로젝트 구조를 분석하고 기존 기능을 유지한 상태에서 아래 라우트와 공통
+컴포넌트 구조를 설계하는 것이다.
 
 ```text
 /

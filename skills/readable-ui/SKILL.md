@@ -207,6 +207,8 @@ return (
 
 ## 필요한 스킬만 읽는다
 
+- API·함수 입력/결과·props 계약: [readable-contracts](../readable-contracts/SKILL.md)
+- HTTP 요청 실행·통신 실패 처리: [http-client](../http-client/SKILL.md)
 - Hook·React 안정 API 선택: [modern-react](../modern-react/SKILL.md)
 - 폴더·의존성 방향·route 조립: [next-app-router](../next-app-router/SKILL.md)
 - Next.js 버전·upgrade·cache·runtime: [modern-nextjs](../modern-nextjs/SKILL.md)

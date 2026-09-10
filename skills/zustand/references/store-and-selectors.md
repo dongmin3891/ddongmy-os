@@ -20,6 +20,26 @@ features/
 작은 store는 한 파일로 시작한다. state, action과 selector가 독립적인 변경 이유를 가질
 때만 나눈다.
 
+가장 작은 유효한 형태는 다음처럼 초기값과 action 구현까지 한 번에 보이는 구조다.
+
+```ts
+import { create } from 'zustand'
+
+type ProjectEditorStore = {
+  selectedProjectId: string | null
+  selectProject: (projectId: string) => void
+  clearSelection: () => void
+}
+
+export const useProjectEditorStore = create<ProjectEditorStore>()((set) => ({
+  selectedProjectId: null,
+  selectProject: (selectedProjectId) => set({ selectedProjectId }),
+  clearSelection: () => set({ selectedProjectId: null }),
+}))
+```
+
+초기값 재사용, reset, 테스트 fixture가 필요해질 때 아래처럼 state와 action 타입을 나눈다.
+
 ## Store 모델
 
 state와 action 타입을 구분해 읽되 최종 store 타입은 하나로 조합한다.
@@ -71,6 +91,17 @@ const selectProject = useProjectEditorStore((state) => state.selectProject)
 - 단순한 selector를 무조건 별도 파일이나 자동 생성 도구로 추상화하지 않는다.
 - 비싼 파생 연산은 selector의 참조 안정성과 실제 render 비용을 확인한다.
 
+### selector 형태를 고르는 기준
+
+- 한 필드: `(state) => state.selectedProjectId`를 호출부에 직접 쓴다.
+- 함께 읽는 소수 필드: 호출부가 더 선명해질 때 `useShallow`로 하나의 객체에 묶는다.
+- 반복되는 파생 규칙: `projectEditorSelectors.canPreview`처럼 도메인 이름을 붙인다.
+- selector가 많아 독립적으로 바뀌는 큰 store: 별도 `selectors.ts`를 고려한다.
+
+`useProjectEditorStore.use.selectedProjectId()` 같은 자동 생성 방식은 팀 전체가 이미 같은
+규칙을 쓰고 탐색 도구가 이를 잘 지원할 때만 채택한다. 단순 selector를 숨기기 위해
+generic helper부터 추가하지 않는다.
+
 ## Selector 확인
 
 - 관계없는 필드가 바뀌었을 때 구독 UI가 불필요하게 다시 렌더링되지 않는지 확인한다.
@@ -79,7 +110,8 @@ const selectProject = useProjectEditorStore((state) => state.selectProject)
 - `useShallow`가 필요한 경우 설치 버전의 import 경로와 사용법을 확인한다.
 - 전체 store 타입은 UI가 필요한 selector를 표현할 때만 공개한다.
 
-## 공식 자료
+## 참고 자료
 
 - [Zustand v5 Migration](https://zustand.docs.pmnd.rs/reference/migrations/migrating-to-v5.html)
 - [Zustand useShallow](https://zustand.docs.pmnd.rs/learn/guides/prevent-rerenders-with-use-shallow.html)
+- [레포지토리 비교](repository-evidence.md)

@@ -4,6 +4,21 @@ TanStack Query v5 기준이다. 도메인 타입과 transport import는 프로�
 공통 이름·추출·화면 분기 기준과 before/after는
 [readable-ui](../../readable-ui/SKILL.md)에 있다.
 
+## 추상화 깊이 결정
+
+가장 짧게 읽히는 단계에서 멈춘다.
+
+| 상황 | 기본 형태 |
+| --- | --- |
+| 한 화면에서만 쓰는 짧은 query | `useQuery`에 inline option |
+| prefetch·SSR·여러 화면에서 같은 정의를 사용 | 도메인 이름의 `queryOptions` 함수 |
+| 권한 조건·기본 `select`·조합 동작을 반복 | 의미 있는 custom hook |
+| 목록·상세·하위 자원의 invalidation 범위가 여럿 | feature 단위 key factory |
+
+`useApiQuery`, `createQueryHook`, 전역 `queryKeys`처럼 도메인 의미를 지우는 범용 계층은
+팀에서 반복되는 문제와 읽기 이득을 증명하지 못하면 만들지 않는다. custom hook은 모든
+query의 의무가 아니다.
+
 ## 배치 예시
 
 feature가 작으면 `queries.ts`와 `mutations.ts`에서 시작한다.
@@ -34,6 +49,18 @@ features/projects/queries/
 - query option은 key, query function과 cache 의미를 묶는다.
 - 컴포넌트는 option을 사용하고 화면 상태를 표현한다.
 - query hook 이름만 바꾼 의미 없는 wrapper는 만들지 않는다.
+
+한 곳에서만 쓰이고 정책도 짧다면 먼저 inline으로 둔다.
+
+```tsx
+const projectsQuery = useQuery({
+  queryKey: ['projects', { status }],
+  queryFn: ({ signal }) => getProjects({ status, signal }),
+})
+```
+
+서버 prefetch나 다른 화면과 공유되는 순간 아래처럼 option으로 옮긴다. 호출부의 모양은
+짧게 유지하면서 key와 요청의 원본은 하나가 된다.
 
 ## Query key와 options
 
@@ -101,6 +128,11 @@ return (
 로딩과 다르므로 실제 옵션에 맞는 안내를 제공한다. 초기 오류와 refetch 오류를 구분하고,
 기존 데이터가 있으면 background refetch 중에도 화면을 유지한다.
 
+- 결과 객체 이름을 유지하면 `projectsQuery.isError`가 어느 요청의 오류인지 바로 보인다.
+- 서로 다른 query가 함께 있으면 특히 `data`, `error`, `isPending` 같은 짧은 별칭을 피한다.
+- object rest destructuring으로 query 결과를 복사하지 않는다. 읽는 필드가 흐려지고
+  TanStack Query의 tracked-property 최적화도 비활성화할 수 있다.
+
 ## Key 검증
 
 - tenant·사용자·filter 변경 시 결과가 달라지면 key에도 반영한다. secret은 key에 넣지 않는다.
@@ -108,7 +140,9 @@ return (
 - list와 infinite query는 서로 다른 key 공간을 사용한다. cache 구조가 서로 다르다.
 - 서버 prefetch와 client 조회에는 같은 정규화 입력·key·공개 데이터 형태를 사용한다.
 
-## 공식 자료
+## 참고 자료
 
 - [Query Keys](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys)
 - [Query Options](https://tanstack.com/query/latest/docs/framework/react/guides/query-options)
+- [Render Optimizations](https://tanstack.com/query/latest/docs/framework/react/guides/render-optimizations)
+- [레포지토리 비교](repository-evidence.md)

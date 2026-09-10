@@ -65,6 +65,10 @@ Zod가 없으면 기존 검증 도구를 우선한다. 이 스킬만을 이유�
 
 ## 필요한 문서만 읽는다
 
+- 요청·응답의 이름·필수성·상태와 계약 원본은
+  [readable-contracts](../readable-contracts/SKILL.md)를 따른다.
+- 외부 API 요청 실행, HTTP·network·취소·timeout 오류는
+  [http-client](../http-client/SKILL.md)를 따른다.
 - URL 정규화, API 응답→화면 모델 구현 시
   [references/parsing-and-models.md](references/parsing-and-models.md)를 읽는다.
 - form 결과 계약과 pending 연결은 [next-forms](../next-forms/SKILL.md)를 읽는다.

@@ -73,6 +73,8 @@ description: >
 
 - action·결과 타입·client form 구현과 optimistic 복구를 연결할 때
   [references/action-flow.md](references/action-flow.md)를 읽는다.
+- action 입력·결과의 이름, 필수성·상태 union은
+  [readable-contracts](../readable-contracts/SKILL.md)를 따른다.
 - 이름·추출·키보드·행동 테스트의 공통 기준은 [readable-ui](../readable-ui/SKILL.md)를 따른다.
 
 ## 검증 방법
