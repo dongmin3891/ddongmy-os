@@ -7,7 +7,7 @@ export default function ContactSection() {
       </p>
       <div className="flex flex-wrap gap-6 pt-4">
         <a
-          href="https://github.com/ddongmy"
+          href="https://github.com/dongmin3891"
           target="_blank"
           rel="noopener noreferrer"
           className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors border border-slate-700"
@@ -24,4 +24,3 @@ export default function ContactSection() {
     </section>
   )
 }
-

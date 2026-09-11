@@ -1,65 +1,20 @@
-import { Project } from '@/types'
-import ProjectCard from '@/components/ProjectCard'
-
-const projects: Project[] = [
-  {
-    id: 'daily',
-    name: '일상함',
-    description: '개인 일상 관리 및 생산성 향상을 위한 웹 애플리케이션',
-    technologies: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
-    status: 'operational',
-    link: 'https://daily.ddongmy.com',
-  },
-  {
-    id: 'server-monitor',
-    name: 'ddongmy-os',
-    description: '현재 사이트. 포트폴리오와 프로젝트를 소개하는 개인 웹사이트',
-    technologies: ['Next.js', 'TypeScript', 'Docker'],
-    status: 'operational',
-    link: 'https://www.ddongmy.com',
-  },
-  {
-    id: 'webview-login',
-    name: 'WebView Login 실험 프로젝트',
-    description: '웹뷰 환경에서의 로그인 플로우 실험 및 테스트',
-    technologies: ['React', 'WebView', 'TypeScript'],
-    status: 'experimental',
-  },
-  {
-    id: 'grooming-test',
-    name: 'Grooming Test',
-    description: '준비 중인 프로젝트',
-    technologies: ['Next.js', 'TypeScript'],
-    status: 'development',
-  },
-]
-
-const statusLabels = {
-  operational: '운영중',
-  development: '개발중',
-  experimental: '실험용',
-}
-
-const statusColors = {
-  operational: 'bg-green-500/20 text-green-400',
-  development: 'bg-yellow-500/20 text-yellow-400',
-  experimental: 'bg-purple-500/20 text-purple-400',
-}
+import Link from 'next/link'
+import ProjectGrid from '@/features/projects/components/ProjectGrid'
+import { featuredProjects } from '@/features/projects/projects'
 
 export default function ProjectsSection() {
   return (
     <section id="projects" className="space-y-6">
-      <h2 className="text-3xl font-bold">Projects</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            statusLabel={statusLabels[project.status]}
-            statusColor={statusColors[project.status]}
-          />
-        ))}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-bold">Featured Projects</h2>
+          <p className="text-slate-300">직접 만들고 운영하며 문제를 해결한 프로젝트입니다.</p>
+        </div>
+        <Link href="/projects" className="font-medium text-primary-400 hover:text-primary-300">
+          모든 프로젝트 보기 →
+        </Link>
       </div>
+      <ProjectGrid projects={featuredProjects} />
     </section>
   )
 }
