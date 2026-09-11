@@ -428,14 +428,15 @@ Pod replacement
 - SSH 정보
 - 민감한 Node 정보
 
-향후 필요하면 별도의 read-only 서비스를 고려한다.
+현재 `web-app-status` ServiceAccount에는 `web-app` Deployment 하나를 `get`하는 권한만
+부여한다. 애플리케이션은 Kubernetes 응답을 검증하고 아래 공개 모델로 줄여 반환한다.
 
 ```text
 Kubernetes
   ↓
 homelab-status
   ↓
-sanitiized JSON
+sanitized JSON
   ↓
 ddongmy.com
 ```
@@ -446,7 +447,7 @@ RBAC 역시 최소 권한만 부여한다.
 
 ## 9. 재미 요소
 
-사이트 Footer에 실제 운영 정보를 작게 노출하는 것을 고려한다.
+사이트 Footer와 `/lab`에 실제 운영 정보를 작게 노출한다.
 
 예:
 
@@ -531,9 +532,14 @@ Notion `Development Log` Database와 초기 초안 3개를 만들었다.
 
 `/lab` 기본 페이지를 구현했다. 공개 가능한 실제 운영 데이터 연결은 Phase 7에서 진행한다.
 
-### Phase 7
+### Phase 7 — 구현 완료
 
-실제 Homelab 상태 데이터 연결
+- `web-app` Deployment 하나만 조회하는 ServiceAccount, Role과 RoleBinding을 추가했다.
+- `/api/server-status`는 준비된 replica 수, 목표 replica 수, release SHA, 배포 시각과
+  확인 시각만 반환한다.
+- `/lab`은 실제 상태와 release를 서버에서 표시한다.
+- Footer는 작은 client 배지로 공개 상태 API를 한 번 조회한다.
+- Kubernetes 조회 실패는 내부 정보를 노출하지 않고 `unavailable`로 표시한다.
 
 ### Phase 8
 
@@ -561,12 +567,13 @@ Search Console 등록 및 실제 검색 노출 확인
 
 ## 13. 다음 작업
 
-Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion Database·Secret과 공개 글
-연동, Phase 4 SEO 구현을 완료했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한
+Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 공개 글, Phase 4 SEO와
+Phase 7 Homelab 상태 조회를 구현했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한
 스킬만 선택해 읽는다.
 
-1. Phase 4 변경을 배포하고 운영 `/sitemap.xml`, `/robots.txt`, 글 canonical과 Article
-   JSON-LD를 확인한다.
-2. Phase 7에서 공개할 Homelab 상태의 필드와 read-only 데이터 경계를 확정한다.
+1. Phase 7 변경을 배포하고 `/api/server-status`, `/lab`과 Footer에서 실제 `2/2` 상태와
+   release SHA가 표시되는지 확인한다.
+2. `kubectl auth can-i`로 `web-app-status`가 `web-app` Deployment 조회만 가능하고 Secret,
+   Pod와 다른 Deployment는 읽지 못하는지 확인한다.
 3. Phase 8의 Deployment History / Incident / Changelog 데이터 모델을 정한다.
-4. SEO 운영 검증 뒤 Search Console에 사이트와 sitemap을 등록한다.
+4. Search Console에 sitemap을 제출하고 실제 색인 상태를 확인한다.

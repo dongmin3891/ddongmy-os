@@ -25,6 +25,7 @@ spec:
         app: web
 
     spec:
+      serviceAccountName: web-app-status
       terminationGracePeriodSeconds: 30
       containers:
         - name: web
@@ -43,6 +44,8 @@ spec:
           ports:
             - containerPort: 3000
           env:
+            - name: NODE_EXTRA_CA_CERTS
+              value: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
             - name: NOTION_TOKEN
               valueFrom:
                 secretKeyRef:

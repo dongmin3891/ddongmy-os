@@ -30,6 +30,7 @@ ddongmy-os/
 │   │   ├── lab/              # 홈서버 운영 소개
 │   │   └── projects/         # 프로젝트 목록
 │   ├── api/health/           # 컨테이너 health check
+│   ├── api/server-status/    # 공개 가능한 Homelab 상태 JSON
 │   ├── globals.css           # 전역 스타일
 │   └── layout.tsx            # 루트 레이아웃과 기본 메타데이터
 ├── components/
@@ -37,9 +38,11 @@ ddongmy-os/
 │   └── site/                 # 사이트 공통 Header, Footer, PageIntro
 ├── features/
 │   ├── development-log/      # 개발 로그 모델·데이터·목록 UI
+│   ├── homelab/              # Kubernetes 상태 조회·공개 모델·UI
 │   └── projects/             # 프로젝트 모델·데이터·카드 UI
 ├── k8s/
 │   ├── deployment.yaml       # 애플리케이션 Deployment
+│   ├── status-rbac.yaml      # web-app Deployment 전용 read-only 권한
 │   ├── service.yaml          # ClusterIP Service
 │   └── ingress.yaml          # Traefik Ingress 및 TLS 설정
 ├── argocd/
@@ -123,6 +126,7 @@ ghcr.io/dongmin3891/ddongmy-os:<commit-sha>
 현재 Kubernetes 구성은 다음과 같습니다.
 
 - Deployment: `web-app`, 2 replicas, 컨테이너 포트 `3000`
+- ServiceAccount: `web-app-status`, `web-app` Deployment 조회만 허용
 - Service: `web-service`, ClusterIP `80` → 컨테이너 `3000`
 - Ingress: Traefik, 호스트 `ddongmy.com`
 - TLS Secret: `ddongmy-tls`
