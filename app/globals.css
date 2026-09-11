@@ -76,6 +76,23 @@ body {
     @apply bg-transparent p-0;
   }
 
+  .development-log-body .mermaid-loading,
+  .development-log-body .mermaid-diagram {
+    @apply min-h-48 overflow-x-auto rounded-lg border border-slate-700 bg-slate-950 p-5;
+  }
+
+  .development-log-body .mermaid-loading {
+    @apply animate-pulse;
+  }
+
+  .development-log-body .mermaid-diagram svg {
+    @apply mx-auto h-auto min-w-[40rem] max-w-full;
+  }
+
+  .development-log-body .mermaid-fallback > p {
+    @apply mb-2 text-sm text-amber-300;
+  }
+
   .development-log-body img {
     @apply rounded-lg;
   }
@@ -90,6 +107,12 @@ body {
 
   .development-log-body td {
     @apply border border-slate-700 p-3;
+  }
+}
+
+@media (min-width: 768px) {
+  .development-log-body .mermaid-diagram svg {
+    min-width: 0;
   }
 }
 
