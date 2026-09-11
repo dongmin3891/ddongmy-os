@@ -1,6 +1,4 @@
-import { Skill } from '@/types'
-
-const skills: Skill[] = [
+const skills = [
   {
     category: '프론트엔드',
     items: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'React Query'],
@@ -44,4 +42,3 @@ export default function SkillsSection() {
     </section>
   )
 }
-

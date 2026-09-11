@@ -2,7 +2,11 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: '천재동민 | 프론트엔드 개발자 포트폴리오',
+  metadataBase: new URL('https://ddongmy.com'),
+  title: {
+    default: '천재동민 | 프론트엔드 개발자',
+    template: '%s | 천재동민',
+  },
   description: '일상을 편하게 만드는 사이드 프로젝트를 좋아하는 프론트엔드 개발자',
 }
 
@@ -20,10 +24,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-slate-900 text-slate-100">
-        {children}
-      </body>
+      <body className="min-h-screen bg-slate-900 text-slate-100">{children}</body>
     </html>
   )
 }
-

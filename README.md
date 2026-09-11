@@ -23,14 +23,20 @@ ddongmy-os/
 ├── .github/workflows/
 │   └── deploy.yml            # 이미지 빌드·푸시 및 배포 매니페스트 갱신
 ├── app/
+│   ├── (site)/               # 공통 헤더·푸터를 사용하는 공개 페이지
+│   │   ├── log/[slug]/       # 개발 로그 상세
+│   │   ├── about/            # 소개
+│   │   ├── lab/              # 홈서버 운영 소개
+│   │   └── projects/         # 프로젝트 목록
+│   ├── api/health/           # 컨테이너 health check
 │   ├── globals.css           # 전역 스타일
-│   ├── layout.tsx            # 루트 레이아웃과 메타데이터
-│   └── page.tsx              # 메인 페이지
+│   └── layout.tsx            # 루트 레이아웃과 기본 메타데이터
 ├── components/
 │   ├── sections/             # Hero, About, Projects, Skills, Contact 섹션
-│   └── ProjectCard.tsx       # 프로젝트 카드
-├── types/
-│   └── index.ts              # 공통 TypeScript 타입
+│   └── site/                 # 사이트 공통 Header, Footer, PageIntro
+├── features/
+│   ├── development-log/      # 개발 로그 모델·데이터·목록 UI
+│   └── projects/             # 프로젝트 모델·데이터·카드 UI
 ├── k8s/
 │   ├── deployment.yaml       # 애플리케이션 Deployment
 │   ├── service.yaml          # ClusterIP Service
@@ -132,7 +138,9 @@ kubectl apply -f argocd/application.yaml
 | --- | --- |
 | 이름, 소개 문구, 바로가기 | `components/sections/HeroSection.tsx` |
 | 자기소개와 키워드 | `components/sections/AboutSection.tsx` |
-| 프로젝트 목록과 상태 | `components/sections/ProjectsSection.tsx` |
+| 프로젝트 목록과 상태 | `features/projects/projects.ts` |
+| 개발 로그 초안 | `features/development-log/development-logs.ts` |
 | 기술 스택 | `components/sections/SkillsSection.tsx` |
 | GitHub와 이메일 | `components/sections/ContactSection.tsx` |
+| 공통 내비게이션과 Footer | `components/site/` |
 | 페이지 제목과 설명 | `app/layout.tsx` |

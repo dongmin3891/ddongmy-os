@@ -1,42 +1,33 @@
-'use client';
-
-import { useEffect } from 'react';
+import Link from 'next/link'
 
 export default function HeroSection() {
-    const scrollToProjects = () => {
-        const projectsSection = document.getElementById('projects');
-        projectsSection?.scrollIntoView({ behavior: 'smooth' });
-    };
-    useEffect(() => {
-        console.log('오신것을 횐영합니다. (배포테스트)2');
-    }, []);
-
-    return (
-        <section className="pt-16 pb-8">
-            <div className="space-y-6">
-                <h1 className="text-5xl lg:text-6xl font-bold text-balance">
-                    프론트엔드 개발자 <span className="text-primary-400">천재동민</span>
-                </h1>
-                <p className="text-xl lg:text-2xl text-slate-300 text-balance">
-                    일상을 편하게 만드는 사이드 프로젝트를 좋아하는 프론트엔드 개발자
-                </p>
-                <div className="flex flex-wrap gap-4 pt-4">
-                    <button
-                        onClick={scrollToProjects}
-                        className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors"
-                    >
-                        프로젝트 보러가기
-                    </button>
-                    <a
-                        href="https://daily.ddongmy.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
-                    >
-                        일상함 바로가기
-                    </a>
-                </div>
-            </div>
-        </section>
-    );
+  return (
+    <section className="pb-8 pt-12 sm:pt-16">
+      <div className="space-y-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary-400">
+          Frontend Developer · Homelab Operator
+        </p>
+        <h1 className="text-balance text-5xl font-bold lg:text-6xl">
+          프론트엔드 개발자 <span className="text-primary-400">천재동민</span>
+        </h1>
+        <p className="max-w-3xl text-balance text-xl leading-relaxed text-slate-300 lg:text-2xl">
+          일상의 문제를 제품으로 해결하고, 만든 서비스를 직접 운영하며 배운 것을 기록합니다.
+        </p>
+        <div className="flex flex-wrap gap-4 pt-4">
+          <Link
+            href="/projects"
+            className="rounded-lg bg-primary-500 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-600"
+          >
+            프로젝트 보기
+          </Link>
+          <Link
+            href="/lab"
+            className="rounded-lg bg-slate-700 px-6 py-3 font-medium text-white transition-colors hover:bg-slate-600"
+          >
+            Home Lab 보기
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
 }
