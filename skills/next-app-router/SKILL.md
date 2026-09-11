@@ -112,6 +112,8 @@ app  →  features  →  shared
 - 외부 입력 parser와 공개 모델 변환은 경계 모듈에 두고 UI에서 import하지 않는다.
   구체적인 방법은 [schema-at-boundary](../schema-at-boundary/SKILL.md)를 따른다.
 - 권한 검사는 UI 노출 여부와 별개로 서버 작업 직전에 수행한다.
+- 서버 조회·변경의 데이터 접근, 인가와 공개 반환 모델을 설계할 때는
+  [references/data-access.md](references/data-access.md)를 읽는다.
 
 ## 상태 성격별 소유자
 

@@ -1,10 +1,10 @@
 ---
 name: tanstack-query
 description: >
-  React 프로젝트에서 TanStack Query를 설계·구현·리팩터링·검토할 때 사용한다.
-  query key, queryOptions, mutation, invalidation, optimistic update, pagination,
-  polling, SSR과 Next.js App Router hydration을 다룬다. 로컬 UI 상태나 단순한
-  Server Component 데이터 조회에는 사용하지 않는다.
+  React 프로젝트에서 TanStack Query의 도입 여부와 inline query, queryOptions,
+  custom hook, key factory 중 필요한 추상화 깊이를 선택·구현·리팩터링·검토할 때
+  사용한다. mutation, invalidation, pagination, polling, SSR과 Next.js App Router
+  hydration을 다룬다. 로컬 UI 상태나 단순한 Server Component 데이터 조회에는 사용하지 않는다.
 ---
 
 # TanStack Query
@@ -50,7 +50,8 @@ TanStack Query는 **원격 서버 상태의 비동기 수명 주기와 캐시**�
 ## Query와 컴포넌트의 책임
 
 - transport는 HTTP 실패·응답 검증·공개 모델 변환을 맡는다.
-- query option은 key, query function과 cache 정책을 해당 feature 가까이에 묶는다.
+- prefetch·invalidation·여러 화면에서 재사용할 때 query option으로 key, query function과
+  cache 정책을 해당 feature 가까이에 묶는다.
 - key에는 결과를 바꾸는 모든 입력을 포함하고 계층으로 invalidation 범위를 표현한다.
 - 정규화한 입력을 key와 실제 요청 양쪽에 사용한다. list와 infinite cache는 구분한다.
 - query function은 오류를 throw하고 가능한 transport에 `AbortSignal`을 전달한다.
@@ -59,6 +60,8 @@ TanStack Query는 **원격 서버 상태의 비동기 수명 주기와 캐시**�
 - 컴포넌트에서는 `projectsQuery`, `renameProjectMutation`처럼 역할이 보이는 결과 객체를
   유지한다. 여러 query의 `data`, `error`, `isPending`을 문맥 없는 이름으로 한꺼번에
   구조 분해하지 않는다.
+- 역할이 다른 고정 개수의 요청은 이름 있는 `useQuery`로 각각 둔다. 입력 개수가
+  동적이거나 배열 조합이 실제 문제를 해결할 때 `useQueries`를 사용한다.
 - 호출부에서 transport까지 `화면 → query option → 도메인 요청 함수` 정도의 짧은
   이동으로 추적되어야 한다. 책임 없는 범용 wrapper가 이 경로를 늘리면 제거한다.
 
@@ -81,6 +84,8 @@ TanStack Query는 **원격 서버 상태의 비동기 수명 주기와 캐시**�
   사용하지 않는다.
 - 기본 refetch와 retry 동작을 알고 변경한다.
 - 모든 query에 같은 전역 설정을 강제하지 말고 공통 의미가 있을 때만 default를 둔다.
+- 공유 `queryOptions`의 `staleTime`을 호출부에서 임의로 덮지 않는다. 다른 freshness
+  의미가 필요하면 이름 있는 별도 option으로 드러낸다.
 - 서버에서 prefetch한 query는 client가 즉시 중복 조회하지 않도록 `staleTime`을
   의도적으로 정한다.
 
@@ -100,6 +105,8 @@ mutation 성공 후 어떤 화면이 최신 상태여야 하는지 먼저 적는
 
 - 모든 query를 무조건 invalidate하지 않는다.
 - key의 계층을 이용해 필요한 범위를 읽을 수 있게 지정한다.
+- cache 갱신은 mutation 정의 또는 mutation을 조정하는 use case 가까이에 둔다.
+  한 호출부뿐이라면 inline으로 둘 수 있으며 `mutations.ts` 파일을 형식적으로 만들지 않는다.
 - optimistic update는 진행 중 query 취소, 이전 값 snapshot, rollback, 최종 동기화를
   함께 설계한다.
 
@@ -133,10 +140,11 @@ refetch 오류와 데이터가 없는 초기 오류를 각각 확인한다.
 
 - query 데이터를 Zustand나 component state에 복사함
 - query function 입력이 key에 포함되지 않음
-- 컴포넌트마다 문자열 query key를 직접 조합함
+- 같은 도메인 key 문자열을 여러 화면에서 반복하거나 호출부마다 서로 다르게 조합함
 - 렌더링할 때마다 새 QueryClient를 만듦
 - server singleton QueryClient를 여러 요청이 공유함
 - 모든 mutation이 전체 cache를 invalidate함
+- 공유 query option의 cache 정책을 호출부마다 덮어씀
 - 이유 없이 `staleTime: Infinity` 또는 refetch 옵션을 끔
 - API 응답 검증 전에 cache에 저장함
 - prefetch가 순차 실행되어 server waterfall을 만듦

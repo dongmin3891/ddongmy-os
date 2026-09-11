@@ -130,6 +130,10 @@ return (
 
 - 결과 객체 이름을 유지하면 `projectsQuery.isError`가 어느 요청의 오류인지 바로 보인다.
 - 서로 다른 query가 함께 있으면 특히 `data`, `error`, `isPending` 같은 짧은 별칭을 피한다.
+- 역할이 다른 고정 개수의 요청은 `projectQuery`, `membersQuery`처럼 이름 있는
+  `useQuery`로 둔다. ID 배열처럼 입력 개수가 동적일 때 `useQueries`를 사용한다.
+- 공유 option의 `staleTime`을 호출부에서 덮지 않는다. 다른 freshness 계약은 이름 있는
+  별도 option으로 만들어 정책 차이를 드러낸다.
 - object rest destructuring으로 query 결과를 복사하지 않는다. 읽는 필드가 흐려지고
   TanStack Query의 tracked-property 최적화도 비활성화할 수 있다.
 
