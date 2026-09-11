@@ -507,10 +507,12 @@ MCP Server는 나중에 아래 데이터를 AI가 조회 / 조작하게 만드�
 
 Notion `Development Log` Database와 초기 초안 3개를 만들었다.
 
-### Phase 3 — route shell 완료
+### Phase 3 — 완료
 
-- `/log`와 `/log/[slug]` 기본 화면 완료
-- Notion API 연결 필요
+- `/log`는 `Published = true`인 글만 조회한다.
+- `/log/[slug]`는 검증된 slug로 공개 글과 Notion Markdown 본문을 조회한다.
+- 외부 응답은 Zod로 검증하고 Notion 전용 server-only 모듈에서 공개 모델로 변환한다.
+- API 오류와 불완전하거나 중복된 공개 글을 빈 값으로 숨기지 않는다.
 
 ### Phase 4
 
@@ -558,13 +560,11 @@ Search Console 등록 및 실제 검색 노출 확인
 
 ## 13. 다음 작업
 
-Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조 및 Notion Database 생성을 완료했다.
-다음 작업은 웹 애플리케이션 전용 Notion Integration을 연결하고 공개 글을 server-only data
-access에서 읽는 것이다. 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
+Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion Database와 공개 글 연동을
+완료했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. Notion Internal Integration을 만들고 `Development Log` Database에 읽기 권한을 부여한다.
-2. `NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID`를 로컬·배포 환경의 server-only secret으로 등록한다.
-   최신 Notion API는 Database container ID가 아니라 Data Source ID로 글 목록을 조회한다.
-3. route 경계에서 slug를 검증하고, data access에서 `Published = true`인 공개 DTO만 반환한다.
-4. 현재 `features/development-log/development-logs.ts` 초안을 Notion 조회 결과로 교체한다.
-5. `/log`와 `/log/[slug]`를 확인한 뒤 cache·revalidation 정책을 정한다.
+1. 클러스터에 `web-app-notion` Secret을 만들고 Deployment에 `NOTION_TOKEN`,
+   `NOTION_DATA_SOURCE_ID`를 주입한다.
+2. Secret 주입 전에는 현재 코드의 로컬 초안 fallback으로 배포가 유지되는지 확인한다.
+3. Phase 4의 `sitemap.ts`, `robots.ts`와 Article structured data를 추가한다.
+4. 배포 후 공개 로그 8개의 목록·본문·canonical과 잘못된 slug의 404를 확인한다.

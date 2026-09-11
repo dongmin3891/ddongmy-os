@@ -12,6 +12,7 @@
 | --- | --- |
 | Frontend | Next.js 16.3 (App Router), React 19.3, TypeScript |
 | Styling | Tailwind CSS 3, Pretendard |
+| Content | Notion API, React Markdown, Zod |
 | Container | Docker, GHCR |
 | Deployment | Kubernetes, Argo CD, Traefik Ingress |
 | CI/CD | GitHub Actions, GitOps |
@@ -61,7 +62,9 @@ npm ci
 npm run dev
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000)으로 접속합니다. 현재 애플리케이션 실행에 필요한 별도의 환경 변수는 없습니다.
+브라우저에서 [http://localhost:3000](http://localhost:3000)으로 접속합니다. Notion의 공개
+개발 로그를 확인하려면 `.env.example`을 참고해 `.env.local`에 server-only 환경 변수를
+등록합니다. 환경 변수가 없으면 저장소의 개발 로그 초안을 표시합니다.
 
 ### npm 스크립트
 
@@ -139,7 +142,8 @@ kubectl apply -f argocd/application.yaml
 | 이름, 소개 문구, 바로가기 | `components/sections/HeroSection.tsx` |
 | 자기소개와 키워드 | `components/sections/AboutSection.tsx` |
 | 프로젝트 목록과 상태 | `features/projects/projects.ts` |
-| 개발 로그 초안 | `features/development-log/development-logs.ts` |
+| 개발 로그 글과 공개 여부 | Notion `Development Log` Database |
+| 개발 로그 임시 초안 | `features/development-log/development-logs.ts` |
 | 기술 스택 | `components/sections/SkillsSection.tsx` |
 | GitHub와 이메일 | `components/sections/ContactSection.tsx` |
 | 공통 내비게이션과 Footer | `components/site/` |

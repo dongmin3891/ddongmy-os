@@ -14,10 +14,15 @@ const config: Config = {
         foreground: 'var(--foreground)',
         primary: {
           DEFAULT: '#60A5FA',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#3B82F6',
+          600: '#2563EB',
           dark: '#3B82F6',
         },
         accent: {
           DEFAULT: '#34D399',
+          400: '#34D399',
           dark: '#10B981',
         },
       },

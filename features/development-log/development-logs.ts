@@ -1,6 +1,6 @@
-import type { DevelopmentLogSummary } from './development-log'
+import type { DevelopmentLogDraft } from './development-log'
 
-export const developmentLogs: readonly DevelopmentLogSummary[] = [
+export const developmentLogs: readonly DevelopmentLogDraft[] = [
   {
     slug: 'kubernetes-oomkilled',
     title: 'Kubernetes OOMKilled를 추적한 기록',
