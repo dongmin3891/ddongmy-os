@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import type { z } from 'zod'
 import type { DevelopmentLogDraft, DevelopmentLogSummary } from './development-log'
 import { developmentLogs, findDevelopmentLog } from './development-logs'
@@ -85,7 +86,7 @@ async function queryPublishedPage(
       start_cursor: startCursor,
       result_type: 'page',
     }),
-    next: { revalidate: 300, tags: ['development-logs'] },
+    cache: 'no-store',
   })
   const body = await readNotionJson(response)
 
@@ -152,14 +153,14 @@ async function getNotionPageMarkdown(config: NotionConfig, pageId: string) {
   return page.markdown
 }
 
-export async function getDevelopmentLogSummaries(): Promise<readonly DevelopmentLogSummary[]> {
+async function readDevelopmentLogSummaries(): Promise<readonly DevelopmentLogSummary[]> {
   const config = getNotionConfig()
   if (!config) return developmentLogs
 
   return getPublishedDevelopmentLogs(config)
 }
 
-export async function getDevelopmentLog(slug: string): Promise<DevelopmentLogEntry | undefined> {
+async function readDevelopmentLog(slug: string): Promise<DevelopmentLogEntry | undefined> {
   const config = getNotionConfig()
   if (!config) return findDevelopmentLog(slug)
 
@@ -171,3 +172,6 @@ export async function getDevelopmentLog(slug: string): Promise<DevelopmentLogEnt
     markdown: await getNotionPageMarkdown(config, log.notionPageId),
   }
 }
+
+export const getDevelopmentLogSummaries = cache(readDevelopmentLogSummaries)
+export const getDevelopmentLog = cache(readDevelopmentLog)

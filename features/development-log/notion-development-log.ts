@@ -6,6 +6,7 @@ const richTextSchema = z.object({ plain_text: z.string() })
 const developmentLogPageSchema = z.object({
   object: z.literal('page'),
   id: z.string(),
+  last_edited_time: z.string(),
   properties: z.object({
     Title: z.object({ type: z.literal('title'), title: z.array(richTextSchema) }),
     Slug: z.object({ type: z.literal('rich_text'), rich_text: z.array(richTextSchema) }),
@@ -69,6 +70,7 @@ export function toPublishedDevelopmentLog(
     status: 'published',
     notionPageId: page.id,
     publishedAt: page.properties.PublishedAt.date?.start,
+    updatedAt: page.last_edited_time,
     seoTitle: seoTitle || undefined,
     seoDescription: seoDescription || undefined,
   }

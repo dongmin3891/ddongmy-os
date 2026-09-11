@@ -15,6 +15,7 @@ export type DevelopmentLogSummary = {
   tags: readonly string[]
   status: DevelopmentLogStatus
   publishedAt?: string
+  updatedAt?: string
   seoTitle?: string
   seoDescription?: string
 }

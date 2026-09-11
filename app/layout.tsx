@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
+import { siteConfig } from '@/config/site'
 import './globals.css'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ddongmy.com'),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: '천재동민 | 프론트엔드 개발자',
-    template: '%s | 천재동민',
+    default: `${siteConfig.name} | 프론트엔드 개발자`,
+    template: `%s | ${siteConfig.name}`,
   },
-  description: '일상을 편하게 만드는 사이드 프로젝트를 좋아하는 프론트엔드 개발자',
+  description: siteConfig.description,
 }
 
 export default function RootLayout({

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { siteConfig } from '@/config/site'
 import DevelopmentLogBody from '@/features/development-log/components/DevelopmentLogBody'
 import { developmentLogSlugSchema } from '@/features/development-log/development-log'
 import { getDevelopmentLog } from '@/features/development-log/notion-development-logs.server'
@@ -20,11 +21,32 @@ export async function generateMetadata({ params }: DevelopmentLogEntryPageProps)
 
   if (!log) return {}
 
+  const title = log.seoTitle ?? log.title
+  const description = log.seoDescription ?? log.summary
+  const canonical = `/log/${log.slug}`
+
   return {
-    title: log.seoTitle ?? log.title,
-    description: log.seoDescription ?? log.summary,
-    alternates: { canonical: `/log/${log.slug}` },
+    title,
+    description,
+    alternates: { canonical },
     robots: log.status === 'published' ? undefined : { index: false, follow: false },
+    authors: [{ name: siteConfig.name, url: siteConfig.url }],
+    openGraph: {
+      type: 'article',
+      url: canonical,
+      locale: 'ko_KR',
+      siteName: siteConfig.name,
+      title,
+      description,
+      publishedTime: log.publishedAt,
+      modifiedTime: log.updatedAt,
+      tags: [...log.tags],
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+    },
   }
 }
 
@@ -37,8 +59,39 @@ export default async function DevelopmentLogEntryPage({ params }: DevelopmentLog
 
   if (!log) notFound()
 
+  const canonicalUrl = `${siteConfig.url}/log/${log.slug}`
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    mainEntityOfPage: canonicalUrl,
+    headline: log.title,
+    description: log.seoDescription ?? log.summary,
+    datePublished: log.publishedAt,
+    dateModified: log.updatedAt ?? log.publishedAt,
+    inLanguage: siteConfig.locale,
+    keywords: [...log.tags],
+    author: {
+      '@type': 'Person',
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    publisher: {
+      '@type': 'Person',
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+  }
+
   return (
     <article className="mx-auto max-w-3xl">
+      {log.status === 'published' && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(articleJsonLd).replace(/</g, '\\u003c'),
+          }}
+        />
+      )}
       <Link href="/log" className="text-sm font-medium text-primary-400 hover:text-primary-300">
         ← Development Log
       </Link>

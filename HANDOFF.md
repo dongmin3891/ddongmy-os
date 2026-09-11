@@ -514,13 +514,14 @@ Notion `Development Log` Database와 초기 초안 3개를 만들었다.
 - 외부 응답은 Zod로 검증하고 Notion 전용 server-only 모듈에서 공개 모델로 변환한다.
 - API 오류와 불완전하거나 중복된 공개 글을 빈 값으로 숨기지 않는다.
 
-### Phase 4
+### Phase 4 — 구현 완료
 
-SEO
-
-- sitemap
-- robots
-- metadata
+- `/sitemap.xml`에 정적 route와 Notion 공개 글만 포함한다.
+- `/robots.txt`에서 공개 페이지를 허용하고 `/api/` 크롤링을 막는다.
+- 홈과 글 상세에 canonical, Open Graph와 Twitter metadata를 제공한다.
+- 공개 글 상세에 Article JSON-LD를 제공한다.
+- sitemap은 운영 Pod의 Notion Secret을 사용하도록 request time에 생성하며, 외부 응답은
+  검증한 공개 모델로 변환한 뒤 사용한다.
 
 ### Phase 5 — 기본 페이지 완료
 
@@ -560,11 +561,12 @@ Search Console 등록 및 실제 검색 노출 확인
 
 ## 13. 다음 작업
 
-Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion Database와 공개 글 연동을
-완료했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
+Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion Database·Secret과 공개 글
+연동, Phase 4 SEO 구현을 완료했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한
+스킬만 선택해 읽는다.
 
-1. 클러스터에 `NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID` 키가 있는 `web-app-notion` Secret을
-   만든다. Deployment의 선택적 `secretKeyRef`는 준비되어 있다.
-2. 새 Secret을 읽도록 `web-app`을 rollout하고 공개 로그 8개의 목록·본문·canonical과
-   잘못된 slug의 404를 확인한다.
-3. Phase 4의 `sitemap.ts`, `robots.ts`와 Article structured data를 추가한다.
+1. Phase 4 변경을 배포하고 운영 `/sitemap.xml`, `/robots.txt`, 글 canonical과 Article
+   JSON-LD를 확인한다.
+2. Phase 7에서 공개할 Homelab 상태의 필드와 read-only 데이터 경계를 확정한다.
+3. Phase 8의 Deployment History / Incident / Changelog 데이터 모델을 정한다.
+4. SEO 운영 검증 뒤 Search Console에 사이트와 sitemap을 등록한다.
