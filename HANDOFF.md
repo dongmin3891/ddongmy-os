@@ -1,37 +1,46 @@
 # ddongmy.com Portfolio / Dev Log / Homelab Handoff
 
-## 0. 완료 — 공통 스킬 2개 추가
+## 0. 완료 — 공통 스킬팩과 자동 라우팅
 
-아래 두 스킬을 `skills/`에 추가해 기존 스킬팩을 보강했다.
+가독성을 최우선으로 하는 React / Next.js 공통 스킬팩 12개를 `skills/`에 구성했다.
 
-1. `skills/readable-contracts/SKILL.md`
-   - API 요청·응답, 함수 입력·결과와 컴포넌트 props의 계약을 읽기 쉽게 설계하는 기준을 담는다.
-   - 용도가 드러나는 이름, 요청·응답·편집 초안의 구분, 필수·생략·`null`의 의미,
-     성공·실패 상태 표현과 계약 원본의 단일화를 다룬다.
-   - `type` / `interface`는 기존 프로젝트 규칙을 우선하고, 과도한 generic·utility type보다
-     사용처에서 바로 이해할 수 있는 표현을 선택한다.
-2. `skills/http-client/SKILL.md`
-   - `fetch` / Axios 기반 요청 실행, 응답 처리와 통신 실패 전달의 공통 기준을 담는다.
-   - 기존 도구 우선, 의도가 드러나는 도메인 요청 함수, 공통 client의 책임, 오류 구분,
-     취소·timeout·재시도 소유자, interceptor와 서버·브라우저 경계를 다룬다.
-   - `fetch`와 Axios를 별도 스킬로 늘리지 않고 도구별 차이·예시는 `references/`로 분리한다.
+| 판단 영역 | 스킬 |
+| --- | --- |
+| UI 이름·분기·추출 | `readable-ui` |
+| API·함수·props 타입 계약 | `readable-contracts` |
+| 외부 입력 런타임 검증 | `schema-at-boundary` |
+| `fetch`·Axios HTTP 실행 | `http-client` |
+| React API·Hook 선택 | `modern-react` |
+| Next.js 버전·cache·runtime | `modern-nextjs` |
+| App Router 구조·route 조립 | `next-app-router` |
+| form·Server Function | `next-forms` |
+| client server-state cache | `tanstack-query` |
+| client workflow state | `zustand` |
+| Tailwind·shadcn/ui·Radix | `tailwind-ui` |
+| 테스트 층·mock 경계 | `testing-ui` |
 
-두 스킬 모두 **가독성을 최우선**으로 하고 다른 프로젝트에도 공통으로 사용할 수 있게 작성한다.
-특정 framework, validator, 폴더 구조나 응답 envelope를 일괄 강제하지 않는다.
-공통화는 실제로 반복되는 책임에만 적용하고 의미 없는 타입·wrapper·계층을 늘리지 않는다.
+공통 기준은 한곳에 두고, 도구 스킬에는 그 스킬만 읽어도 오용을 막을 금지사항을 남겼다.
+타입 계약은 `readable-contracts`, 런타임 검증은 `schema-at-boundary`, HTTP 통신은
+`http-client`, client cache는 `tanstack-query`가 담당한다. 모든 도구를 순서대로
+도입하지 않고 실제로 바뀌는 층의 스킬만 선택한다.
 
-역할 경계는 `readable-contracts`가 계약 설계, `http-client`가 통신 실행,
-[schema-at-boundary](skills/schema-at-boundary/SKILL.md)가 런타임 검증,
-[tanstack-query](skills/tanstack-query/SKILL.md)가 client cache·갱신·구독을 담당하도록 유지한다.
-기존 스킬에는 선택이 갈리는 위치에만 링크를 연결하고, 각 도구의 오용 방지 규칙은 유지한다.
-스킬 형식·상대 링크와 추가한 TypeScript 코드 예시를 검증했다. 다음 작업부터 아래 사이트
-설계로 진행한다.
+`tanstack-query`는 inline query → `queryOptions` → custom Hook → key factory 중 필요한
+추상화 깊이만 선택한다. 한 호출부의 짧은 inline key는 허용하고, 같은 문자열을 여러
+화면에서 반복 조합하는 경우만 금지한다. `zustand`는 원격 원본을 복사하지 않고 client
+workflow와 복원할 초안만 소유한다.
 
-추가로 `tanstack-query`와 `zustand`도 공식 문서뿐 아니라 TanStack Query, Zustand,
-Bulletproof React, Supabase, xyflow, LobeHub의 공개 source를 비교해 보정했다. star 수는
-조사 후보를 고르는 신호로만 사용하고, 최종 채택은 호출부의 명확성·추적 거리·상태 소유권을
-기준으로 판단한다. 두 스킬 모두 작은 inline 구조에서 시작해 재사용·규모·인스턴스 수명이
-생길 때만 options, custom hook, selector module, slice와 Provider를 추가한다.
+App Router 내부 데이터 접근·인가·공개 DTO 기준은 독립 스킬로 늘리지 않고
+[`next-app-router/references/data-access.md`](skills/next-app-router/references/data-access.md)에
+두었다. 요청 입력을 사용자 신원으로 쓰지 않고, 없음·권한 없음·인프라 오류를 호출자가
+구분하며, 변경도 같은 server-only 모듈에서 인가 직후 수행한다.
+
+루트 [`AGENTS.md`](AGENTS.md)는 작업마다 가장 작은 스킬 집합을 선택하고 해당
+`SKILL.md`를 먼저 읽도록 지시한다. 필요한 reference만 추가로 읽으며, 사용자가 스킬을
+직접 지정하면 그 선택을 우선한다.
+
+현재 스킬팩은 닫힌 상태다. `data-access-layer`는 위 reference가 커질 때까지 승격하지
+않고, `auth-session`은 인증·인가 판단이 여러 프로젝트에서 반복될 때, `accessible-ui`는
+combobox·tabs·tree 같은 복합 위젯이 반복될 때 추가한다.
 
 ---
 
@@ -477,7 +486,8 @@ MCP Server는 나중에 아래 데이터를 AI가 조회 / 조작하게 만드�
 
 ### Phase 0 — 완료
 
-0절의 `readable-contracts`와 `http-client` 스킬 추가 및 검증을 완료했다.
+0절의 공통 스킬팩 12개, App Router data-access reference와 `AGENTS.md` 라우팅을
+추가하고 문서 구조·상대 링크·TypeScript 예시를 검증했다.
 
 ### Phase 1
 
@@ -539,9 +549,9 @@ Search Console 등록 및 실제 검색 노출 확인
 
 ## 13. 다음 작업
 
-0절의 두 스킬 추가·검증을 완료했다. 다음 작업은 Notion API 연동에 앞서 현재
-`ddongmy-os` 프로젝트 구조를 분석하고 기존 기능을 유지한 상태에서 아래 라우트와 공통
-컴포넌트 구조를 설계하는 것이다.
+스킬팩 정리는 완료했다. 다음 작업은 Notion API 연동에 앞서 현재 `ddongmy-os` 프로젝트
+구조를 분석하고 기존 기능을 유지한 상태에서 아래 라우트와 공통 컴포넌트 구조를 설계하는
+것이다. 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
 ```text
 /
