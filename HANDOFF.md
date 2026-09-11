@@ -563,8 +563,8 @@ Search Console 등록 및 실제 검색 노출 확인
 Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion Database와 공개 글 연동을
 완료했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. 클러스터에 `web-app-notion` Secret을 만들고 Deployment에 `NOTION_TOKEN`,
-   `NOTION_DATA_SOURCE_ID`를 주입한다.
-2. Secret 주입 전에는 현재 코드의 로컬 초안 fallback으로 배포가 유지되는지 확인한다.
+1. 클러스터에 `NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID` 키가 있는 `web-app-notion` Secret을
+   만든다. Deployment의 선택적 `secretKeyRef`는 준비되어 있다.
+2. 새 Secret을 읽도록 `web-app`을 rollout하고 공개 로그 8개의 목록·본문·canonical과
+   잘못된 slug의 404를 확인한다.
 3. Phase 4의 `sitemap.ts`, `robots.ts`와 Article structured data를 추가한다.
-4. 배포 후 공개 로그 8개의 목록·본문·canonical과 잘못된 slug의 404를 확인한다.

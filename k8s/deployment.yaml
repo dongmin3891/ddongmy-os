@@ -42,6 +42,19 @@ spec:
               type: RuntimeDefault
           ports:
             - containerPort: 3000
+          env:
+            - name: NOTION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-notion
+                  key: NOTION_TOKEN
+                  optional: true
+            - name: NOTION_DATA_SOURCE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-notion
+                  key: NOTION_DATA_SOURCE_ID
+                  optional: true
           lifecycle:
             preStop:
               exec:
