@@ -10,7 +10,7 @@
 
 | 구분 | 기술 |
 | --- | --- |
-| Frontend | Next.js 15 (App Router), React 18, TypeScript |
+| Frontend | Next.js 16.3 (App Router), React 19.3, TypeScript |
 | Styling | Tailwind CSS 3, Pretendard |
 | Container | Docker, GHCR |
 | Deployment | Kubernetes, Argo CD, Traefik Ingress |
@@ -45,7 +45,7 @@ ddongmy-os/
 
 ### 요구 사항
 
-- Node.js 20 이상
+- Node.js 22.13 이상
 - npm
 
 ### 실행 방법
@@ -64,7 +64,8 @@ npm run dev
 | `npm run dev` | 개발 서버 실행 |
 | `npm run build` | 프로덕션 빌드 생성 |
 | `npm run start` | 프로덕션 서버 실행 |
-| `npm run lint` | Next.js ESLint 검사 |
+| `npm run lint` | ESLint 검사 |
+| `npm run typecheck` | TypeScript 타입 검사 |
 
 ## Docker 이미지 확인
 
