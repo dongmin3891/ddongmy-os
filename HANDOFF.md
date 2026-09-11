@@ -532,7 +532,7 @@ Notion `Development Log` Database와 초기 초안 3개를 만들었다.
 
 `/lab` 기본 페이지를 구현했다. 공개 가능한 실제 운영 데이터 연결은 Phase 7에서 진행한다.
 
-### Phase 7 — 구현 완료
+### Phase 7 — 운영 검증 완료
 
 - `web-app` Deployment 하나만 조회하는 ServiceAccount, Role과 RoleBinding을 추가했다.
 - `/api/server-status`는 준비된 replica 수, 목표 replica 수, release SHA, 배포 시각과
@@ -540,10 +540,16 @@ Notion `Development Log` Database와 초기 초안 3개를 만들었다.
 - `/lab`은 실제 상태와 release를 서버에서 표시한다.
 - Footer는 작은 client 배지로 공개 상태 API를 한 번 조회한다.
 - Kubernetes 조회 실패는 내부 정보를 노출하지 않고 `unavailable`로 표시한다.
+- 운영에서 `2/2` 상태와 release SHA를 확인했다.
+- `kubectl auth can-i`로 `web-app` Deployment 단건 조회만 허용되고 Secret, Pod와 전체
+  Deployment 조회는 거부되는 것을 확인했다.
 
-### Phase 8
+### Phase 8 — 구현 완료
 
-Deployment History / Incident / Changelog
+- 현재 Kubernetes release와 검증된 주요 배포를 함께 보여주는 Deployment History
+- 증상·실제 원인·해결과 상세 개발 로그를 연결하는 Incident Log
+- 운영 문제와 구조 변경을 시간순으로 보여주는 Homelab Changelog
+- 추가 Kubernetes 권한이나 외부 API 없이 공개 가능한 정적 기록과 기존 상태 응답만 사용
 
 ### Phase 9
 
@@ -568,12 +574,9 @@ Search Console 등록 및 실제 검색 노출 확인
 ## 13. 다음 작업
 
 Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 공개 글, Phase 4 SEO와
-Phase 7 Homelab 상태 조회를 구현했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한
+Phase 8 Homelab 운영 기록을 구현했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한
 스킬만 선택해 읽는다.
 
-1. Phase 7 변경을 배포하고 `/api/server-status`, `/lab`과 Footer에서 실제 `2/2` 상태와
-   release SHA가 표시되는지 확인한다.
-2. `kubectl auth can-i`로 `web-app-status`가 `web-app` Deployment 조회만 가능하고 Secret,
-   Pod와 다른 Deployment는 읽지 못하는지 확인한다.
-3. Phase 8의 Deployment History / Incident / Changelog 데이터 모델을 정한다.
-4. Search Console에 sitemap을 제출하고 실제 색인 상태를 확인한다.
+1. Phase 8 변경을 배포하고 `/lab`의 현재 release, 배포 이력, Changelog와 Incident 링크를
+   데스크톱·모바일에서 확인한다.
+2. Search Console에 sitemap을 제출하고 실제 색인 상태를 확인한다.

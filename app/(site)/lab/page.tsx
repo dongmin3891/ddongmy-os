@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import PageIntro from '@/components/site/PageIntro'
+import DeploymentHistorySection from '@/features/homelab/components/DeploymentHistorySection'
+import HomelabChangelogSection from '@/features/homelab/components/HomelabChangelogSection'
 import HomelabStatusPanel from '@/features/homelab/components/HomelabStatusPanel'
+import IncidentLogSection from '@/features/homelab/components/IncidentLogSection'
 import { getHomelabStatus } from '@/features/homelab/kubernetes-homelab-status.server'
 
 export const dynamic = 'force-dynamic'
@@ -26,6 +29,8 @@ export default async function HomeLabPage() {
 
       <HomelabStatusPanel homelabStatus={homelabStatus} />
 
+      <DeploymentHistorySection homelabStatus={homelabStatus} />
+
       <section className="space-y-6" aria-labelledby="request-path-title">
         <div className="space-y-2">
           <h2 id="request-path-title" className="text-3xl font-bold text-white">How this page reached you</h2>
@@ -40,6 +45,10 @@ export default async function HomeLabPage() {
           ))}
         </ol>
       </section>
+
+      <HomelabChangelogSection />
+
+      <IncidentLogSection />
 
       <section className="rounded-lg border border-slate-700 bg-slate-800 p-6" aria-labelledby="lab-access-title">
         <h2 id="lab-access-title" className="text-2xl font-bold text-white">공개 데이터 경계</h2>
