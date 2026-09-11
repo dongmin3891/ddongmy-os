@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: web
-          image: ghcr.io/dongmin3891/ddongmy-os:a9f137abd4b7f60aff1c62c046a99c6cc07ddde2
+          image: ghcr.io/dongmin3891/ddongmy-os:8175b49857a8bca7544f2b76ed81855f5acecd3b
           imagePullPolicy: Always
           securityContext:
             runAsNonRoot: true
