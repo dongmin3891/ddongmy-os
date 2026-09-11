@@ -239,6 +239,10 @@ Notion API는 반드시 Server Side에서 호출하고 Notion Integration Token�
 
 `Development Log` Database를 만든다.
 
+`개발 노트` Notion workspace에 Database를 생성했고, 사이트에 먼저 표시한 초안 3개를
+`Published = false`로 등록했다. 웹 애플리케이션은 MCP 연결과 별개의 Notion Integration을
+사용한다.
+
 필드 예:
 
 - `Title`
@@ -499,9 +503,9 @@ MCP Server는 나중에 아래 데이터를 AI가 조회 / 조작하게 만드�
 - 프로젝트와 개발 로그를 각각 `features/` 아래에 둔 기본 데이터 경계
 - 존재하지 않는 개발 로그의 404와 초안 페이지의 `noindex`
 
-### Phase 2
+### Phase 2 — 완료
 
-Notion Development Log Database
+Notion `Development Log` Database와 초기 초안 3개를 만들었다.
 
 ### Phase 3 — route shell 완료
 
@@ -554,12 +558,13 @@ Search Console 등록 및 실제 검색 노출 확인
 
 ## 13. 다음 작업
 
-Next.js와 React 안정 버전 업그레이드 및 기본 사이트 구조 구현을 완료했다. 다음 작업은
-Notion에 `Development Log` Database를 만들고, 공개 글을 server-only data access에서
-읽는 것이다. 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
+Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조 및 Notion Database 생성을 완료했다.
+다음 작업은 웹 애플리케이션 전용 Notion Integration을 연결하고 공개 글을 server-only data
+access에서 읽는 것이다. 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. 5절의 필드로 Notion Database를 만들고 Integration에 읽기 권한을 부여한다.
-2. `NOTION_TOKEN`, `NOTION_DATABASE_ID`를 로컬·배포 환경의 server-only secret으로 등록한다.
+1. Notion Internal Integration을 만들고 `Development Log` Database에 읽기 권한을 부여한다.
+2. `NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID`를 로컬·배포 환경의 server-only secret으로 등록한다.
+   최신 Notion API는 Database container ID가 아니라 Data Source ID로 글 목록을 조회한다.
 3. route 경계에서 slug를 검증하고, data access에서 `Published = true`인 공개 DTO만 반환한다.
 4. 현재 `features/development-log/development-logs.ts` 초안을 Notion 조회 결과로 교체한다.
 5. `/log`와 `/log/[slug]`를 확인한 뒤 cache·revalidation 정책을 정한다.
