@@ -444,10 +444,9 @@ StatefulSet만 조회하고 `webApp`, `argoCd`, `traefik` 같은 안정적인 �
 Secret, ConfigMap, Pod log·exec와 create·update·patch·delete 권한은 항상 제외한다.
 
 exporter는 외부 Ingress 없이 ClusterIP로만 제공하고 NetworkPolicy가 활성화된 환경에서는
-`ddongmy-os`에서만 접근하게 한다. exporter 전환과 운영 검증이 끝난 뒤 기존
-`web-app-status` Role·RoleBinding을 제거하고 `web-app`에
-`automountServiceAccountToken: false`를 적용한다. 전환 전에 기존 권한을 제거해 현재
-`/lab` 상태 조회를 끊지 않는다.
+`ddongmy-os`에서만 접근하게 한다. 운영 검증을 마친 뒤 기존 `web-app-status`
+Role·RoleBinding을 제거했고, `web-app`에는 `automountServiceAccountToken: false`를
+적용했다.
 
 ---
 
@@ -478,11 +477,16 @@ exporter는 외부 Ingress 없이 ClusterIP로만 제공하고 NetworkPolicy가 
 - SSH 정보
 - 민감한 Node 정보
 
-현재 `web-app-status` ServiceAccount에는 `web-app` Deployment 하나를 `get`하는 권한만
-부여한다. 애플리케이션은 Kubernetes 응답을 검증하고 아래 공개 모델로 줄여 반환한다.
+`status-exporter` ServiceAccount에만 `web-app` Deployment 하나를 `get`하는 권한을
+부여한다. exporter가 Kubernetes 응답을 공개 모델로 줄이고, 애플리케이션은 그 응답을
+다시 검증한다.
 
 ```text
 Kubernetes
+  ↓
+status-exporter
+  ↓
+ClusterIP
   ↓
 homelab-status
   ↓
@@ -629,9 +633,9 @@ Netdata 서버 지표를 `/lab`에 연결했다.
 chart ID는 `disk_space./`이며 `NETDATA_ROOT_DISK_CHART`로 지정한다.
 운영 `/lab`에서 CPU, memory, root disk, temperature와 uptime 표시를 확인했다.
 
-### Phase 11 — 구현 완료, 운영 전환 대기
+### Phase 11 — 완료
 
-현재 `web-app-status` 직접 Kubernetes 조회를 별도 `status-exporter`로 이전한다.
+기존 `web-app-status` 직접 Kubernetes 조회를 별도 `status-exporter`로 이전했다.
 
 1. exporter 전용 ServiceAccount와 선택 resource의 `get`만 허용하는 최소 RBAC
 2. Deployment·StatefulSet을 안정적인 공개 workload 모델로 변환
@@ -648,10 +652,10 @@ namespace의 `web-app` Deployment만 이름을 지정한 `get` 권한으로 읽�
 ServiceAccount·Role·RoleBinding, ClusterIP Service와 `app=web` Pod만 허용하는 ingress
 NetworkPolicy도 `k8s/status-exporter.yaml`에 정의했다.
 
-웹앱은 `STATUS_EXPORTER_BASE_URL`의 응답을 먼저 검증해서 사용한다. 배포 순서가 엇갈리거나
-exporter가 실패하면 운영 검증 전까지 기존 Kubernetes 직접 조회로 fallback한다. 운영에서
-exporter 응답과 `/lab` 상태를 확인한 뒤에만 기존 `k8s/status-rbac.yaml`을 제거하고
-`web-app`의 ServiceAccount token 자동 mount를 끈다.
+운영에서 exporter Deployment·Service, 최소 RBAC, ClusterIP 응답과 `/lab` 표시를
+확인했다. 기존 `k8s/status-rbac.yaml`과 Kubernetes 직접 조회 코드를 제거했으며,
+`web-app`은 `automountServiceAccountToken: false`로 실행한다. Kubernetes API 권한과
+ServiceAccount token은 exporter에만 남아 있다.
 
 ### 보류 — 방문자와 조회수
 
@@ -683,7 +687,7 @@ Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 
 Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. Phase 11 변경을 배포하고 `status-exporter` Deployment·Service가 준비됐는지 확인한다.
-2. `web-app` Pod에서 `http://status-exporter:8080/status` 응답과 최소 RBAC를 확인한다.
-3. 운영 `/lab`과 `/api/server-status`가 exporter의 replica·release 정보를 표시하는지 확인한다.
-4. 검증 후 기존 `web-app-status` RBAC를 제거하고 `automountServiceAccountToken: false`를 적용한다.
+1. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
+2. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
+   뒤 대상별 `get` 권한과 공개 key를 추가한다.
+3. Search Console에서 색인과 검색 유입을 계속 관찰한다.

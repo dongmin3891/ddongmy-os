@@ -115,9 +115,13 @@ main 브랜치 push
 ```text
 ghcr.io/dongmin3891/ddongmy-os:latest
 ghcr.io/dongmin3891/ddongmy-os:<commit-sha>
+ghcr.io/dongmin3891/ddongmy-os:status-exporter-latest
+ghcr.io/dongmin3891/ddongmy-os:status-exporter-<commit-sha>
 ```
 
-이미지를 push한 뒤 `k8s/deployment.yaml`의 이미지 태그를 commit SHA로 변경하고 저장소에 commit합니다. `k8s/**`만 변경된 push는 워크플로 실행 대상에서 제외되어 배포 commit으로 인한 중복 빌드를 방지합니다.
+이미지를 push한 뒤 웹앱과 status-exporter manifest의 이미지 태그를 commit SHA로 변경하고
+저장소에 commit합니다. `k8s/**`만 변경된 push는 워크플로 실행 대상에서 제외되어 배포
+commit으로 인한 중복 빌드를 방지합니다.
 
 ### CD: Argo CD와 Kubernetes
 
@@ -126,8 +130,11 @@ ghcr.io/dongmin3891/ddongmy-os:<commit-sha>
 현재 Kubernetes 구성은 다음과 같습니다.
 
 - Deployment: `web-app`, 2 replicas, 컨테이너 포트 `3000`
-- ServiceAccount: `web-app-status`, `web-app` Deployment 조회만 허용
+- Deployment: `status-exporter`, 지정된 workload 상태만 공개
+- ServiceAccount: `status-exporter`, `web-app` Deployment의 `get`만 허용
+- `web-app`에는 Kubernetes ServiceAccount token을 mount하지 않음
 - Service: `web-service`, ClusterIP `80` → 컨테이너 `3000`
+- Service: `status-exporter`, ClusterIP `8080`
 - Ingress: Traefik, 호스트 `ddongmy.com`
 - TLS Secret: `ddongmy-tls`
 
