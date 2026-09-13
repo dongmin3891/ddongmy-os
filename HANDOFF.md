@@ -608,7 +608,7 @@ Notion `Development Log` Database와 초기 초안 3개를 만들었다.
 - `/`, `/log`, `/lab`의 색인 생성을 요청했다.
 - 실제 색인과 검색 유입은 Search Console에서 계속 관찰한다.
 
-### Phase 10 — 구현 완료, 운영 검증 대기
+### Phase 10 — 완료
 
 Netdata 서버 지표를 `/lab`에 연결했다.
 
@@ -627,8 +627,9 @@ Netdata 서버 지표를 `/lab`에 연결했다.
 장비별로 다르며 현재 홈서버의 CPU package 온도는
 `sensors.temperature_coretemp-isa-0000_temp1_Package_id_0_input`을 사용한다. Root disk
 chart ID는 `disk_space./`이며 `NETDATA_ROOT_DISK_CHART`로 지정한다.
+운영 `/lab`에서 CPU, memory, root disk, temperature와 uptime 표시를 확인했다.
 
-### Phase 11 — Phase 10 이후
+### Phase 11 — 구현 완료, 운영 전환 대기
 
 현재 `web-app-status` 직접 Kubernetes 조회를 별도 `status-exporter`로 이전한다.
 
@@ -640,6 +641,17 @@ chart ID는 `disk_space./`이며 `NETDATA_ROOT_DISK_CHART`로 지정한다.
 6. `web-app`에 `automountServiceAccountToken: false` 적용
 
 전체 Pod 집계와 `list pods` 권한은 실제 표시 가치가 확인될 때까지 추가하지 않는다.
+
+`services/status-exporter`에 Node 표준 HTTP 기반 exporter를 추가했다. 현재는 `default`
+namespace의 `web-app` Deployment만 이름을 지정한 `get` 권한으로 읽으며 `/status`에는
+`webApp` 공개 key, replica 상태, release SHA와 배포 시각만 반환한다. 전용
+ServiceAccount·Role·RoleBinding, ClusterIP Service와 `app=web` Pod만 허용하는 ingress
+NetworkPolicy도 `k8s/status-exporter.yaml`에 정의했다.
+
+웹앱은 `STATUS_EXPORTER_BASE_URL`의 응답을 먼저 검증해서 사용한다. 배포 순서가 엇갈리거나
+exporter가 실패하면 운영 검증 전까지 기존 Kubernetes 직접 조회로 fallback한다. 운영에서
+exporter 응답과 `/lab` 상태를 확인한 뒤에만 기존 `k8s/status-rbac.yaml`을 제거하고
+`web-app`의 ServiceAccount token 자동 mount를 끈다.
 
 ### 보류 — 방문자와 조회수
 
@@ -671,7 +683,7 @@ Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 
 Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. 운영 Netdata의 temperature chart ID를 확인해 `NETDATA_TEMPERATURE_CHART`를 정한다.
-2. Phase 10 변경을 배포하고 CPU, memory, root disk, temperature와 uptime 값을 확인한다.
-3. `/lab` 서버 리소스 패널의 데스크톱·모바일 배치와 Netdata 장애 시 fallback을 확인한다.
-4. Phase 10 운영 검증 후 Phase 11의 `status-exporter` 전환을 시작한다.
+1. Phase 11 변경을 배포하고 `status-exporter` Deployment·Service가 준비됐는지 확인한다.
+2. `web-app` Pod에서 `http://status-exporter:8080/status` 응답과 최소 RBAC를 확인한다.
+3. 운영 `/lab`과 `/api/server-status`가 exporter의 replica·release 정보를 표시하는지 확인한다.
+4. 검증 후 기존 `web-app-status` RBAC를 제거하고 `automountServiceAccountToken: false`를 적용한다.

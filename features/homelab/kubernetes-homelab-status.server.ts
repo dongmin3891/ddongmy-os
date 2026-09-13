@@ -80,7 +80,7 @@ function getFailureReason(error: unknown) {
   return 'request-failed'
 }
 
-async function readHomelabStatus(): Promise<PublicHomelabStatus> {
+async function readKubernetesHomelabStatus(): Promise<PublicHomelabStatus> {
   const checkedAt = new Date().toISOString()
   if (!process.env.KUBERNETES_SERVICE_HOST) return { status: 'unavailable', checkedAt }
 
@@ -136,4 +136,4 @@ async function readHomelabStatus(): Promise<PublicHomelabStatus> {
   }
 }
 
-export const getHomelabStatus = cache(readHomelabStatus)
+export const getKubernetesHomelabStatus = cache(readKubernetesHomelabStatus)

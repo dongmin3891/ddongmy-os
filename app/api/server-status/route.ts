@@ -1,4 +1,4 @@
-import { getHomelabStatus } from '@/features/homelab/kubernetes-homelab-status.server'
+import { getHomelabStatus } from '@/features/homelab/homelab-status.server'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,0 +1,5 @@
+{
+  "name": "ddongmy-status-exporter",
+  "private": true,
+  "type": "module"
+}

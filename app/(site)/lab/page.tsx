@@ -5,7 +5,7 @@ import HomelabChangelogSection from '@/features/homelab/components/HomelabChange
 import HomelabStatusPanel from '@/features/homelab/components/HomelabStatusPanel'
 import IncidentLogSection from '@/features/homelab/components/IncidentLogSection'
 import ServerMetricsPanel from '@/features/homelab/components/ServerMetricsPanel'
-import { getHomelabStatus } from '@/features/homelab/kubernetes-homelab-status.server'
+import { getHomelabStatus } from '@/features/homelab/homelab-status.server'
 import { getServerMetrics } from '@/features/homelab/netdata-server-metrics.server'
 
 export const dynamic = 'force-dynamic'

@@ -56,6 +56,8 @@ spec:
               value: disk_space./
             - name: NETDATA_TEMPERATURE_CHART
               value: sensors.temperature_coretemp-isa-0000_temp1_Package_id_0_input
+            - name: STATUS_EXPORTER_BASE_URL
+              value: http://status-exporter:8080
             - name: NOTION_TOKEN
               valueFrom:
                 secretKeyRef:
