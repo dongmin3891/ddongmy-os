@@ -626,7 +626,7 @@ Netdata 서버 지표를 `/lab`에 연결했다.
 배포 후 CPU, memory, root disk와 uptime의 실제 chart 응답을 확인한다. Temperature chart ID는
 장비별로 다르며 현재 홈서버의 CPU package 온도는
 `sensors.temperature_coretemp-isa-0000_temp1_Package_id_0_input`을 사용한다. Root disk
-chart ID는 운영 Netdata에서 확인해 `NETDATA_ROOT_DISK_CHART`로 지정할 수 있다.
+chart ID는 `disk_space./`이며 `NETDATA_ROOT_DISK_CHART`로 지정한다.
 
 ### Phase 11 — Phase 10 이후
 

@@ -52,6 +52,8 @@ spec:
                   fieldPath: status.hostIP
             - name: NETDATA_BASE_URL
               value: http://$(NETDATA_HOST):19999
+            - name: NETDATA_ROOT_DISK_CHART
+              value: disk_space./
             - name: NETDATA_TEMPERATURE_CHART
               value: sensors.temperature_coretemp-isa-0000_temp1_Package_id_0_input
             - name: NOTION_TOKEN
