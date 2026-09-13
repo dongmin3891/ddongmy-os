@@ -1,37 +1,95 @@
 import Link from 'next/link'
-import type { DevelopmentLogSummary } from '../development-log'
+import {
+  getDevelopmentLogCategoryLabel,
+  type DevelopmentLogSummary,
+} from '../development-log'
 
 type DevelopmentLogListProps = {
   logs: readonly DevelopmentLogSummary[]
+  emptyMessage?: string
 }
 
-export default function DevelopmentLogList({ logs }: DevelopmentLogListProps) {
+export default function DevelopmentLogList({
+  logs,
+  emptyMessage = '공개된 개발 기록이 없습니다.',
+}: DevelopmentLogListProps) {
   if (logs.length === 0) {
-    return <p className="rounded-lg border border-slate-700 bg-slate-800 p-6 text-slate-300">공개된 개발 기록이 없습니다.</p>
+    return <p className="rounded-lg border border-slate-700 bg-slate-800 p-6 text-slate-300">{emptyMessage}</p>
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] gap-6">
       {logs.map((log) => (
-        <article key={log.slug} className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-          <div className="mb-3 flex flex-wrap items-center gap-3">
-            <span className="rounded bg-yellow-500/20 px-2 py-1 text-xs font-medium text-yellow-300">
-              {log.status === 'draft' ? '초안 준비 중' : '공개'}
-            </span>
-            <ul className="flex flex-wrap gap-2 text-xs text-slate-400" aria-label={`${log.title} 태그`}>
+        <article
+          key={log.slug}
+          className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-slate-700 bg-slate-800 transition duration-300 hover:-translate-y-1 hover:border-primary-400/60 hover:shadow-xl hover:shadow-slate-950/30 focus-within:ring-2 focus-within:ring-primary-400 motion-reduce:transform-none motion-reduce:transition-none"
+        >
+          <DevelopmentLogThumbnail log={log} />
+          <div className="flex flex-1 flex-col p-6">
+            <h2 className="line-clamp-2 text-xl font-bold leading-snug text-white transition-colors group-hover:text-primary-300">
+              <Link
+                href={`/log/${log.slug}`}
+                className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+              >
+                {log.title}
+              </Link>
+            </h2>
+            <p className="mt-3 line-clamp-3 flex-1 leading-relaxed text-slate-300">{log.summary}</p>
+            <ul className="mt-5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400">
               {log.tags.map((tag) => (
                 <li key={tag}>#{tag}</li>
               ))}
             </ul>
+            <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary-300">
+              글 읽기
+              <span
+                className="transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </span>
           </div>
-          <h2 className="text-xl font-bold text-white">
-            <Link href={`/log/${log.slug}`} className="hover:text-primary-400">
-              {log.title}
-            </Link>
-          </h2>
-          <p className="mt-3 leading-relaxed text-slate-300">{log.summary}</p>
         </article>
       ))}
     </div>
   )
+}
+
+type DevelopmentLogThumbnailProps = {
+  log: DevelopmentLogSummary
+}
+
+function DevelopmentLogThumbnail({ log }: DevelopmentLogThumbnailProps) {
+  const categoryLabel =
+    log.status === 'draft' ? '초안 준비 중' : getDevelopmentLogCategoryLabel(log.category)
+
+  return (
+    <div
+      className={`relative aspect-video overflow-hidden ${getCategoryBackgroundClassName(log.category)}`}
+    >
+      {log.thumbnailUrl && (
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+          style={{ backgroundImage: `url(${log.thumbnailUrl})` }}
+          aria-hidden="true"
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
+      <span className="absolute bottom-4 left-4 rounded-md border border-white/10 bg-slate-950/70 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+        {categoryLabel}
+      </span>
+    </div>
+  )
+}
+
+function getCategoryBackgroundClassName(category: DevelopmentLogSummary['category']) {
+  switch (category) {
+    case 'improvement':
+      return 'bg-gradient-to-br from-blue-500/40 via-slate-800 to-cyan-400/20'
+    case 'operations':
+      return 'bg-gradient-to-br from-amber-500/35 via-slate-800 to-orange-400/20'
+    case 'retrospective':
+      return 'bg-gradient-to-br from-violet-500/35 via-slate-800 to-fuchsia-400/20'
+  }
 }
