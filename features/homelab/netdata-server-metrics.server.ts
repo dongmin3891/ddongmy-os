@@ -119,6 +119,18 @@ function getUsedPercent(sample: NetdataChartSample) {
   return clampPercent((used / total) * 100)
 }
 
+function getCpuUsagePercent(sample: NetdataChartSample) {
+  const idle = sample.values.get('idle')
+  if (idle !== undefined) return clampPercent(100 - idle)
+
+  const usage = [...sample.values.entries()].reduce((total, [dimension, value]) => {
+    if (dimension === 'guest' || dimension === 'guest_nice') return total
+    return total + Math.max(0, value)
+  }, 0)
+
+  return clampPercent(usage)
+}
+
 async function getTemperatureCelsius(baseUrl: URL) {
   const temperatureChart = process.env.NETDATA_TEMPERATURE_CHART
   if (!temperatureChart) return null
@@ -168,7 +180,7 @@ async function readServerMetrics(): Promise<ServerMetricsStatus> {
       checkedAt,
       observedAt,
       data: {
-        cpuUsagePercent: clampPercent(100 - getRequiredValue(cpu, 'idle')),
+        cpuUsagePercent: getCpuUsagePercent(cpu),
         memoryUsagePercent: getUsedPercent(memory),
         diskUsagePercent: getUsedPercent(rootDisk),
         temperatureCelsius,
