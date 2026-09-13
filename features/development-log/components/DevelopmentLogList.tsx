@@ -1,4 +1,6 @@
+import Image from 'next/image'
 import Link from 'next/link'
+import notionImageSource from '@/config/notion-image-source'
 import {
   getDevelopmentLogCategoryLabel,
   type DevelopmentLogSummary,
@@ -63,12 +65,24 @@ type DevelopmentLogThumbnailProps = {
 function DevelopmentLogThumbnail({ log }: DevelopmentLogThumbnailProps) {
   const categoryLabel =
     log.status === 'draft' ? '초안 준비 중' : getDevelopmentLogCategoryLabel(log.category)
+  const shouldOptimizeThumbnail =
+    log.thumbnailUrl && isOptimizableNotionThumbnail(log.thumbnailUrl)
 
   return (
     <div
       className={`relative aspect-video overflow-hidden ${getCategoryBackgroundClassName(log.category)}`}
     >
-      {log.thumbnailUrl && (
+      {shouldOptimizeThumbnail && log.thumbnailUrl && (
+        <Image
+          src={log.thumbnailUrl}
+          alt=""
+          fill
+          sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+          quality={60}
+          className="object-cover object-center transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+        />
+      )}
+      {log.thumbnailUrl && !shouldOptimizeThumbnail && (
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
           style={{ backgroundImage: `url(${log.thumbnailUrl})` }}
@@ -80,6 +94,16 @@ function DevelopmentLogThumbnail({ log }: DevelopmentLogThumbnailProps) {
         {categoryLabel}
       </span>
     </div>
+  )
+}
+
+function isOptimizableNotionThumbnail(thumbnailUrl: string) {
+  const url = new URL(thumbnailUrl)
+
+  return (
+    url.protocol === `${notionImageSource.protocol}:` &&
+    url.hostname === notionImageSource.hostname &&
+    url.pathname.startsWith(notionImageSource.pathnamePrefix)
   )
 }
 
