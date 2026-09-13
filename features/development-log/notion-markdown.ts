@@ -1,6 +1,7 @@
 const calloutPattern = /<callout\b[^>]*>([\s\S]*?)<\/callout>/gi
 const lineBreakPattern = /<br\s*\/?>/gi
 const tableOfContentsPattern = /<table_of_contents\s*\/>/gi
+const tableFollowedByMarkdownPattern = /<\/table>[ \t]*\r?\n(?=\S)/gi
 
 function toBlockquote(content: string) {
   return content
@@ -15,5 +16,6 @@ export function normalizeNotionMarkdown(markdown: string) {
   return markdown
     .replace(calloutPattern, (_, content: string) => `${toBlockquote(content)}\n`)
     .replace(tableOfContentsPattern, '')
+    .replace(tableFollowedByMarkdownPattern, '</table>\n\n')
     .replace(lineBreakPattern, '  \n')
 }

@@ -3,6 +3,7 @@ import Markdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
+import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
 import { normalizeNotionMarkdown } from '../notion-markdown'
 import MermaidDiagram from './MermaidDiagram'
@@ -20,14 +21,22 @@ const markdownComponents: Components = {
   pre({ children, node, ...props }) {
     void node
 
-    if (
-      isValidElement<MarkdownCodeProps>(children) &&
-      children.props.className === 'language-mermaid'
-    ) {
+    if (!isValidElement<MarkdownCodeProps>(children)) {
+      return <pre {...props}>{children}</pre>
+    }
+
+    const language = children.props.className?.match(/language-([\w-]+)/)?.[1]
+
+    if (language === 'mermaid') {
       return <MermaidDiagram chart={String(children.props.children).trim()} />
     }
 
-    return <pre {...props}>{children}</pre>
+    return (
+      <div className="code-block">
+        {language && <div className="code-block-language">{language}</div>}
+        <pre {...props}>{children}</pre>
+      </div>
+    )
   },
 }
 
@@ -37,7 +46,7 @@ export default function DevelopmentLogBody({ markdown }: DevelopmentLogBodyProps
       <Markdown
         components={markdownComponents}
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeSanitize]}
+        rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
       >
         {normalizeNotionMarkdown(markdown)}
       </Markdown>
