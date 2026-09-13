@@ -399,6 +399,56 @@ Pod replacement
 
 관련 Development Log로 연결한다.
 
+### 다음 운영 지표 경계
+
+`/lab`은 Kubernetes API를 직접 넓게 조회하지 않는다. 서버 지표와 Kubernetes 상태를
+서로 다른 내부 소스에서 받아 공개 모델로 줄인다.
+
+```text
+Linux / K3s
+  → Netdata
+  → server-only data access
+  → /lab
+
+Kubernetes API
+  → status-exporter
+  → ClusterIP Service
+  → server-only data access
+  → /lab
+```
+
+Netdata에서는 CPU, memory, root disk, temperature와 uptime만 읽는다. 원본 chart,
+host 주소와 내부 식별자는 Browser에 전달하지 않는다. Temperature는 센서가 없거나 값을
+읽지 못할 수 있으므로 `null`을 허용하며, 일부 지표 누락을 전체 장애로 바꾸지 않는다.
+
+두 소스의 공개 결과는 같은 상태 형태를 사용한다. 확인 시각은 항상 `checkedAt`으로,
+실제 관찰 시각을 알 수 있을 때만 `observedAt`으로 표현한다.
+
+```ts
+type HomelabStatus<T> =
+  | {
+      status: 'available'
+      checkedAt: string
+      observedAt: string
+      data: T
+    }
+  | {
+      status: 'unavailable'
+      checkedAt: string
+    }
+```
+
+`status-exporter`는 내부에서 `namespace + kind + name`으로 지정한 Deployment 또는
+StatefulSet만 조회하고 `webApp`, `argoCd`, `traefik` 같은 안정적인 공개 key로 변환한다.
+초기에는 전체 Pod 수를 제공하지 않으며 cluster-wide `list pods` 권한도 부여하지 않는다.
+Secret, ConfigMap, Pod log·exec와 create·update·patch·delete 권한은 항상 제외한다.
+
+exporter는 외부 Ingress 없이 ClusterIP로만 제공하고 NetworkPolicy가 활성화된 환경에서는
+`ddongmy-os`에서만 접근하게 한다. exporter 전환과 운영 검증이 끝난 뒤 기존
+`web-app-status` Role·RoleBinding을 제거하고 `web-app`에
+`automountServiceAccountToken: false`를 적용한다. 전환 전에 기존 권한을 제거해 현재
+`/lab` 상태 조회를 끊지 않는다.
+
 ---
 
 ## 8. 공개 운영 데이터 보안
@@ -551,9 +601,53 @@ Notion `Development Log` Database와 초기 초안 3개를 만들었다.
 - 운영 문제와 구조 변경을 시간순으로 보여주는 Homelab Changelog
 - 추가 Kubernetes 권한이나 외부 API 없이 공개 가능한 정적 기록과 기존 상태 응답만 사용
 
-### Phase 9
+### Phase 9 — 등록 완료, 관찰 중
 
-Search Console 등록 및 실제 검색 노출 확인
+- Google Search Console에서 `ddongmy.com` 소유권을 확인했다.
+- `/sitemap.xml` 제출이 처리됐고 13개 페이지가 발견됐다.
+- `/`, `/log`, `/lab`의 색인 생성을 요청했다.
+- 실제 색인과 검색 유입은 Search Console에서 계속 관찰한다.
+
+### Phase 10 — 구현 완료, 운영 검증 대기
+
+Netdata 서버 지표를 `/lab`에 연결했다.
+
+- CPU usage
+- memory usage
+- root disk usage
+- temperature 또는 `null`
+- uptime
+- server-only HTTP 요청, 외부 응답 검증과 공개 DTO 변환
+- 60초 갱신 정책과 source별 `unavailable` 처리
+- Pod의 `status.hostIP`로 외부에 공개되지 않은 Netdata Agent에 접근
+- 원본 응답과 내부 주소를 Browser에 전달하지 않는 서버 리소스 패널
+
+실행 중인 `web-app` Pod에서 Netdata `/api/v1/info`가 HTTP 200으로 응답하는 것을 확인했다.
+배포 후 CPU, memory, root disk와 uptime의 실제 chart 응답을 확인한다. Temperature chart ID는
+장비별로 다르며 현재 홈서버의 CPU package 온도는
+`sensors.temperature_coretemp-isa-0000_temp1_Package_id_0_input`을 사용한다. Root disk
+chart ID는 운영 Netdata에서 확인해 `NETDATA_ROOT_DISK_CHART`로 지정할 수 있다.
+
+### Phase 11 — Phase 10 이후
+
+현재 `web-app-status` 직접 Kubernetes 조회를 별도 `status-exporter`로 이전한다.
+
+1. exporter 전용 ServiceAccount와 선택 resource의 `get`만 허용하는 최소 RBAC
+2. Deployment·StatefulSet을 안정적인 공개 workload 모델로 변환
+3. ClusterIP와 NetworkPolicy 검증
+4. `ddongmy-os`가 exporter 응답을 검증해 `/lab`에 표시
+5. 운영 상태 확인 후 기존 `web-app-status` Role·RoleBinding 제거
+6. `web-app`에 `automountServiceAccountToken: false` 적용
+
+전체 Pod 집계와 `list pods` 권한은 실제 표시 가치가 확인될 때까지 추가하지 않는다.
+
+### 보류 — 방문자와 조회수
+
+전체 방문자, 오늘 방문자, 전체 조회수와 글별 조회수는 이번 운영 지표 작업에서 제외한다.
+나중에 구현할 때는 Pod 메모리·파일·SQLite를 사용하지 않고 중앙 PostgreSQL을 사용한다.
+익명 방문자와 유효 page view를 저장해 5분 중복을 DB 제약으로 막고, 필요해질 때만
+일별 집계나 Redis를 추가한다. Server Component는 같은 앱의 GET API를 다시 호출하지 않고
+server-only data-access 함수로 요약과 글별 조회수를 배치 조회한다.
 
 ---
 
@@ -573,10 +667,11 @@ Search Console 등록 및 실제 검색 노출 확인
 
 ## 13. 다음 작업
 
-Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 공개 글, Phase 4 SEO와
-Phase 8 Homelab 운영 기록을 구현했다. 다음 작업을 시작하면 루트 `AGENTS.md`에 따라 필요한
-스킬만 선택해 읽는다.
+Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 공개 글, SEO,
+Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
+`AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. Phase 8 변경을 배포하고 `/lab`의 현재 release, 배포 이력, Changelog와 Incident 링크를
-   데스크톱·모바일에서 확인한다.
-2. Search Console에 sitemap을 제출하고 실제 색인 상태를 확인한다.
+1. 운영 Netdata의 temperature chart ID를 확인해 `NETDATA_TEMPERATURE_CHART`를 정한다.
+2. Phase 10 변경을 배포하고 CPU, memory, root disk, temperature와 uptime 값을 확인한다.
+3. `/lab` 서버 리소스 패널의 데스크톱·모바일 배치와 Netdata 장애 시 fallback을 확인한다.
+4. Phase 10 운영 검증 후 Phase 11의 `status-exporter` 전환을 시작한다.

@@ -4,7 +4,9 @@ import DeploymentHistorySection from '@/features/homelab/components/DeploymentHi
 import HomelabChangelogSection from '@/features/homelab/components/HomelabChangelogSection'
 import HomelabStatusPanel from '@/features/homelab/components/HomelabStatusPanel'
 import IncidentLogSection from '@/features/homelab/components/IncidentLogSection'
+import ServerMetricsPanel from '@/features/homelab/components/ServerMetricsPanel'
 import { getHomelabStatus } from '@/features/homelab/kubernetes-homelab-status.server'
+import { getServerMetrics } from '@/features/homelab/netdata-server-metrics.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +19,10 @@ export const metadata: Metadata = {
 const requestPath = ['Internet', 'Home Network', 'K3s', 'Traefik', 'Ingress', 'Service', 'Next.js Pod']
 
 export default async function HomeLabPage() {
-  const homelabStatus = await getHomelabStatus()
+  const [homelabStatus, serverMetrics] = await Promise.all([
+    getHomelabStatus(),
+    getServerMetrics(),
+  ])
 
   return (
     <div className="space-y-12">
@@ -28,6 +33,8 @@ export default async function HomeLabPage() {
       />
 
       <HomelabStatusPanel homelabStatus={homelabStatus} />
+
+      <ServerMetricsPanel serverMetrics={serverMetrics} />
 
       <DeploymentHistorySection homelabStatus={homelabStatus} />
 
@@ -53,7 +60,9 @@ export default async function HomeLabPage() {
       <section className="rounded-lg border border-slate-700 bg-slate-800 p-6" aria-labelledby="lab-access-title">
         <h2 id="lab-access-title" className="text-2xl font-bold text-white">공개 데이터 경계</h2>
         <p className="mt-3 max-w-3xl leading-relaxed text-slate-300">
-          이 페이지는 web-app Deployment 하나의 준비된 replica 수, release SHA와 배포 시각만 공개합니다. Pod 이름, 내부 IP, Kubernetes endpoint와 Secret은 반환하지 않습니다.
+          이 페이지는 web-app Deployment의 준비된 replica 수, release SHA와 배포 시각,
+          홈서버의 가공된 리소스 사용률만 공개합니다. 원본 Netdata 응답, Pod 이름, 내부 IP,
+          Kubernetes endpoint와 Secret은 반환하지 않습니다.
         </p>
       </section>
     </div>
