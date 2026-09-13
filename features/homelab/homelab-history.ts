@@ -50,7 +50,7 @@ export const homelabIncidents: readonly HomelabIncident[] = [
     symptom: 'web-app Pod가 메모리 한도를 초과하며 반복해서 재시작했습니다.',
     cause: '컨테이너 내부의 비정상 프로세스가 메모리를 점유해 cgroup 한도를 초과했습니다.',
     resolution: 'Next.js 보안 패치와 clean image rebuild 후 Pod를 교체하고 runtime memory 확인을 추가했습니다.',
-    developmentLogHref: '/log/kubernetes-oomkilled',
+    developmentLogHref: '/log/oomkilled-runtime-security',
   },
 ]
 
