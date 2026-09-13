@@ -25,6 +25,7 @@ spec:
         app: web
 
     spec:
+      serviceAccountName: default
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 30
       containers:
