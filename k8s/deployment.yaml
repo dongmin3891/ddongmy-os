@@ -69,6 +69,42 @@ spec:
                   name: web-app-notion
                   key: NOTION_DATA_SOURCE_ID
                   optional: true
+            - name: NOTION_WEBHOOK_VERIFICATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-notion
+                  key: NOTION_WEBHOOK_VERIFICATION_TOKEN
+                  optional: true
+            - name: R2_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-r2
+                  key: R2_ACCOUNT_ID
+                  optional: true
+            - name: R2_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-r2
+                  key: R2_ACCESS_KEY_ID
+                  optional: true
+            - name: R2_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-r2
+                  key: R2_SECRET_ACCESS_KEY
+                  optional: true
+            - name: R2_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-r2
+                  key: R2_BUCKET
+                  optional: true
+            - name: R2_PUBLIC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-r2
+                  key: R2_PUBLIC_URL
+                  optional: true
           lifecycle:
             preStop:
               exec:

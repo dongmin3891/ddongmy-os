@@ -47,6 +47,7 @@ COPY --chown=node:node --from=builder /app/package.json ./package.json
 COPY --chown=node:node --from=builder /app/package-lock.json ./package-lock.json
 COPY --chown=node:node --from=builder /app/next.config.mjs ./next.config.mjs
 COPY --chown=node:node --from=builder /app/config/notion-image-source.js ./config/notion-image-source.js
+COPY --chown=node:node --from=builder /app/config/r2-image-source.js ./config/r2-image-source.js
 COPY --chown=node:node --from=builder /app/.next ./.next
 COPY --chown=node:node --from=deps /app/node_modules ./node_modules
 

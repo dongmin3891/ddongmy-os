@@ -234,7 +234,7 @@ Notion cover를 R2로 동기화하는 webhook을 추가하기로 설계를 확�
 
 Notion API는 반드시 Server Side에서 호출하고 Notion Integration Token을 Browser에 노출하지 않는다.
 
-### Cover 이미지 전달 — Phase 12 설계 완료, 구현 전
+### Cover 이미지 전달 — Phase 12 구현 완료, 운영 연결 전
 
 현재 `/log` 카드의 Notion-hosted cover는 1시간 동안 유효한 S3 서명 URL을
 `next/image`에 직접 전달한다. 2026-09-14 운영 측정에서 원본 PNG 한 장은 약 1.52MB였고,
@@ -286,10 +286,10 @@ Notion cover를 cdn.ddongmy.com external URL로 교체
 - 사이트 표시: 기존 aspect-ratio wrapper와 `fill`을 유지한 `next/image`, `unoptimized`
 
 `unoptimized`는 최적화를 포기한다는 의미가 아니다. R2에 저장하기 전에 이미 크기와 format을
-고정하므로 Next.js Pod에서 같은 작업을 반복하지 않는다는 의미다. 현재 CDN URL은
-`isOptimizableNotionThumbnail()`을 통과하지 않아 CSS `background-image` fallback으로
-렌더링되므로, 구현 시 CDN cover도 `Image`의 lazy loading과 decoding을 사용하도록 분기를
-수정한다. 마이그레이션 중에는 기존 Notion URL도 계속 표시할 수 있어야 한다.
+고정하므로 Next.js Pod에서 같은 작업을 반복하지 않는다는 의미다. CDN cover는
+`Image fill unoptimized`로 렌더링하고, 마이그레이션 중의 기존 Notion URL은 지금처럼 Next.js
+image optimization을 사용한다. 두 경로에 해당하지 않는 외부 URL만 CSS background fallback을
+유지한다.
 
 #### Webhook 처리 계약
 
@@ -321,7 +321,8 @@ page 최신 상태 재조회
 sourceIdentity가 같을 때만 external R2 cover로 변경
 ```
 
-Webhook payload는 JSON parsing 전에 raw text로 signature를 검증한다. `timingSafeEqual`을
+일회성 subscription verification payload는 아직 signature가 없으므로 별도로 식별한다. 일반
+Webhook event는 JSON parsing에 사용한 raw text로 signature를 검증한다. `timingSafeEqual`을
 호출하기 전에 두 signature buffer 길이가 같은지 확인한다. 이벤트 payload는 최신 page 전체
 상태로 신뢰하지 않고 page ID를 이용해 Notion API에서 다시 조회한다. 중복·지연·순서가 바뀐
 이벤트는 content hash와 최신 상태 재조회로 안전하게 수렴시킨다.
@@ -334,7 +335,9 @@ fail-closed한 로그를 근거로 allowlist에 명시적으로 추가한다.
 다운로드는 `response.ok`, `Content-Type: image/*`, 알려진 `Content-Length`를 먼저 확인한다.
 `Content-Length`가 없거나 잘못된 경우에도 10MB 제한이 유지되도록 response stream을 실제로
 읽은 byte 수로 제한한다. R2와 Notion credential은 server-only module에서만 읽고 Browser
-bundle, 오류 응답과 log에 노출하지 않는다.
+bundle, 오류 응답과 log에 노출하지 않는다. 최초 subscription 생성 시에만 아직 설정되지 않은
+`verification_token`을 Pod log에 남겨 운영자가 Kubernetes Secret으로 옮긴다. Secret이 설정된
+뒤에는 다른 verification token을 `401`로 거절하고 token을 다시 log에 남기지 않는다.
 
 변환 중 사용자가 cover A를 B로 바꾸는 경쟁 조건을 막기 위해 Notion cover를 교체하기 직전에
 page를 다시 조회한다. 이때 서명 query가 아니라 `hostname + pathname`으로 처음 처리한 원본과
@@ -356,13 +359,14 @@ page를 다시 조회한다. 이때 서명 query가 아니라 `hostname + pathna
    Write로 변경한 뒤 smoke WebP upload에 성공했다. 공개 응답은 `200`, `Content-Type: image/webp`,
    `Cache-Control: public, max-age=31536000, immutable`이었고 최초 `MISS` 이후 같은 URL이 `HIT`로
    전환되며 `Age`가 증가하는 것을 확인했다.
-6. Notion webhook subscription 생성, verification token 저장과 event 구독은 아직 하지 않았다.
+6. `/api/notion/webhook` Route Handler는 구현했지만 아직 운영 배포하지 않았다. Notion webhook
+   subscription 생성, verification token 저장과 event 구독도 아직 하지 않았다.
 
 Cloudflare Free/Pro에서 기존 authoritative DNS를 유지하는 partial CNAME setup은 사용할 수
 없다. `ddongmy.com`이 Cloudflare DNS를 사용하지 않는다면 Free plan에서는 full setup으로
 nameserver를 이전해야 한다. `r2.dev`는 운영에 사용하지 않고 custom domain만 공개한다.
 
-예정 환경변수는 다음과 같다.
+환경변수는 다음과 같다.
 
 ```text
 NOTION_WEBHOOK_VERIFICATION_TOKEN
@@ -394,6 +398,12 @@ Kubernetes Secret으로 제공한다. Account ID, bucket name과 public URL은 �
 9. cover A 처리 중 B로 변경되는 race가 B를 A로 덮어쓰지 않는지 검증한다.
 10. 운영에서 Notion cover 업로드만으로 R2 WebP와 external cover가 생성되고 두 번째 webhook이
     no-op으로 종료되는지 확인한다.
+
+1~7의 application 구현은 완료했다. Node 내장 test runner로 signature, event parser, exact host,
+Content-Type, Content-Length와 실제 bytes 제한, 원본 hash, 1200px WebP, signed query를 제외한
+source identity와 A→B race 판정을 검증했다. 총 12개 단위 테스트, typecheck, lint와 Next 16
+webpack production build가 통과했다. 빌드된 standalone server에서는 verification `200`, 잘못된
+JSON `400`, 올바른 signature의 비대상 event `200`, 잘못된 signature `401`을 확인했다.
 
 공개 `/log` 또는 `/log/[slug]` 요청 안에서는 Sharp 변환, R2 upload와 Notion mutation을 절대
 실행하지 않는다. 별도 이미지 서버, CronJob과 queue는 현재 규모에서 추가하지 않는다.
@@ -833,11 +843,12 @@ signature 검증, exact hostname allowlist, 실제 bytes 제한, 멱등성과 co
 4절의 `Cover 이미지 전달`에 기록했다.
 
 R2 bucket과 custom domain의 공개 조회는 확인했다. application에는 R2 client, 환경변수 검증,
-immutable cover upload 함수와 CDN `Image fill unoptimized` 표시 경로를 추가했다. AWS SDK 실제
-upload와 CDN의 WebP content type, immutable cache header, `MISS` 후 `HIT` 전환을 확인했다.
-typecheck, lint와 Next 16 webpack production build는 통과했다. 기본 Turbopack build는 실행
-환경의 worker port binding 제한으로 검증하지 못했다. Notion webhook subscription과 route
-구현은 아직 시작하지 않았다.
+immutable cover upload 함수, CDN `Image fill unoptimized` 표시 경로와 Notion webhook cover sync를
+추가했다. AWS SDK 실제 upload와 CDN의 WebP content type, immutable cache header, `MISS` 후 `HIT`
+전환을 확인했다. 12개 단위 테스트, typecheck, lint, Next 16 webpack production build와 webhook
+standalone HTTP smoke가 통과했다. 기본 Turbopack build는 실행 환경의 worker port binding 제한으로
+검증하지 못했다. application은 아직 운영 배포하지 않았고 Notion webhook subscription도 만들지
+않았다.
 
 ### 보류 — 방문자와 조회수
 
@@ -869,10 +880,15 @@ Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 
 Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. Notion webhook subscription과 verification token을 준비하고 cover 자동화 route를 구현한다.
-2. 잘못된 signature, 중복 event, host/type/content/크기 제한과 cover 변경 race를 검증한다.
-3. 운영에서 Notion cover 업로드만으로 R2 WebP 생성, external cover 교체와 두 번째 webhook
-   no-op이 이어지는지 확인한다.
+1. 현재 webhook 구현을 검토한 뒤 커밋하고 운영에 배포한다. 배포 전에 `web-app-r2` Secret에
+   R2 환경변수 5개를 넣고 기존 Notion connection에 update content capability가 있는지 확인한다.
+2. Notion connection의 Webhooks 탭에서 `https://ddongmy.com/api/notion/webhook` subscription을
+   만들고 `page.created`, `page.properties_updated`를 구독한다.
+3. 두 `web-app` Pod log 중 verification 요청을 받은 Pod에서 일회성 token을 확인해
+   `web-app-notion` Secret의 `NOTION_WEBHOOK_VERIFICATION_TOKEN`으로 저장하고 rollout한다.
+4. Notion Webhooks 탭에 같은 token을 입력해 subscription을 Active로 만든다.
+5. 운영에서 Notion cover 업로드만으로 R2 WebP 생성, external cover 교체와 두 번째 webhook
+   `already-synced` no-op이 이어지는지 확인한다.
 4. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
 5. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
    뒤 대상별 `get` 권한과 공개 key를 추가한다.
