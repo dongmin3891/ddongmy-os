@@ -33,11 +33,27 @@ test('처리할 page event에서 event와 page ID를 추출한다', () => {
   )
 })
 
-test('구독 대상이 아닌 event는 성공적으로 무시한다', () => {
+test('page content update를 cover 동기화 대상으로 처리한다', () => {
   assert.deepEqual(
     parseNotionWebhookPayload({
       id: 'event-id',
       type: 'page.content_updated',
+      entity: { type: 'page', id: 'page-id' },
+    }),
+    {
+      type: 'page-event',
+      eventId: 'event-id',
+      eventType: 'page.content_updated',
+      pageId: 'page-id',
+    },
+  )
+})
+
+test('구독 대상이 아닌 event는 성공적으로 무시한다', () => {
+  assert.deepEqual(
+    parseNotionWebhookPayload({
+      id: 'event-id',
+      type: 'page.locked',
       entity: { type: 'page', id: 'page-id' },
     }),
     { type: 'ignored-event' },

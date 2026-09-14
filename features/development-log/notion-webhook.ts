@@ -16,7 +16,11 @@ const notionWebhookEventSchema = z.object({
   }),
 })
 
-const handledPageEventTypes = new Set(['page.created', 'page.properties_updated'])
+const handledPageEventTypes = new Set([
+  'page.created',
+  'page.content_updated',
+  'page.properties_updated',
+])
 
 export type NotionWebhookPayload =
   | { type: 'verification'; verificationToken: string }

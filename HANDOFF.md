@@ -293,6 +293,11 @@ image optimization을 사용한다. 두 경로에 해당하지 않는 외부 URL
 
 #### Webhook 처리 계약
 
+커버는 page `properties`가 아닌 page 최상위 필드이다. 운영 subscription과
+서버는 `page.created`, `page.content_updated`, `page.properties_updated`를 모두 처리한다.
+`page.content_updated`가 빠지면 Notion에서 기존 cover를 교체해도 cover sync 로직이
+실행되지 않을 수 있다.
+
 ```text
 raw request body 확보
   ↓
@@ -884,12 +889,9 @@ Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 
 Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. verification 요청의 `503` hotfix를 커밋하고 운영에 배포한다.
-2. Notion verification 화면에서 `토큰 재전송`을 눌러 새 version이 `200`을 반환하게 한다.
-3. 두 `web-app` Pod log 중 verification 요청을 받은 Pod에서 일회성 token을 확인해
-   `web-app-notion` Secret의 `NOTION_WEBHOOK_VERIFICATION_TOKEN`으로 저장하고 rollout한다.
-4. Notion Webhooks 탭에 같은 token을 입력해 subscription을 Active로 만든다.
-5. 운영에서 Notion cover 업로드만으로 R2 WebP 생성, external cover 교체와 두 번째 webhook
+1. Notion Webhook subscription에 `page.content_updated`를 추가한다.
+2. `page.content_updated` 처리 hotfix를 운영에 배포한다.
+3. 운영에서 Notion cover 업로드만으로 R2 WebP 생성, external cover 교체와 두 번째 webhook
    `already-synced` no-op이 이어지는지 확인한다.
 4. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
 5. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
