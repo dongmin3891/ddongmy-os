@@ -23,17 +23,24 @@ export type NotionWebhookPayload =
   | { type: 'page-event'; eventId: string; eventType: string; pageId: string }
   | { type: 'ignored-event' }
 
+export type NotionWebhookVerification = Extract<NotionWebhookPayload, { type: 'verification' }>
+export type NotionWebhookEvent = Exclude<NotionWebhookPayload, { type: 'verification' }>
+
 export class WebhookBodyTooLargeError extends Error {}
 
-export function parseNotionWebhookPayload(value: unknown): NotionWebhookPayload {
+export function parseNotionWebhookVerification(
+  value: unknown,
+): NotionWebhookVerification | undefined {
   const verification = notionWebhookVerificationSchema.safeParse(value)
-  if (verification.success) {
-    return {
-      type: 'verification',
-      verificationToken: verification.data.verification_token,
-    }
-  }
+  if (!verification.success) return undefined
 
+  return {
+    type: 'verification',
+    verificationToken: verification.data.verification_token,
+  }
+}
+
+export function parseNotionWebhookEvent(value: unknown): NotionWebhookEvent {
   const event = notionWebhookEventSchema.parse(value)
   if (!handledPageEventTypes.has(event.type) || event.entity.type !== 'page') {
     return { type: 'ignored-event' }
@@ -45,6 +52,10 @@ export function parseNotionWebhookPayload(value: unknown): NotionWebhookPayload 
     eventType: event.type,
     pageId: event.entity.id,
   }
+}
+
+export function parseNotionWebhookPayload(value: unknown): NotionWebhookPayload {
+  return parseNotionWebhookVerification(value) ?? parseNotionWebhookEvent(value)
 }
 
 export function hasValidNotionWebhookSignature({

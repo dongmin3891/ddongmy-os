@@ -2,7 +2,8 @@ import { z } from 'zod'
 import {
   hasSameSecret,
   hasValidNotionWebhookSignature,
-  parseNotionWebhookPayload,
+  parseNotionWebhookEvent,
+  parseNotionWebhookVerification,
   readWebhookBody,
   WebhookBodyTooLargeError,
 } from '@/features/development-log/notion-webhook'
@@ -29,19 +30,6 @@ export async function POST(request: Request) {
     throw error
   }
 
-  const verificationToken = getConfiguredVerificationToken()
-  const signature = request.headers.get('x-notion-signature')
-
-  if (signature) {
-    if (!verificationToken) {
-      return Response.json({ received: false }, { status: 503 })
-    }
-
-    if (!hasValidNotionWebhookSignature({ rawBody, signature, verificationToken })) {
-      return Response.json({ received: false }, { status: 401 })
-    }
-  }
-
   let rawPayload: unknown
 
   try {
@@ -50,34 +38,47 @@ export async function POST(request: Request) {
     return Response.json({ received: false }, { status: 400 })
   }
 
-  let payload
+  const verificationToken = getConfiguredVerificationToken()
+  const verification = parseNotionWebhookVerification(rawPayload)
 
-  try {
-    payload = parseNotionWebhookPayload(rawPayload)
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return Response.json({ received: false }, { status: 400 })
-    }
-    throw error
-  }
-
-  if (payload.type === 'verification') {
-    if (verificationToken && !hasSameSecret(payload.verificationToken, verificationToken)) {
+  if (verification) {
+    if (verificationToken && !hasSameSecret(verification.verificationToken, verificationToken)) {
       return Response.json({ received: false }, { status: 401 })
     }
 
     if (!verificationToken) {
       console.info(
         '[notion-webhook] Set NOTION_WEBHOOK_VERIFICATION_TOKEN to:',
-        payload.verificationToken,
+        verification.verificationToken,
       )
     }
 
     return Response.json({ received: true, type: 'verification' })
   }
 
-  if (!signature) {
+  if (!verificationToken) {
+    return Response.json({ received: false }, { status: 503 })
+  }
+
+  if (
+    !hasValidNotionWebhookSignature({
+      rawBody,
+      signature: request.headers.get('x-notion-signature'),
+      verificationToken,
+    })
+  ) {
     return Response.json({ received: false }, { status: 401 })
+  }
+
+  let payload
+
+  try {
+    payload = parseNotionWebhookEvent(rawPayload)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return Response.json({ received: false }, { status: 400 })
+    }
+    throw error
   }
 
   if (payload.type === 'ignored-event') {

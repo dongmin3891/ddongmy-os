@@ -321,11 +321,13 @@ page 최신 상태 재조회
 sourceIdentity가 같을 때만 external R2 cover로 변경
 ```
 
-일회성 subscription verification payload는 아직 signature가 없으므로 별도로 식별한다. 일반
-Webhook event는 JSON parsing에 사용한 raw text로 signature를 검증한다. `timingSafeEqual`을
-호출하기 전에 두 signature buffer 길이가 같은지 확인한다. 이벤트 payload는 최신 page 전체
-상태로 신뢰하지 않고 page ID를 이용해 Notion API에서 다시 조회한다. 중복·지연·순서가 바뀐
-이벤트는 content hash와 최신 상태 재조회로 안전하게 수렴시킨다.
+일회성 subscription verification payload는 strict `{ verification_token }` schema로 먼저
+식별한다. 운영에서 이 초기 요청에도 `X-Notion-Signature`가 포함되는 것을 확인했지만, 아직
+서버에 verification token이 없으므로 이 요청 자체가 전달한 token을 bootstrap 값으로 받는다.
+그 외 일반 Webhook event는 raw text HMAC을 통과한 뒤 event schema를 해석한다.
+`timingSafeEqual`을 호출하기 전에 두 signature buffer 길이가 같은지 확인한다. 이벤트 payload는
+최신 page 전체 상태로 신뢰하지 않고 page ID를 이용해 Notion API에서 다시 조회한다. 중복·지연·
+순서가 바뀐 이벤트는 content hash와 최신 상태 재조회로 안전하게 수렴시킨다.
 
 원본 URL 검증은 `*.amazonaws.com` 같은 wildcard를 사용하지 않는다. 현재 확인한
 `prod-files-secure.s3.us-west-2.amazonaws.com`을 exact allowlist로 두고 HTTPS, 빈 port와
@@ -401,7 +403,7 @@ Kubernetes Secret으로 제공한다. Account ID, bucket name과 public URL은 �
 
 1~7의 application 구현은 완료했다. Node 내장 test runner로 signature, event parser, exact host,
 Content-Type, Content-Length와 실제 bytes 제한, 원본 hash, 1200px WebP, signed query를 제외한
-source identity와 A→B race 판정을 검증했다. 총 12개 단위 테스트, typecheck, lint와 Next 16
+source identity와 A→B race 판정을 검증했다. 총 13개 단위 테스트, typecheck, lint와 Next 16
 webpack production build가 통과했다. 빌드된 standalone server에서는 verification `200`, 잘못된
 JSON `400`, 올바른 signature의 비대상 event `200`, 잘못된 signature `401`을 확인했다.
 
@@ -845,10 +847,12 @@ signature 검증, exact hostname allowlist, 실제 bytes 제한, 멱등성과 co
 R2 bucket과 custom domain의 공개 조회는 확인했다. application에는 R2 client, 환경변수 검증,
 immutable cover upload 함수, CDN `Image fill unoptimized` 표시 경로와 Notion webhook cover sync를
 추가했다. AWS SDK 실제 upload와 CDN의 WebP content type, immutable cache header, `MISS` 후 `HIT`
-전환을 확인했다. 12개 단위 테스트, typecheck, lint, Next 16 webpack production build와 webhook
+전환을 확인했다. 13개 단위 테스트, typecheck, lint, Next 16 webpack production build와 webhook
 standalone HTTP smoke가 통과했다. 기본 Turbopack build는 실행 환경의 worker port binding 제한으로
-검증하지 못했다. application은 아직 운영 배포하지 않았고 Notion webhook subscription도 만들지
-않았다.
+검증하지 못했다. 첫 webhook version과 `web-app-r2` Secret은 운영에 배포했다. Notion subscription
+verification 요청에 signature가 포함되자 token 미설정 검사가 먼저 `503`을 반환한 문제를 운영에서
+발견했고, strict verification payload를 먼저 받도록 local hotfix와 회귀 테스트를 완료했다. 이
+hotfix는 아직 배포 전이며 subscription은 verification 대기 상태다.
 
 ### 보류 — 방문자와 조회수
 
@@ -880,10 +884,8 @@ Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 
 Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. 현재 webhook 구현을 검토한 뒤 커밋하고 운영에 배포한다. 배포 전에 `web-app-r2` Secret에
-   R2 환경변수 5개를 넣고 기존 Notion connection에 update content capability가 있는지 확인한다.
-2. Notion connection의 Webhooks 탭에서 `https://ddongmy.com/api/notion/webhook` subscription을
-   만들고 `page.created`, `page.properties_updated`를 구독한다.
+1. verification 요청의 `503` hotfix를 커밋하고 운영에 배포한다.
+2. Notion verification 화면에서 `토큰 재전송`을 눌러 새 version이 `200`을 반환하게 한다.
 3. 두 `web-app` Pod log 중 verification 요청을 받은 Pod에서 일회성 token을 확인해
    `web-app-notion` Secret의 `NOTION_WEBHOOK_VERIFICATION_TOKEN`으로 저장하고 rollout한다.
 4. Notion Webhooks 탭에 같은 token을 입력해 subscription을 Active로 만든다.

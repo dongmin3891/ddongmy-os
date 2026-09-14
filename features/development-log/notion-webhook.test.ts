@@ -8,6 +8,7 @@ import {
   readWebhookBody,
   WebhookBodyTooLargeError,
 } from './notion-webhook'
+import { POST } from '../../app/api/notion/webhook/route'
 
 test('verification payload를 별도 bootstrap 요청으로 구분한다', () => {
   assert.deepEqual(parseNotionWebhookPayload({ verification_token: 'secret_token' }), {
@@ -85,4 +86,32 @@ test('webhook body는 실제로 읽은 byte 수로 제한한다', async () => {
   } as RequestInit)
 
   await assert.rejects(() => readWebhookBody(request, 7), WebhookBodyTooLargeError)
+})
+
+test('초기 verification 요청에 signature가 있어도 설정 전에는 token을 수신한다', async (t) => {
+  const previousToken = process.env.NOTION_WEBHOOK_VERIFICATION_TOKEN
+  delete process.env.NOTION_WEBHOOK_VERIFICATION_TOKEN
+  t.mock.method(console, 'info', () => {})
+
+  try {
+    const response = await POST(
+      new Request('https://ddongmy.com/api/notion/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Notion-Signature': `sha256=${'0'.repeat(64)}`,
+        },
+        body: JSON.stringify({ verification_token: 'secret_bootstrap' }),
+      }),
+    )
+
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), { received: true, type: 'verification' })
+  } finally {
+    if (previousToken === undefined) {
+      delete process.env.NOTION_WEBHOOK_VERIFICATION_TOKEN
+    } else {
+      process.env.NOTION_WEBHOOK_VERIFICATION_TOKEN = previousToken
+    }
+  }
 })
