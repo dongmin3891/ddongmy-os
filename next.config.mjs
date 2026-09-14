@@ -1,4 +1,5 @@
 import notionImageSource from './config/notion-image-source.js'
+import r2ImageSource from './config/r2-image-source.js'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -13,6 +14,12 @@ const nextConfig = {
         hostname: notionImageSource.hostname,
         port: '',
         pathname: `${notionImageSource.pathnamePrefix}**`,
+      },
+      {
+        protocol: r2ImageSource.protocol,
+        hostname: r2ImageSource.hostname,
+        port: '',
+        pathname: `${r2ImageSource.pathnamePrefix}**`,
       },
     ],
   },
