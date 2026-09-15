@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import notionImageSource from '@/config/notion-image-source'
 import r2ImageSource from '@/config/r2-image-source'
@@ -6,6 +5,7 @@ import {
   getDevelopmentLogCategoryLabel,
   type DevelopmentLogSummary,
 } from '../development-log'
+import DevelopmentLogThumbnailImage from './DevelopmentLogThumbnailImage'
 
 type DevelopmentLogListProps = {
   logs: readonly DevelopmentLogSummary[]
@@ -22,12 +22,12 @@ export default function DevelopmentLogList({
 
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] gap-6">
-      {logs.map((log) => (
+      {logs.map((log, index) => (
         <article
           key={log.slug}
           className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-slate-700 bg-slate-800 transition duration-300 hover:-translate-y-1 hover:border-primary-400/60 hover:shadow-xl hover:shadow-slate-950/30 focus-within:ring-2 focus-within:ring-primary-400 motion-reduce:transform-none motion-reduce:transition-none"
         >
-          <DevelopmentLogThumbnail log={log} />
+          <DevelopmentLogThumbnail log={log} shouldLoadEagerly={index === 0} />
           <div className="flex flex-1 flex-col p-6">
             <h2 className="line-clamp-2 text-xl font-bold leading-snug text-white transition-colors group-hover:text-primary-300">
               <Link
@@ -61,9 +61,10 @@ export default function DevelopmentLogList({
 
 type DevelopmentLogThumbnailProps = {
   log: DevelopmentLogSummary
+  shouldLoadEagerly: boolean
 }
 
-function DevelopmentLogThumbnail({ log }: DevelopmentLogThumbnailProps) {
+function DevelopmentLogThumbnail({ log, shouldLoadEagerly }: DevelopmentLogThumbnailProps) {
   const categoryLabel =
     log.status === 'draft' ? '초안 준비 중' : getDevelopmentLogCategoryLabel(log.category)
   const isNotionThumbnail = Boolean(
@@ -79,14 +80,12 @@ function DevelopmentLogThumbnail({ log }: DevelopmentLogThumbnailProps) {
       className={`relative aspect-video overflow-hidden ${getCategoryBackgroundClassName(log.category)}`}
     >
       {shouldRenderImage && log.thumbnailUrl && (
-        <Image
+        <DevelopmentLogThumbnailImage
+          key={log.thumbnailUrl}
+          loading={shouldLoadEagerly ? 'eager' : 'lazy'}
           src={log.thumbnailUrl}
-          alt=""
-          fill
-          sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
           quality={isNotionThumbnail ? 60 : undefined}
           unoptimized={isR2Thumbnail}
-          className="object-cover object-center transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
         />
       )}
       {log.thumbnailUrl && !shouldRenderImage && (
