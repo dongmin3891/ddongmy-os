@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080" role="img" aria-labelledby="title desc">
+  <title id="title">ddongmy 전체 파이프라인</title>
+  <desc id="desc">개발, GitOps 배포, 콘텐츠 관리, 사용자 요청과 운영 상태 조회를 보여주는 시스템 파이프라인</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#08111f"/>
+      <stop offset="1" stop-color="#111b31"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5eead4"/>
+      <stop offset="1" stop-color="#60a5fa"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#020617" flood-opacity="0.45"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowCyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5eead4"/>
+    </marker>
+    <style>
+      .title { font: 700 40px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f8fafc; }
+      .subtitle { font: 400 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #94a3b8; }
+      .lane-title { font: 700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #cbd5e1; letter-spacing: 1.5px; }
+      .node-title { font: 700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f8fafc; text-anchor: middle; }
+      .node-sub { font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #94a3b8; text-anchor: middle; }
+      .edge-label { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #94a3b8; text-anchor: middle; }
+      .card { fill: #162238; stroke: #334155; stroke-width: 1.5; filter: url(#shadow); }
+      .card-accent { fill: #102b35; stroke: #2dd4bf; stroke-width: 1.5; filter: url(#shadow); }
+      .card-blue { fill: #142641; stroke: #60a5fa; stroke-width: 1.5; filter: url(#shadow); }
+      .lane { fill: #0f172a; fill-opacity: .62; stroke: #26344c; stroke-width: 1; }
+      .edge { fill: none; stroke: #64748b; stroke-width: 2.2; marker-end: url(#arrow); }
+      .edge-cyan { fill: none; stroke: #5eead4; stroke-width: 2.5; marker-end: url(#arrowCyan); }
+      .edge-dash { fill: none; stroke: #64748b; stroke-width: 2; stroke-dasharray: 8 8; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1080" rx="28" fill="url(#background)"/>
+  <rect x="54" y="42" width="7" height="72" rx="3.5" fill="url(#hero)"/>
+  <text x="84" y="78" class="title">ddongmy Pipeline</text>
+  <text x="84" y="108" class="subtitle">코드가 배포되고, 콘텐츠가 연결되고, 방문자에게 서비스되기까지</text>
+
+  <!-- Deployment lane -->
+  <rect x="48" y="146" width="1504" height="238" rx="24" class="lane"/>
+  <text x="78" y="181" class="lane-title">CODE DELIVERY · GITOPS</text>
+
+  <rect x="78" y="218" width="190" height="100" rx="18" class="card"/>
+  <text x="173" y="258" class="node-title">로컬 개발</text>
+  <text x="173" y="284" class="node-sub">ddongmy-os</text>
+
+  <rect x="326" y="218" width="170" height="100" rx="18" class="card"/>
+  <text x="411" y="258" class="node-title">GitHub</text>
+  <text x="411" y="284" class="node-sub">main branch</text>
+
+  <rect x="554" y="218" width="210" height="100" rx="18" class="card-blue"/>
+  <text x="659" y="258" class="node-title">GitHub Actions</text>
+  <text x="659" y="284" class="node-sub">검증 · Docker build</text>
+
+  <rect x="822" y="198" width="190" height="80" rx="18" class="card"/>
+  <text x="917" y="233" class="node-title">GHCR</text>
+  <text x="917" y="257" class="node-sub">Docker images</text>
+
+  <rect x="822" y="294" width="190" height="64" rx="18" class="card"/>
+  <text x="917" y="321" class="node-title">GitHub</text>
+  <text x="917" y="343" class="node-sub">manifest image SHA commit</text>
+
+  <rect x="1070" y="218" width="180" height="100" rx="18" class="card-blue"/>
+  <text x="1160" y="258" class="node-title">Argo CD</text>
+  <text x="1160" y="284" class="node-sub">자동 동기화</text>
+
+  <rect x="1308" y="218" width="190" height="100" rx="18" class="card-accent"/>
+  <text x="1403" y="258" class="node-title">K3s</text>
+  <text x="1403" y="284" class="node-sub">홈서버 · RollingUpdate</text>
+
+  <path d="M268 268 H326" class="edge"/>
+  <text x="297" y="252" class="edge-label">push</text>
+  <path d="M496 268 H554" class="edge"/>
+  <path d="M764 246 H822" class="edge"/>
+  <path d="M764 292 C790 292 790 326 822 326" class="edge"/>
+  <path d="M1012 326 C1040 326 1040 286 1070 286" class="edge"/>
+  <path d="M1250 268 H1308" class="edge-cyan"/>
+  <path d="M1012 238 C1180 170 1290 178 1362 218" class="edge-dash"/>
+  <text x="1185" y="183" class="edge-label">image pull</text>
+
+  <!-- Runtime lane -->
+  <rect x="48" y="410" width="1504" height="354" rx="24" class="lane"/>
+  <text x="78" y="445" class="lane-title">RUNTIME · REQUEST FLOW</text>
+
+  <rect x="78" y="500" width="170" height="100" rx="18" class="card"/>
+  <text x="163" y="540" class="node-title">방문자</text>
+  <text x="163" y="566" class="node-sub">Browser</text>
+
+  <rect x="306" y="500" width="190" height="100" rx="18" class="card-blue"/>
+  <text x="401" y="540" class="node-title">Cloudflare</text>
+  <text x="401" y="566" class="node-sub">DNS · Proxy · TLS</text>
+
+  <rect x="554" y="500" width="170" height="100" rx="18" class="card"/>
+  <text x="639" y="540" class="node-title">Traefik</text>
+  <text x="639" y="566" class="node-sub">Ingress</text>
+
+  <rect x="782" y="500" width="180" height="100" rx="18" class="card"/>
+  <text x="872" y="540" class="node-title">web-service</text>
+  <text x="872" y="566" class="node-sub">ClusterIP</text>
+
+  <rect x="1020" y="488" width="220" height="124" rx="20" class="card-accent"/>
+  <text x="1130" y="535" class="node-title">Next.js web-app</text>
+  <text x="1130" y="562" class="node-sub">2 Pods</text>
+  <text x="1130" y="585" class="node-sub">화면 · API · Webhook</text>
+
+  <rect x="1300" y="466" width="190" height="82" rx="18" class="card"/>
+  <text x="1395" y="501" class="node-title">Notion</text>
+  <text x="1395" y="525" class="node-sub">CMS · API</text>
+
+  <rect x="306" y="642" width="190" height="82" rx="18" class="card-blue"/>
+  <text x="401" y="677" class="node-title">Cloudflare CDN</text>
+  <text x="401" y="701" class="node-sub">cdn.ddongmy.com</text>
+
+  <rect x="600" y="642" width="190" height="82" rx="18" class="card"/>
+  <text x="695" y="677" class="node-title">Cloudflare R2</text>
+  <text x="695" y="701" class="node-sub">WebP Asset Storage</text>
+
+  <path d="M248 550 H306" class="edge-cyan"/>
+  <text x="277" y="533" class="edge-label">HTML · API</text>
+  <path d="M496 550 H554" class="edge-cyan"/>
+  <path d="M724 550 H782" class="edge-cyan"/>
+  <path d="M962 550 H1020" class="edge-cyan"/>
+  <path d="M1240 508 H1300" class="edge"/>
+  <path d="M1300 536 H1240" class="edge"/>
+  <text x="1270" y="492" class="edge-label">API read</text>
+  <text x="1270" y="559" class="edge-label">Webhook</text>
+
+  <path d="M163 600 V683 H306" class="edge-cyan"/>
+  <text x="220" y="667" class="edge-label">Image</text>
+  <path d="M496 683 H600" class="edge-dash"/>
+  <text x="548" y="666" class="edge-label">cache miss</text>
+  <path d="M1080 612 V738 H816 C800 738 790 724 790 708 V683 H790" class="edge"/>
+  <text x="914" y="724" class="edge-label">Webhook · Sharp/WebP upload</text>
+
+  <!-- Operations lane -->
+  <rect x="48" y="790" width="1504" height="224" rx="24" class="lane"/>
+  <text x="78" y="825" class="lane-title">OPERATIONS · VISIBILITY</text>
+
+  <rect x="416" y="872" width="220" height="96" rx="18" class="card-accent"/>
+  <text x="526" y="911" class="node-title">Next.js web-app</text>
+  <text x="526" y="939" class="node-sub">/api/server-status</text>
+
+  <rect x="702" y="864" width="210" height="112" rx="18" class="card-blue"/>
+  <text x="807" y="899" class="node-title">status-exporter</text>
+  <text x="807" y="925" class="node-sub">전용 ServiceAccount</text>
+  <text x="807" y="949" class="node-sub">ClusterIP · internal only</text>
+
+  <rect x="978" y="872" width="210" height="96" rx="18" class="card"/>
+  <text x="1083" y="911" class="node-title">Kubernetes API</text>
+  <text x="1083" y="939" class="node-sub">web-app 상태만 조회</text>
+
+  <path d="M636 920 H702" class="edge"/>
+  <path d="M912 920 H978" class="edge"/>
+  <text x="945" y="903" class="edge-label">최소 RBAC</text>
+
+  <text x="800" y="1048" class="subtitle" text-anchor="middle">Notion CMS · GitHub Actions · Argo CD · K3s · Cloudflare</text>
+</svg>

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { siteConfig } from '@/config/site'
 import { getDevelopmentLogSummaries } from '@/features/development-log/notion-development-logs.server'
+import { projects } from '@/features/projects/projects'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,11 +10,16 @@ const staticRoutes: MetadataRoute.Sitemap = [
   { url: `${siteConfig.url}/projects`, changeFrequency: 'monthly' },
   { url: `${siteConfig.url}/log`, changeFrequency: 'weekly' },
   { url: `${siteConfig.url}/lab`, changeFrequency: 'monthly' },
+  { url: `${siteConfig.url}/lab/architecture`, changeFrequency: 'monthly' },
   { url: `${siteConfig.url}/about`, changeFrequency: 'yearly' },
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const logs = await getDevelopmentLogSummaries()
+  const projectRoutes: MetadataRoute.Sitemap = projects.map((project) => ({
+    url: `${siteConfig.url}/projects/${project.slug}`,
+    changeFrequency: 'monthly',
+  }))
   const publishedLogs: MetadataRoute.Sitemap = logs
     .filter((log) => log.status === 'published')
     .map((log) => ({
@@ -22,5 +28,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
     }))
 
-  return [...staticRoutes, ...publishedLogs]
+  return [...staticRoutes, ...projectRoutes, ...publishedLogs]
 }

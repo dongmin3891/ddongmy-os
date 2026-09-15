@@ -1,0 +1,31 @@
+flowchart TB
+  subgraph DELIVERY["CODE DELIVERY · GITOPS"]
+    direction LR
+    DEV["로컬 개발"] -->|push| GITHUB["GitHub"]
+    GITHUB --> ACTIONS["GitHub Actions"]
+    ACTIONS --> GHCR["GHCR"]
+    ACTIONS -->|ops commit| MANIFEST["GitHub<br/>manifest image SHA"]
+    MANIFEST --> ARGO["Argo CD"] --> K3S["홈서버 K3s"]
+    GHCR -.->|image pull| K3S
+  end
+
+  subgraph RUNTIME["RUNTIME · REQUEST FLOW"]
+    direction LR
+    VISITOR["방문자"] -->|HTML · API| CLOUDFLARE["Cloudflare"]
+    CLOUDFLARE --> TRAEFIK["Traefik"] --> SERVICE["web-service"] --> WEB["Next.js"]
+
+    WEB -->|API read| NOTION["Notion"]
+    NOTION -->|Webhook| WEB
+
+    VISITOR -->|Image| CDN["Cloudflare CDN"]
+    CDN -.->|cache miss · origin fetch| R2["R2"]
+    WEB -->|Sharp · WebP upload| R2
+  end
+
+  subgraph OPERATIONS["OPERATIONS · VISIBILITY"]
+    direction LR
+    WEB -->|server status| STATUS["status-exporter<br/>ClusterIP · internal only"]
+    STATUS -->|최소 RBAC| KUBEAPI["Kubernetes API"]
+  end
+
+  K3S --> WEB

@@ -1,27 +1,29 @@
-import type { ProjectStatus, ProjectSummary } from '../project'
-
-const statusPresentation: Record<ProjectStatus, { label: string; className: string }> = {
-  operational: { label: '운영 중', className: 'bg-green-500/20 text-green-300' },
-  development: { label: '개발 중', className: 'bg-yellow-500/20 text-yellow-300' },
-  experimental: { label: '실험', className: 'bg-purple-500/20 text-purple-300' },
-}
+import Link from 'next/link'
+import { getProjectCategoryLabel, type ProjectSummary } from '../project'
+import ProjectStatusBadge from './ProjectStatusBadge'
 
 type ProjectCardProps = {
   project: ProjectSummary
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  const status = statusPresentation[project.status]
-
   return (
-    <article className="flex h-full flex-col rounded-lg border border-slate-700 bg-slate-800 p-6 transition-colors hover:border-slate-600">
+    <article className="group relative flex min-h-72 flex-col rounded-xl border border-slate-700 bg-slate-800/80 p-6 transition duration-300 hover:-translate-y-1 hover:border-primary-400/60 hover:shadow-xl hover:shadow-slate-950/30 focus-within:ring-2 focus-within:ring-primary-400 motion-reduce:transform-none motion-reduce:transition-none">
       <div className="mb-3 flex items-start justify-between gap-4">
-        <h2 className="text-xl font-bold text-white">{project.name}</h2>
-        <span className={`shrink-0 rounded px-2 py-1 text-xs font-medium ${status.className}`}>
-          {status.label}
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary-300">
+          {getProjectCategoryLabel(project.category)}
         </span>
+        <ProjectStatusBadge status={project.status} />
       </div>
-      <p className="mb-4 flex-1 text-sm leading-relaxed text-slate-300">{project.description}</p>
+      <h2 className="mt-4 text-2xl font-bold text-white transition-colors group-hover:text-primary-300">
+        <Link
+          href={`/projects/${project.slug}`}
+          className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+        >
+          {project.name}
+        </Link>
+      </h2>
+      <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-300">{project.description}</p>
       <ul className="mb-5 flex flex-wrap gap-2" aria-label={`${project.name} 기술`}>
         {project.technologies.map((technology) => (
           <li key={technology} className="rounded bg-slate-700 px-2 py-1 text-xs text-slate-300">
@@ -29,20 +31,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </li>
         ))}
       </ul>
-      {(project.siteUrl || project.githubUrl) && (
-        <div className="flex gap-4 text-sm font-medium">
-          {project.siteUrl && (
-            <a href={project.siteUrl} target="_blank" rel="noreferrer" className="text-primary-400 hover:text-primary-300">
-              사이트 보기 →
-            </a>
-          )}
-          {project.githubUrl && (
-            <a href={project.githubUrl} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-200">
-              GitHub →
-            </a>
-          )}
-        </div>
-      )}
+      <span className="text-sm font-semibold text-primary-300" aria-hidden="true">
+        Case study 보기 →
+      </span>
     </article>
   )
 }

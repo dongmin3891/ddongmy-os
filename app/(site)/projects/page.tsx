@@ -13,9 +13,9 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-12">
       <PageIntro
-        eyebrow="Portfolio"
-        title="Projects"
-        description="사용자의 문제를 해결하고 직접 운영하며 개선한 프로젝트를 소개합니다."
+        eyebrow="Projects"
+        title="문제를 제품으로 풀어낸 기록"
+        description="사용자의 문제, 직접 다룬 범위와 기술적 선택을 프로젝트별 Case Study로 정리했습니다."
       />
       <ProjectGrid projects={projects} />
     </div>

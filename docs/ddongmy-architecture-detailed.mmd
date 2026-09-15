@@ -1,0 +1,63 @@
+flowchart LR
+  subgraph DELIVERY["CODE DELIVERY · GITOPS"]
+    DEV["로컬 개발"] -->|push main| GITHUB["GitHub"]
+    GITHUB --> ACTIONS["GitHub Actions"]
+    ACTIONS -->|build · push| GHCR["GHCR"]
+    ACTIONS -->|manifest SHA commit| GITHUB
+    GITHUB -->|watch main/k8s| ARGO["Argo CD Application"]
+  end
+
+  USER["방문자"] -->|HTML · API| CF["Cloudflare"]
+  NOTION["Notion"] -->|Webhook POST| CF
+  USER -->|Image| CDN["Cloudflare CDN"]
+  CDN -.->|cache miss · origin fetch| R2["R2"]
+
+  subgraph K3S["HOME SERVER · K3s"]
+    direction LR
+
+    subgraph ARGO_NS["namespace · argocd"]
+      ARGO_CONTROLLER["Argo CD Controller"]
+    end
+
+    subgraph TRAEFIK_NS["namespace · kube-system"]
+      TRAEFIK["Traefik Controller"]
+    end
+    API["Kubernetes API"]
+
+    subgraph DEFAULT_NS["namespace · default"]
+      INGRESS["Ingress · web-ingress<br/>ddongmy.com"]
+      TLS["Secret · ddongmy-tls"]
+      WEB_SERVICE["Service · web-service<br/>80 → 3000"]
+      WEB_DEPLOY["Deployment · web-app<br/>2 replicas · RollingUpdate"]
+      WEB_PODS["web Pods ×2<br/>Next.js :3000<br/>health probes · resource limits<br/>SA token disabled"]
+      APP_SECRETS["Secrets<br/>web-app-notion · web-app-r2"]
+
+      STATUS_SERVICE["Service · status-exporter<br/>ClusterIP :8080"]
+      STATUS_WORKLOAD["Deployment/Pod · status-exporter<br/>/healthz · /status"]
+      NETWORK_POLICY["NetworkPolicy<br/>app=web → :8080 only"]
+      RBAC["ServiceAccount · RoleBinding · Role<br/>Deployment/web-app get only"]
+
+      TLS -.-> INGRESS
+      INGRESS --> WEB_SERVICE --> WEB_PODS
+      WEB_DEPLOY -.->|manage| WEB_PODS
+      APP_SECRETS -.->|env| WEB_PODS
+
+      WEB_PODS -->|/api/server-status| STATUS_SERVICE
+      NETWORK_POLICY -.-> STATUS_SERVICE
+      STATUS_SERVICE --> STATUS_WORKLOAD
+      RBAC -.-> STATUS_WORKLOAD
+      STATUS_WORKLOAD -->|Bearer token| API
+    end
+
+    TRAEFIK --> INGRESS
+    ARGO_CONTROLLER -->|apply desired state| API
+    API -.-> WEB_DEPLOY
+    API -.-> STATUS_WORKLOAD
+  end
+
+  ARGO --> ARGO_CONTROLLER
+  GHCR -.->|image pull| WEB_DEPLOY
+  GHCR -.-> STATUS_WORKLOAD
+  CF -->|HTTPS| TRAEFIK
+  WEB_PODS -->|API read · cover update| NOTION
+  WEB_PODS -->|Webhook · Sharp/WebP upload| R2

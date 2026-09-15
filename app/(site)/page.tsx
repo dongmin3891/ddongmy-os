@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
-import AboutSection from '@/components/sections/AboutSection'
-import ContactSection from '@/components/sections/ContactSection'
+import ExploreSection from '@/components/sections/ExploreSection'
 import HeroSection from '@/components/sections/HeroSection'
 import ProjectsSection from '@/components/sections/ProjectsSection'
-import SkillsSection from '@/components/sections/SkillsSection'
 import { siteConfig } from '@/config/site'
 
 export const metadata: Metadata = {
@@ -25,12 +23,10 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="space-y-24">
+    <div className="space-y-16 sm:space-y-20">
       <HeroSection />
       <ProjectsSection />
-      <AboutSection />
-      <SkillsSection />
-      <ContactSection />
+      <ExploreSection />
     </div>
   )
 }
