@@ -165,7 +165,7 @@ function MetricChart({
           <div className="relative w-full">
             <svg
               viewBox={`0 0 ${width} ${height}`}
-              className="h-52 w-full"
+              className="h-auto w-full"
               role="img"
               aria-label={`${definition.label} 변화 그래프. 평균 ${average?.toFixed(1)}${definition.unit}`}
             >
@@ -213,8 +213,12 @@ function MetricChart({
                 <button
                   key={`${definition.key}-${deployment.serviceName}-${deployment.commitSha}`}
                   type="button"
-                  className="group absolute top-[18px] h-[152px] w-6 -translate-x-1/2 focus-visible:outline-none"
-                  style={{ left: `${left}%` }}
+                  className="group absolute w-6 -translate-x-1/2 focus-visible:outline-none"
+                  style={{
+                    left: `${left}%`,
+                    top: `${(plot.top / height) * 100}%`,
+                    height: `${((plot.bottom - plot.top) / height) * 100}%`,
+                  }}
                   onClick={() => onDeploymentSelect(deployment)}
                   aria-label={`${deployment.serviceName} 배포 ${deployment.commitSha.slice(0, 7)} 상세 보기`}
                 >
@@ -308,7 +312,7 @@ export default function ServerHistorySection({
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {metricCharts.map((definition) => (
           <MetricChart
             key={definition.key}
