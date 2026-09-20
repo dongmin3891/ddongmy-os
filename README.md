@@ -27,9 +27,10 @@ ddongmy-os/
 │   ├── (site)/               # 공통 헤더·푸터를 사용하는 공개 페이지
 │   │   ├── log/[slug]/       # 개발 로그 상세
 │   │   ├── about/            # 소개
-│   │   ├── lab/              # 홈서버 현재 상태와 7일 리소스 이력
+│   │   ├── lab/              # 홈서버 상태, 리소스 이력과 Deploy Timeline
 │   │   └── projects/         # 프로젝트 목록
 │   ├── api/health/           # 컨테이너 health check
+│   ├── api/deployment-status/# 현재 배포의 Argo CD·Pod Ready 상태
 │   ├── api/server-status/    # 공개 가능한 Homelab 상태 JSON
 │   ├── globals.css           # 전역 스타일
 │   └── layout.tsx            # 루트 레이아웃과 기본 메타데이터
@@ -40,10 +41,11 @@ ddongmy-os/
 │   ├── development-log/      # 개발 로그 모델·데이터·목록 UI
 │   ├── homelab/              # Kubernetes 상태 조회·공개 모델·UI
 │   └── projects/             # 프로젝트 모델·데이터·카드 UI
+├── data/homelab/
+│   └── deployment-history.json # 단계별 배포 시간과 상태 기록
 ├── k8s/
 │   ├── deployment.yaml       # 애플리케이션 Deployment
-│   ├── deployment-history.json # 배포 시간·서비스·commit SHA 기록
-│   ├── status-rbac.yaml      # web-app Deployment 전용 read-only 권한
+│   ├── status-exporter.yaml  # 상태 exporter와 최소 read-only 권한
 │   ├── service.yaml          # ClusterIP Service
 │   └── ingress.yaml          # Traefik Ingress 및 TLS 설정
 ├── argocd/
@@ -121,13 +123,16 @@ ghcr.io/dongmin3891/ddongmy-os:status-exporter-<commit-sha>
 ```
 
 이미지를 push한 뒤 웹앱과 status-exporter manifest의 이미지 태그를 commit SHA로 변경하고
-저장소에 commit합니다. `k8s/**`만 변경된 push는 워크플로 실행 대상에서 제외되어 배포
-commit으로 인한 중복 빌드를 방지합니다.
+저장소에 commit합니다. `k8s/**`와 `data/homelab/deployment-history.json`만 변경된 push는
+실행 대상에서 제외되어 배포 기록 commit으로 인한 중복 빌드를 방지합니다.
 
-워크플로는 이미지 빌드 전에 `k8s/deployment-history.json`에 배포 시간, 서비스명과
-commit SHA를 추가합니다. 기록은 90일 동안 Git과 웹앱 이미지에 함께 보존되며 `/lab`의
-Netdata 리소스 그래프에 배포 마커로 표시됩니다. CPU, Memory, Disk, 온도 시계열 자체는
-별도 애플리케이션 DB에 복제하지 않고 기존 Netdata 보존 데이터를 조회합니다.
+워크플로는 GitHub Push, GitHub Actions와 GHCR 단계 시간을 직접 기록합니다. 매니페스트
+commit 뒤 `/api/deployment-status`를 polling해 status-exporter가 읽은 Argo CD operation과
+현재 이미지의 K3s Pod Ready 시간을 합친 뒤 `data/homelab/deployment-history.json`에
+90일 동안 보존합니다. `/lab`은 이 기록을 Deploy Timeline과 Netdata 그래프의 배포 마커로
+표시합니다. 기능 도입 전 기록에는 당시 저장되지 않았던 단계가 `수집 전`으로 표시됩니다.
+CPU, Memory, Disk, 온도 시계열은 별도 DB에 복제하지 않고 기존 Netdata 보존 데이터를
+조회합니다.
 
 ### CD: Argo CD와 Kubernetes
 
@@ -137,7 +142,8 @@ Netdata 리소스 그래프에 배포 마커로 표시됩니다. CPU, Memory, Di
 
 - Deployment: `web-app`, 2 replicas, 컨테이너 포트 `3000`
 - Deployment: `status-exporter`, 지정된 workload 상태만 공개
-- ServiceAccount: `status-exporter`, `web-app` Deployment의 `get`만 허용
+- ServiceAccount: `status-exporter`, `web-app` Deployment 조회, Pod 목록 조회, 이름이
+  `ddongmy-os`인 Argo CD Application 조회만 허용
 - `web-app`에는 Kubernetes ServiceAccount token을 mount하지 않음
 - Service: `web-service`, ClusterIP `80` → 컨테이너 `3000`
 - Service: `status-exporter`, ClusterIP `8080`

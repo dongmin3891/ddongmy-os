@@ -1,4 +1,5 @@
 import { createServer } from 'node:http'
+import { getDeploymentRuntimeResponse } from './deployment-timeline.js'
 import { getStatusExporterResponse } from './kubernetes-status.js'
 import { workloadTargets } from './targets.js'
 
@@ -27,6 +28,11 @@ const server = createServer(async (request, response) => {
 
   if (path === '/status') {
     writeJson(response, 200, await getStatusExporterResponse(workloadTargets))
+    return
+  }
+
+  if (path === '/deployment-timeline') {
+    writeJson(response, 200, await getDeploymentRuntimeResponse())
     return
   }
 

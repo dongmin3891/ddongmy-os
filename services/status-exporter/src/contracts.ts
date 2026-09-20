@@ -31,3 +31,30 @@ export type StatusExporterResponse =
       status: 'unavailable'
       checkedAt: string
     }
+
+export type DeploymentStageStatus =
+  | 'running'
+  | 'success'
+  | 'failed'
+  | 'unavailable'
+
+export type DeploymentRuntimeStage = {
+  status: DeploymentStageStatus
+  startedAt: string | null
+  completedAt: string | null
+}
+
+export type DeploymentRuntimeResponse =
+  | {
+      status: 'running' | 'success' | 'failed'
+      checkedAt: string
+      commitSha: string
+      stages: {
+        argoCd: DeploymentRuntimeStage
+        k3sPodReady: DeploymentRuntimeStage
+      }
+    }
+  | {
+      status: 'unavailable'
+      checkedAt: string
+    }

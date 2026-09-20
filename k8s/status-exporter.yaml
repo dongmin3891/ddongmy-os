@@ -18,6 +18,12 @@ rules:
       - web-app
     verbs:
       - get
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - list
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -32,6 +38,33 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: status-exporter-reader
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: status-exporter-argocd-reader
+rules:
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - applications
+    resourceNames:
+      - ddongmy-os
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: status-exporter-argocd-reader
+subjects:
+  - kind: ServiceAccount
+    name: status-exporter
+    namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: status-exporter-argocd-reader
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -6,6 +6,7 @@ on:
       - main
     paths-ignore:
       - "k8s/**"
+      - "data/homelab/deployment-history.json"
   workflow_dispatch:
 
 concurrency:
@@ -19,6 +20,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DEPLOYMENT_STATUS_URL: https://ddongmy.com/api/deployment-status
 
 jobs:
   build-and-push:
@@ -28,21 +30,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Record deployment event
-        run: node scripts/record-deployment.mjs "$GITHUB_SHA" web-app
+      - name: Capture pipeline start
+        env:
+          PUSH_EVENT_AT: ${{ github.event.head_commit.timestamp }}
+        run: |
+          now="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
+          push_started_at="${PUSH_EVENT_AT:-$now}"
+
+          echo "GITHUB_PUSH_STATUS=success" >> "$GITHUB_ENV"
+          echo "GITHUB_PUSH_STARTED_AT=$push_started_at" >> "$GITHUB_ENV"
+          echo "GITHUB_PUSH_COMPLETED_AT=$now" >> "$GITHUB_ENV"
+          echo "GITHUB_ACTIONS_STARTED_AT=$now" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
+        id: setup_buildx
         uses: docker/setup-buildx-action@v3
+        continue-on-error: true
 
       - name: Log in to GHCR
+        id: login_ghcr
         uses: docker/login-action@v3
+        continue-on-error: true
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Capture GHCR start
+        if: always()
+        run: echo "GHCR_STARTED_AT=$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)" >> "$GITHUB_ENV"
+
       - name: Build and push image
+        id: build_web
         uses: docker/build-push-action@v6
+        continue-on-error: true
         with:
           context: .
           push: true
@@ -51,7 +72,9 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Build and push status exporter image
+        id: build_status_exporter
         uses: docker/build-push-action@v6
+        continue-on-error: true
         with:
           context: .
           file: services/status-exporter/Dockerfile
@@ -60,22 +83,115 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:status-exporter-latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:status-exporter-${{ github.sha }}
 
+      - name: Capture registry result
+        if: always()
+        env:
+          SETUP_OUTCOME: ${{ steps.setup_buildx.outcome }}
+          LOGIN_OUTCOME: ${{ steps.login_ghcr.outcome }}
+          WEB_BUILD_OUTCOME: ${{ steps.build_web.outcome }}
+          EXPORTER_BUILD_OUTCOME: ${{ steps.build_status_exporter.outcome }}
+        run: |
+          completed_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
+          echo "GHCR_COMPLETED_AT=$completed_at" >> "$GITHUB_ENV"
+
+          if [ "$SETUP_OUTCOME" = "success" ] && \
+             [ "$LOGIN_OUTCOME" = "success" ] && \
+             [ "$WEB_BUILD_OUTCOME" = "success" ] && \
+             [ "$EXPORTER_BUILD_OUTCOME" = "success" ]; then
+            echo "BUILD_STATUS=success" >> "$GITHUB_ENV"
+            echo "GHCR_STATUS=success" >> "$GITHUB_ENV"
+            echo "GITHUB_ACTIONS_STATUS=running" >> "$GITHUB_ENV"
+            echo "DEPLOYMENT_STATUS=running" >> "$GITHUB_ENV"
+          else
+            echo "BUILD_STATUS=failed" >> "$GITHUB_ENV"
+            echo "GHCR_STATUS=failed" >> "$GITHUB_ENV"
+            echo "GITHUB_ACTIONS_STATUS=failed" >> "$GITHUB_ENV"
+            echo "GITHUB_ACTIONS_COMPLETED_AT=$completed_at" >> "$GITHUB_ENV"
+            echo "DEPLOYMENT_STATUS=failed" >> "$GITHUB_ENV"
+          fi
+
       - name: Update Kubernetes image tag
+        if: env.BUILD_STATUS == 'success'
         run: |
           sed -i "s|image: ghcr.io/dongmin3891/ddongmy-os:.*|image: ghcr.io/dongmin3891/ddongmy-os:${GITHUB_SHA}|" k8s/deployment.yaml
           sed -i "s|image: ghcr.io/dongmin3891/ddongmy-os:status-exporter-.*|image: ghcr.io/dongmin3891/ddongmy-os:status-exporter-${GITHUB_SHA}|" k8s/status-exporter.yaml
 
-      - name: Commit Kubernetes manifest
+      - name: Record pipeline stages
+        if: always()
+        run: node scripts/record-deployment.mjs "$GITHUB_SHA" web-app
+
+      - name: Commit deployment request
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add k8s/deployment.yaml k8s/status-exporter.yaml k8s/deployment-history.json
+          git add data/homelab/deployment-history.json
+          if [ "$BUILD_STATUS" = "success" ]; then
+            git add k8s/deployment.yaml k8s/status-exporter.yaml
+          fi
 
           if git diff --cached --quiet; then
-            echo "No manifest changes"
+            echo "No deployment changes"
             exit 0
           fi
 
-          git commit -m "ops: deploy ${GITHUB_SHA}"
+          if [ "$BUILD_STATUS" = "success" ]; then
+            git commit -m "ops: deploy ${GITHUB_SHA}"
+          else
+            git commit -m "ops: record failed deploy ${GITHUB_SHA}"
+          fi
           git push
+
+      - name: Wait for Argo CD and K3s
+        if: env.BUILD_STATUS == 'success'
+        run: |
+          runtime_status=""
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error --max-time 10 \
+              "${DEPLOYMENT_STATUS_URL}?commitSha=${GITHUB_SHA}" \
+              --output /tmp/deployment-runtime.json; then
+              runtime_status="$(node -e "const fs=require('node:fs'); console.log(JSON.parse(fs.readFileSync('/tmp/deployment-runtime.json','utf8')).status)")"
+              if [ "$runtime_status" = "success" ] || [ "$runtime_status" = "failed" ]; then
+                break
+              fi
+            fi
+            sleep 10
+          done
+
+          if [ "$runtime_status" != "success" ] && [ "$runtime_status" != "failed" ]; then
+            runtime_status="failed"
+          fi
+          echo "RUNTIME_STATUS=$runtime_status" >> "$GITHUB_ENV"
+
+      - name: Finalize deployment timeline
+        if: env.BUILD_STATUS == 'success'
+        run: |
+          completed_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
+          runtime_path=""
+          if [ -f /tmp/deployment-runtime.json ]; then
+            runtime_path="/tmp/deployment-runtime.json"
+          fi
+
+          DEPLOYMENT_STATUS="$RUNTIME_STATUS" \
+          GITHUB_ACTIONS_STATUS="$RUNTIME_STATUS" \
+          GITHUB_ACTIONS_COMPLETED_AT="$completed_at" \
+          DEPLOYMENT_RUNTIME_PATH="$runtime_path" \
+          node scripts/record-deployment.mjs "$GITHUB_SHA" web-app
+
+      - name: Commit completed deployment timeline
+        if: env.BUILD_STATUS == 'success'
+        run: |
+          git add data/homelab/deployment-history.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "ops: complete deploy ${GITHUB_SHA}"
+          git push
+
+      - name: Verify deployment succeeded
+        if: always()
+        run: |
+          if [ "$BUILD_STATUS" != "success" ] || [ "$RUNTIME_STATUS" != "success" ]; then
+            exit 1
+          fi
