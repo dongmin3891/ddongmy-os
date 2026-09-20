@@ -27,7 +27,7 @@ ddongmy-os/
 │   ├── (site)/               # 공통 헤더·푸터를 사용하는 공개 페이지
 │   │   ├── log/[slug]/       # 개발 로그 상세
 │   │   ├── about/            # 소개
-│   │   ├── lab/              # 홈서버 운영 소개
+│   │   ├── lab/              # 홈서버 현재 상태와 7일 리소스 이력
 │   │   └── projects/         # 프로젝트 목록
 │   ├── api/health/           # 컨테이너 health check
 │   ├── api/server-status/    # 공개 가능한 Homelab 상태 JSON
@@ -42,6 +42,7 @@ ddongmy-os/
 │   └── projects/             # 프로젝트 모델·데이터·카드 UI
 ├── k8s/
 │   ├── deployment.yaml       # 애플리케이션 Deployment
+│   ├── deployment-history.json # 배포 시간·서비스·commit SHA 기록
 │   ├── status-rbac.yaml      # web-app Deployment 전용 read-only 권한
 │   ├── service.yaml          # ClusterIP Service
 │   └── ingress.yaml          # Traefik Ingress 및 TLS 설정
@@ -122,6 +123,11 @@ ghcr.io/dongmin3891/ddongmy-os:status-exporter-<commit-sha>
 이미지를 push한 뒤 웹앱과 status-exporter manifest의 이미지 태그를 commit SHA로 변경하고
 저장소에 commit합니다. `k8s/**`만 변경된 push는 워크플로 실행 대상에서 제외되어 배포
 commit으로 인한 중복 빌드를 방지합니다.
+
+워크플로는 이미지 빌드 전에 `k8s/deployment-history.json`에 배포 시간, 서비스명과
+commit SHA를 추가합니다. 기록은 90일 동안 Git과 웹앱 이미지에 함께 보존되며 `/lab`의
+Netdata 리소스 그래프에 배포 마커로 표시됩니다. CPU, Memory, Disk, 온도 시계열 자체는
+별도 애플리케이션 DB에 복제하지 않고 기존 Netdata 보존 데이터를 조회합니다.
 
 ### CD: Argo CD와 Kubernetes
 
