@@ -84,7 +84,7 @@ spec:
       serviceAccountName: status-exporter
       containers:
         - name: status-exporter
-          image: ghcr.io/dongmin3891/ddongmy-os:status-exporter-08c62ba513cb0c56edf410e5471b28783df0e8ed
+          image: ghcr.io/dongmin3891/ddongmy-os:status-exporter-3b21718f0bd052b4e79c0c11e7e2db4c5f26869f
           imagePullPolicy: Always
           securityContext:
             runAsNonRoot: true
