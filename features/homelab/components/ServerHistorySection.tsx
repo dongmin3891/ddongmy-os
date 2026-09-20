@@ -158,12 +158,11 @@ function MetricChart({
         </div>
       ) : (
         <div
-          className="mt-4 overflow-x-auto pb-2"
+          className="mt-4"
           role="region"
-          aria-label={`${definition.label} 그래프, 가로로 스크롤 가능`}
-          tabIndex={0}
+          aria-label={`${definition.label} 그래프`}
         >
-          <div className="relative min-w-[35rem]">
+          <div className="relative w-full">
             <svg
               viewBox={`0 0 ${width} ${height}`}
               className="h-52 w-full"
@@ -264,10 +263,11 @@ export default function ServerHistorySection({
     (deployment) =>
       deployment.deployedAt >= startsAt && deployment.deployedAt <= history.data.endsAt,
   )
-  const selectedDeployment = visibleDeployments.find(
-    (deployment) =>
-      `${deployment.serviceName}:${deployment.commitSha}` === selectedDeploymentKey,
-  )
+  const selectedDeployment =
+    visibleDeployments.find(
+      (deployment) =>
+        `${deployment.serviceName}:${deployment.commitSha}` === selectedDeploymentKey,
+    ) ?? visibleDeployments[0]
 
   function changeRange(nextRange: HistoryRange) {
     setRange(nextRange)

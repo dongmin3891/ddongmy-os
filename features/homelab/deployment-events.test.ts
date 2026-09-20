@@ -9,7 +9,13 @@ test('저장된 배포 이력이 공개 계약을 만족한다', () => {
 
   assert.ok(deployments.length > 0)
   assert.match(deployments[0].commitSha, /^[a-f0-9]{40}$/)
-  assert.equal(deployments[0].stages.githubPush.status, 'unavailable')
+  assert.deepEqual(Object.keys(deployments[0].stages), [
+    'githubPush',
+    'githubActions',
+    'ghcr',
+    'argoCd',
+    'k3sPodReady',
+  ])
 })
 
 test('잘못된 SHA나 단계 상태가 있는 배포 이력을 거부한다', () => {
