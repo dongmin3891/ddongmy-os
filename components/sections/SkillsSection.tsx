@@ -7,9 +7,9 @@ const skills = [
   },
   {
     number: '02',
-    category: 'Service Backend',
-    description: '제품에 필요한 API와 데이터 경계를 직접 설계하며 프론트엔드와 연결합니다.',
-    items: ['NestJS', 'PostgreSQL', 'Prisma', 'REST API', 'Object Storage'],
+    category: 'Web Platform & Performance',
+    description: 'SSR과 데이터 생명주기, 실제 사용자 지표와 운영 로그를 함께 보며 병목을 개선합니다.',
+    items: ['SSR', 'Hydration', 'WebView', 'Core Web Vitals', 'Datadog RUM'],
   },
   {
     number: '03',
