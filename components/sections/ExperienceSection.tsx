@@ -1,3 +1,6 @@
+import Link from 'next/link'
+import { measuredResults } from '@/features/profile/measured-results'
+
 const experienceHighlights = [
   {
     period: '2025.09 - 현재',
@@ -16,24 +19,6 @@ const experienceHighlights = [
     title: '여러 제품 도메인의 문제 해결',
     description:
       '미디어를 중심으로 물류 배차, 교육 콘텐츠·커머스와 AI 학습 서비스까지 사용자와 운영자 화면의 복잡한 상태와 업무 흐름을 제품으로 구현했습니다.',
-  },
-] as const
-
-const measuredResults = [
-  {
-    value: '34 → 84',
-    label: 'Lighthouse Performance',
-    detail: '기존 U+모아tv 개발 환경',
-  },
-  {
-    value: '12.2s → 1.3s',
-    label: 'LCP',
-    detail: '핵심 패널과 이미지 요청 개선',
-  },
-  {
-    value: '155MB → 93MB',
-    label: 'Node.js heapUsed',
-    detail: '동일한 로컬 반복 요청 기준',
   },
 ] as const
 
@@ -105,14 +90,18 @@ export default function ExperienceSection() {
 
       <div className="grid gap-4 md:grid-cols-3" aria-label="대표 성과">
         {measuredResults.map((result) => (
-          <article
+          <Link
             key={result.label}
-            className="rounded-xl border border-slate-700 bg-slate-900 p-6"
+            href={result.logHref}
+            className="group rounded-xl border border-slate-700 bg-slate-900 p-6 transition-colors hover:border-primary-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-400"
           >
             <p className="font-mono text-2xl font-bold text-primary-300">{result.value}</p>
             <h3 className="mt-3 font-bold text-white">{result.label}</h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-500">{result.detail}</p>
-          </article>
+            <span className="mt-4 inline-flex text-sm font-semibold text-primary-300 transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+              개선 기록 읽기 →
+            </span>
+          </Link>
         ))}
       </div>
 

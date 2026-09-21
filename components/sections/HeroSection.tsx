@@ -28,12 +28,14 @@ export default function HeroSection() {
             >
               대표 프로젝트
             </Link>
-            <Link
-              href="/log"
+            <a
+              href="/documents/career-profile.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-lg border border-slate-600 bg-slate-800/80 px-5 py-3 font-semibold text-slate-100 transition-colors hover:border-slate-500 hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-400"
             >
-              개발 기록 읽기
-            </Link>
+              경력기술서 보기 ↗
+            </a>
           </div>
         </div>
 

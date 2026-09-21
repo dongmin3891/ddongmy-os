@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import EngineeringProofSection from '@/components/sections/EngineeringProofSection'
 import ExploreSection from '@/components/sections/ExploreSection'
 import HeroSection from '@/components/sections/HeroSection'
 import ProjectsSection from '@/components/sections/ProjectsSection'
@@ -25,6 +26,7 @@ export default function HomePage() {
   return (
     <div className="space-y-16 sm:space-y-20">
       <HeroSection />
+      <EngineeringProofSection />
       <ProjectsSection />
       <ExploreSection />
     </div>
