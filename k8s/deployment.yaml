@@ -105,6 +105,18 @@ spec:
                   name: web-app-r2
                   key: R2_PUBLIC_URL
                   optional: true
+            - name: CLOUDFLARE_ANALYTICS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-cloudflare
+                  key: CLOUDFLARE_ANALYTICS_API_TOKEN
+                  optional: true
+            - name: CLOUDFLARE_ZONE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-cloudflare
+                  key: CLOUDFLARE_ZONE_ID
+                  optional: true
           lifecycle:
             preStop:
               exec:

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --conditions=react-server --import tsx --test features/development-log/*.test.ts features/homelab/*.test.ts",
+    "test": "node --conditions=react-server --import tsx --test features/development-log/*.test.ts features/homelab/*.test.ts features/traffic/*.test.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },

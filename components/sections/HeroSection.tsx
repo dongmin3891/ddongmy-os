@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import TrafficSummary from '@/features/traffic/components/TrafficSummary'
 
 export default function HeroSection() {
   return (
@@ -63,6 +64,7 @@ export default function HeroSection() {
               </li>
             ))}
           </ul>
+          <TrafficSummary />
           <Link
             href="/lab"
             className="mt-6 inline-flex font-semibold text-primary-300 hover:text-primary-200"
