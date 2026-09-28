@@ -7,7 +7,7 @@ export async function GET() {
 
   return Response.json(trafficStats, {
     headers: {
-      'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=3600',
+      'Cache-Control': 'no-store',
     },
   })
 }

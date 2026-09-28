@@ -1,5 +1,4 @@
 import 'server-only'
-import { unstable_cache } from 'next/cache'
 import { z } from 'zod'
 import {
   getSeoulTrafficQueryWindow,
@@ -9,7 +8,6 @@ import type { PublicTrafficStats } from './traffic-stats'
 
 const CLOUDFLARE_GRAPHQL_URL = 'https://api.cloudflare.com/client/v4/graphql'
 const TRAFFIC_HOSTNAME = 'ddongmy.com'
-const TRAFFIC_REVALIDATE_SECONDS = 600
 const TRAFFIC_REQUEST_TIMEOUT_MS = 10_000
 
 const cloudflareTrafficEnvironmentSchema = z.object({
@@ -136,8 +134,4 @@ async function readCloudflareTrafficStats(): Promise<PublicTrafficStats> {
   }
 }
 
-export const getCloudflareTrafficStats = unstable_cache(
-  readCloudflareTrafficStats,
-  ['cloudflare-traffic', TRAFFIC_HOSTNAME],
-  { revalidate: TRAFFIC_REVALIDATE_SECONDS },
-)
+export const getCloudflareTrafficStats = readCloudflareTrafficStats
