@@ -867,6 +867,63 @@ hotfix는 아직 배포 전이며 subscription은 verification 대기 상태다.
 일별 집계나 Redis를 추가한다. Server Component는 같은 앱의 GET API를 다시 호출하지 않고
 server-only data-access 함수로 요약과 글별 조회수를 배치 조회한다.
 
+### Phase 13 — `/log/[slug]` 조회수 구현 중
+
+위 `보류 — 방문자와 조회수`에 기록한 초기안 중 글별 조회수 정책을 구체화해 구현을
+시작했다. 현재 목표는 공개 개발 로그 상단에 `오늘 N · 누적 N`을 표시하는 것이다. Notion은
+계속 제목·본문·태그·slug의 원본이고, PostgreSQL은 게시글별 KST 일자 조회수만 저장한다.
+
+#### 운영 준비 완료
+
+- 운영 `ddongmy` DB에 `000_create_schema_migrations.sql`과
+  `001_create_log_view_stats.sql` 적용 완료
+- `default/web-app-db` Secret 생성 및 실행 중인 `web-app` Deployment 연결 완료
+- 저장소의 `k8s/deployment.yaml`에도 Secret 값 없이 `web-app-db`의 `DATABASE_URL` key
+  참조만 기록
+- 실제 `DATABASE_URL`, 비밀번호와 인증정보는 Git에 기록하지 않음
+
+#### 확정한 identity와 집계 정책
+
+- 영구 identity, DB 집계와 브라우저 30분 중복 방지는 변경되지 않는 Notion page ID인
+  `post_id`를 기준으로 한다.
+- `post_slug`는 현재 공개 URL과 게시글 공개 검증에 사용한다. slug가 바뀌면 같은
+  `post_id`의 다음 upsert에서 최신 slug로 갱신한다.
+- 조회수 증가는 Server Component render가 아니라 hydration 뒤 Client Counter의 POST에서
+  수행한다. metadata 생성, prefetch, crawler와 RSC render로 인한 과다 집계를 피한다.
+- 같은 브라우저에서 같은 `post_id`를 30분 안에 다시 열면 localStorage 기준으로 증가시키지
+  않는다. 이는 정확한 unique visitor 지표가 아니라 콘텐츠별 대략적인 조회수다.
+- PostgreSQL 조회 실패가 Notion 게시글 렌더링을 막지 않도록 장애를 격리한다. 초기 조회가
+  실패하면 조회수만 unavailable로 처리하고, POST 실패도 본문 탐색에 영향을 주지 않는다.
+
+#### 구현 상태
+
+- STEP 1 — 완료: `pg`, `@types/pg` 추가와 server-only PostgreSQL Pool 구현
+  - `DATABASE_URL`을 호출 시점에 검증
+  - Pool `max: 5`, 연결 timeout 2초, idle timeout 30초, statement timeout 3초
+  - 개발 HMR에서 `globalThis`로 Pool 중복 생성을 방지
+  - idle client의 예기치 않은 오류를 서버 로그에 기록
+- STEP 2 — 다음 작업: `post_id` 기준 오늘/누적 조회와 atomic increment를 담당하는
+  server-only 조회수 SQL 모듈 구현
+- 이후 작업: POST API → Client Counter와 30분 중복 방지 → 단위·통합 테스트 → PR
+- 아직 조회수 SQL 모듈, POST API, Client Counter와 `/log/[slug]` UI는 구현하지 않았다.
+- `main` merge와 운영 배포는 이 브랜치에서 구현·검증과 PR review를 마친 뒤 진행한다.
+
+#### 다른 PC에서 이어서 작업
+
+```bash
+git fetch origin
+git switch feat/log-view-counter
+git pull --ff-only
+npm ci
+npm run typecheck
+npm run lint
+npm test
+```
+
+로컬에서 DB 연결이 필요한 단계가 되면 Git에 포함되지 않는 `.env.local`에
+`DATABASE_URL`을 설정한다. 운영 migration `000`, `001`은 이미 적용됐으므로 다시 실행하지
+않고 `database/README.md`의 확인 쿼리로 적용 이력만 확인한다.
+
 ---
 
 ## 12. 개발 원칙
