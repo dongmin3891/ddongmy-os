@@ -889,7 +889,8 @@ server-only data-access 함수로 요약과 글별 조회수를 배치 조회한
 - `post_slug`는 현재 공개 URL과 게시글 공개 검증에 사용한다. slug가 바뀌면 같은
   `post_id`의 다음 upsert에서 최신 slug로 갱신한다.
 - 조회수 증가는 Server Component render가 아니라 hydration 뒤 Client Counter의 POST에서
-  수행한다. metadata 생성, prefetch, crawler와 RSC render로 인한 과다 집계를 피한다.
+  수행한다. Server render와 Next.js prefetch로 인한 집계를 제외한다. JavaScript를 실행하는
+  크롤러나 자동화 요청은 여전히 집계될 수 있다.
 - 같은 브라우저에서 같은 `post_id`를 30분 안에 다시 열면 localStorage 기준으로 증가시키지
   않는다. 이는 정확한 unique visitor 지표가 아니라 콘텐츠별 대략적인 조회수다.
 - PostgreSQL 조회 실패가 Notion 게시글 렌더링을 막지 않도록 장애를 격리한다. 초기 조회가
