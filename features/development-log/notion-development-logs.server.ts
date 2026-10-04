@@ -1,7 +1,7 @@
 import 'server-only'
 import { cache } from 'react'
 import type { z } from 'zod'
-import type { DevelopmentLogDraft, DevelopmentLogSummary } from './development-log'
+import type { DevelopmentLogDraft } from './development-log'
 import { developmentLogs, findDevelopmentLog } from './development-logs'
 import {
   notionDevelopmentLogQuerySchema,
@@ -22,6 +22,7 @@ export type PublishedDevelopmentLogEntry = PublishedDevelopmentLog & {
   markdown: string
 }
 
+export type DevelopmentLogListEntry = DevelopmentLogDraft | PublishedDevelopmentLog
 export type DevelopmentLogEntry = DevelopmentLogDraft | PublishedDevelopmentLogEntry
 
 export class NotionResponseError extends Error {
@@ -153,7 +154,7 @@ async function getNotionPageMarkdown(config: NotionConfig, pageId: string) {
   return page.markdown
 }
 
-async function readDevelopmentLogSummaries(): Promise<readonly DevelopmentLogSummary[]> {
+async function readDevelopmentLogSummaries(): Promise<readonly DevelopmentLogListEntry[]> {
   const config = getNotionConfig()
   if (!config) return developmentLogs
 

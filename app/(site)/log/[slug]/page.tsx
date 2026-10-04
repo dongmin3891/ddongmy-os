@@ -112,14 +112,15 @@ export default async function DevelopmentLogEntryPage({ params }: DevelopmentLog
           {log.status === 'published' ? 'Development Log' : 'Draft'}
         </p>
         <h1 className="text-balance text-4xl font-bold text-white sm:text-5xl">{log.title}</h1>
-        <p className="text-lg leading-relaxed text-slate-300">{log.summary}</p>
         {log.status === 'published' && (
           <DevelopmentLogViewCounter
             postId={log.notionPageId}
             postSlug={log.slug}
+            publishedAt={log.publishedAt}
             initialViewStats={initialViewStats}
           />
         )}
+        <p className="text-lg leading-relaxed text-slate-300">{log.summary}</p>
         <ul className="flex flex-wrap gap-2" aria-label="태그">
           {log.tags.map((tag) => (
             <li key={tag} className="rounded bg-slate-800 px-3 py-1 text-sm text-slate-300">

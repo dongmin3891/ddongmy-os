@@ -11,6 +11,12 @@ const logViewStatsRowSchema = z.object({
 
 type LogViewStatsRow = z.infer<typeof logViewStatsRowSchema>
 
+const logViewStatsBatchRowSchema = logViewStatsRowSchema.extend({
+  post_id: z.string().min(1),
+})
+
+type LogViewStatsBatchRow = z.infer<typeof logViewStatsBatchRowSchema>
+
 const getLogViewStatsSql = `
   SELECT
     COALESCE(
@@ -22,6 +28,25 @@ const getLogViewStatsSql = `
     COALESCE(SUM(views), 0)::text AS total_views
   FROM public.log_view_stats
   WHERE post_id = $1
+`
+
+const getLogViewStatsBatchSql = `
+  WITH requested_posts AS (
+    SELECT DISTINCT UNNEST($1::text[]) AS post_id
+  )
+  SELECT
+    requested_posts.post_id,
+    COALESCE(
+      SUM(log_view_stats.views) FILTER (
+        WHERE log_view_stats.view_date = (NOW() AT TIME ZONE 'Asia/Seoul')::date
+      ),
+      0
+    )::text AS today_views,
+    COALESCE(SUM(log_view_stats.views), 0)::text AS total_views
+  FROM requested_posts
+  LEFT JOIN public.log_view_stats
+    ON log_view_stats.post_id = requested_posts.post_id
+  GROUP BY requested_posts.post_id
 `
 
 const incrementLogViewSql = `
@@ -97,6 +122,17 @@ export function parseDevelopmentLogViewStatsRow(value: unknown): DevelopmentLogV
   }
 }
 
+export function parseDevelopmentLogViewStatsBatchRows(values: readonly unknown[]) {
+  const viewStatsByPostId = new Map<string, DevelopmentLogViewStats>()
+
+  for (const value of values) {
+    const row = logViewStatsBatchRowSchema.parse(value)
+    viewStatsByPostId.set(row.post_id, parseDevelopmentLogViewStatsRow(row))
+  }
+
+  return viewStatsByPostId
+}
+
 function readSingleStatsRow(rows: LogViewStatsRow[]) {
   if (rows.length !== 1) {
     throw new Error(`Expected one development log view stats row, received ${rows.length}`)
@@ -114,6 +150,16 @@ export async function getDevelopmentLogViewStats(
   postId: string,
 ): Promise<DevelopmentLogViewStats> {
   return queryDevelopmentLogViewStats(getPostgresPool(), postId)
+}
+
+export async function getDevelopmentLogViewStatsBatch(postIds: readonly string[]) {
+  const uniquePostIds = [...new Set(postIds)]
+  if (uniquePostIds.length === 0) return new Map<string, DevelopmentLogViewStats>()
+
+  const result = await getPostgresPool().query<LogViewStatsBatchRow>(getLogViewStatsBatchSql, [
+    uniquePostIds,
+  ])
+  return parseDevelopmentLogViewStatsBatchRows(result.rows)
 }
 
 type IncrementDevelopmentLogViewInput = {

@@ -3,26 +3,27 @@ import notionImageSource from '@/config/notion-image-source'
 import r2ImageSource from '@/config/r2-image-source'
 import {
   getDevelopmentLogCategoryLabel,
-  type DevelopmentLogSummary,
 } from '../development-log'
+import type { DevelopmentLogListItem } from '../development-log-list'
+import DevelopmentLogMetadata from './DevelopmentLogMetadata'
 import DevelopmentLogThumbnailImage from './DevelopmentLogThumbnailImage'
 
 type DevelopmentLogListProps = {
-  logs: readonly DevelopmentLogSummary[]
+  items: readonly DevelopmentLogListItem[]
   emptyMessage?: string
 }
 
 export default function DevelopmentLogList({
-  logs,
+  items,
   emptyMessage = '공개된 개발 기록이 없습니다.',
 }: DevelopmentLogListProps) {
-  if (logs.length === 0) {
+  if (items.length === 0) {
     return <p className="rounded-lg border border-slate-700 bg-slate-800 p-6 text-slate-300">{emptyMessage}</p>
   }
 
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] gap-6">
-      {logs.map((log, index) => (
+      {items.map(({ log, viewStats }, index) => (
         <article
           key={log.slug}
           className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-slate-700 bg-slate-800 transition duration-300 hover:-translate-y-1 hover:border-primary-400/60 hover:shadow-xl hover:shadow-slate-950/30 focus-within:ring-2 focus-within:ring-primary-400 motion-reduce:transform-none motion-reduce:transition-none"
@@ -43,6 +44,14 @@ export default function DevelopmentLogList({
                 <li key={tag}>#{tag}</li>
               ))}
             </ul>
+            {log.status === 'published' && (
+              <div className="mt-5 border-t border-slate-700/80 pt-4">
+                <DevelopmentLogMetadata
+                  publishedAt={log.publishedAt}
+                  viewStats={viewStats}
+                />
+              </div>
+            )}
             <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary-300">
               글 읽기
               <span
@@ -60,7 +69,7 @@ export default function DevelopmentLogList({
 }
 
 type DevelopmentLogThumbnailProps = {
-  log: DevelopmentLogSummary
+  log: DevelopmentLogListItem['log']
   shouldLoadEagerly: boolean
 }
 
@@ -126,7 +135,7 @@ function matchesImageSource(thumbnailUrl: string, source: ImageSource) {
   )
 }
 
-function getCategoryBackgroundClassName(category: DevelopmentLogSummary['category']) {
+function getCategoryBackgroundClassName(category: DevelopmentLogListItem['log']['category']) {
   switch (category) {
     case 'improvement':
       return 'bg-gradient-to-br from-blue-500/40 via-slate-800 to-cyan-400/20'

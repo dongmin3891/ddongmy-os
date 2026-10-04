@@ -8,10 +8,12 @@ import {
   type DevelopmentLogViewStats,
 } from '../log-view-count'
 import type { IncrementDevelopmentLogViewRequest } from '../log-view-request'
+import DevelopmentLogMetadata from './DevelopmentLogMetadata'
 
 type DevelopmentLogViewCounterProps = {
   postId: string
   postSlug: string
+  publishedAt?: string
   initialViewStats: DevelopmentLogViewStats | null
 }
 
@@ -59,6 +61,7 @@ function getInitialViewCounterState(
 export default function DevelopmentLogViewCounter({
   postId,
   postSlug,
+  publishedAt,
   initialViewStats,
 }: DevelopmentLogViewCounterProps) {
   const [counterState, setCounterState] = useState<ViewCounterState>(() =>
@@ -88,14 +91,12 @@ export default function DevelopmentLogViewCounter({
       })
   }, [initialViewStats, postId, postSlug])
 
-  if (counterState.status === 'unavailable') {
-    return <p className="text-sm text-slate-500">조회수 정보를 불러올 수 없습니다.</p>
-  }
-
   return (
-    <p className="text-sm text-slate-400" aria-live="polite">
-      오늘 {counterState.viewStats.todayViews.toLocaleString('ko-KR')} · 누적{' '}
-      {counterState.viewStats.totalViews.toLocaleString('ko-KR')}
-    </p>
+    <div aria-live="polite">
+      <DevelopmentLogMetadata
+        publishedAt={publishedAt}
+        viewStats={counterState.status === 'available' ? counterState.viewStats : null}
+      />
+    </div>
   )
 }

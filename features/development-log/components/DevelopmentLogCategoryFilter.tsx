@@ -3,20 +3,23 @@ import {
   developmentLogCategories,
   type DevelopmentLogCategory,
 } from '../development-log'
+import { getDevelopmentLogListHref, type DevelopmentLogSort } from '../development-log-list'
 
 type DevelopmentLogCategoryFilterProps = {
   selectedCategory?: DevelopmentLogCategory
+  selectedSort: DevelopmentLogSort
 }
 
 export default function DevelopmentLogCategoryFilter({
   selectedCategory,
+  selectedSort,
 }: DevelopmentLogCategoryFilterProps) {
   return (
     <nav aria-label="개발 기록 분류">
       <ul className="flex flex-wrap gap-2">
         <li>
           <Link
-            href="/log"
+            href={getDevelopmentLogListHref({ sort: selectedSort })}
             aria-current={selectedCategory ? undefined : 'page'}
             className={getCategoryLinkClassName(!selectedCategory)}
           >
@@ -29,7 +32,10 @@ export default function DevelopmentLogCategoryFilter({
           return (
             <li key={category.value}>
               <Link
-                href={`/log?category=${category.value}`}
+                href={getDevelopmentLogListHref({
+                  category: category.value,
+                  sort: selectedSort,
+                })}
                 aria-current={isSelected ? 'page' : undefined}
                 className={getCategoryLinkClassName(isSelected)}
               >
