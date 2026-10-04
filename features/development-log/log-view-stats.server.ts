@@ -1,4 +1,5 @@
 import 'server-only'
+import type { Pool, PoolClient } from 'pg'
 import { z } from 'zod'
 import { getPostgresPool } from '@/database/postgres.server'
 import type { DevelopmentLogViewStats } from './log-view-count'
@@ -59,6 +60,25 @@ const incrementLogViewSql = `
   FROM incremented
 `
 
+const acceptLogViewVisitorSql = `
+  INSERT INTO public.log_view_visitors (
+    post_id,
+    visitor_hash,
+    last_counted_at
+  )
+  VALUES ($1, $2, NOW())
+  ON CONFLICT (post_id, visitor_hash)
+  DO UPDATE SET
+    last_counted_at = EXCLUDED.last_counted_at
+  WHERE log_view_visitors.last_counted_at <=
+    EXCLUDED.last_counted_at - ($3 * INTERVAL '1 second')
+  RETURNING post_id
+`
+
+const LOG_VIEW_DEDUPLICATION_WINDOW_SECONDS = 30 * 60
+
+type PostgresQueryable = Pool | PoolClient
+
 function toSafeViewCount(value: string) {
   const count = BigInt(value)
   if (count > BigInt(Number.MAX_SAFE_INTEGER)) {
@@ -85,25 +105,65 @@ function readSingleStatsRow(rows: LogViewStatsRow[]) {
   return parseDevelopmentLogViewStatsRow(rows[0])
 }
 
+async function queryDevelopmentLogViewStats(queryable: PostgresQueryable, postId: string) {
+  const result = await queryable.query<LogViewStatsRow>(getLogViewStatsSql, [postId])
+  return readSingleStatsRow(result.rows)
+}
+
 export async function getDevelopmentLogViewStats(
   postId: string,
 ): Promise<DevelopmentLogViewStats> {
-  const result = await getPostgresPool().query<LogViewStatsRow>(getLogViewStatsSql, [postId])
-  return readSingleStatsRow(result.rows)
+  return queryDevelopmentLogViewStats(getPostgresPool(), postId)
 }
 
 type IncrementDevelopmentLogViewInput = {
   postId: string
   postSlug: string
+  visitorHash: string
+}
+
+export type IncrementDevelopmentLogViewResult = {
+  status: 'counted' | 'duplicate'
+  viewStats: DevelopmentLogViewStats
 }
 
 export async function incrementDevelopmentLogView({
   postId,
   postSlug,
-}: IncrementDevelopmentLogViewInput): Promise<DevelopmentLogViewStats> {
-  const result = await getPostgresPool().query<LogViewStatsRow>(incrementLogViewSql, [
-    postId,
-    postSlug,
-  ])
-  return readSingleStatsRow(result.rows)
+  visitorHash,
+}: IncrementDevelopmentLogViewInput): Promise<IncrementDevelopmentLogViewResult> {
+  const client = await getPostgresPool().connect()
+
+  try {
+    await client.query('BEGIN')
+
+    const visitorResult = await client.query(acceptLogViewVisitorSql, [
+      postId,
+      visitorHash,
+      LOG_VIEW_DEDUPLICATION_WINDOW_SECONDS,
+    ])
+
+    if (visitorResult.rows.length === 0) {
+      const viewStats = await queryDevelopmentLogViewStats(client, postId)
+      await client.query('COMMIT')
+      return { status: 'duplicate', viewStats }
+    }
+
+    const incrementResult = await client.query<LogViewStatsRow>(incrementLogViewSql, [
+      postId,
+      postSlug,
+    ])
+    const viewStats = readSingleStatsRow(incrementResult.rows)
+    await client.query('COMMIT')
+    return { status: 'counted', viewStats }
+  } catch (error) {
+    try {
+      await client.query('ROLLBACK')
+    } catch (rollbackError) {
+      console.error('[log-views] Failed to roll back view transaction', rollbackError)
+    }
+    throw error
+  } finally {
+    client.release()
+  }
 }

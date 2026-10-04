@@ -863,15 +863,16 @@ standalone HTTP smoke가 통과했다. 첫 webhook version과 `web-app-r2` Secre
 사이트 전체 분석이 필요해질 때 익명 identity, DB 중복 방지와 일별 집계를 별도로 설계한다.
 글별 조회수는 아래 Phase 13의 단순 정책으로 구현한다.
 
-### Phase 13 — `/log/[slug]` 조회수 구현 완료, 배포 전
+### Phase 13 — `/log/[slug]` 조회수 1차 배포 완료, 서버 보호 구현 중
 
 글별 조회수 정책을 구체화해 공개 개발 로그 상단에 `오늘 N · 누적 N`을 표시한다. Notion은
-계속 제목·본문·태그·slug의 원본이고, PostgreSQL은 게시글별 KST 일자 조회수만 저장한다.
+계속 제목·본문·태그·slug의 원본이고, PostgreSQL은 게시글별 KST 일자 조회수와 서버측
+요청 제한·중복 방지 상태를 저장한다.
 
 #### 운영 준비 완료
 
 - 운영 `ddongmy` DB에 `000_create_schema_migrations.sql`과
-  `001_create_log_view_stats.sql` 적용 완료
+  `001_create_log_view_stats.sql` 적용 완료. `002_protect_log_view_counts.sql`은 적용 전이다.
 - `default/web-app-db` Secret 생성 및 실행 중인 `web-app` Deployment 연결 완료
 - 저장소의 `k8s/deployment.yaml`에도 Secret 값 없이 `web-app-db`의 `DATABASE_URL` key
   참조만 기록
@@ -891,8 +892,11 @@ standalone HTTP smoke가 통과했다. 첫 webhook version과 `web-app-r2` Secre
 - 조회수 증가는 Server Component render가 아니라 hydration 뒤 Client Counter의 POST에서
   수행한다. Server render와 Next.js prefetch로 인한 집계를 제외한다. JavaScript를 실행하는
   크롤러나 자동화 요청은 여전히 집계될 수 있다.
-- 같은 브라우저에서 같은 `post_id`를 30분 안에 다시 열면 localStorage 기준으로 증가시키지
-  않는다. 이는 정확한 unique visitor 지표가 아니라 콘텐츠별 대략적인 조회수다.
+- 같은 브라우저에서 같은 `post_id`를 30분 안에 다시 열면 localStorage 기준으로 요청을
+  생략한다. 서버는 IP+User-Agent의 HMAC과 `post_id`를 기준으로 PostgreSQL에서 30분 중복을
+  다시 차단한다. 이는 정확한 unique visitor 지표가 아니라 콘텐츠별 대략적인 조회수다.
+- 원본 IP와 User-Agent는 저장하지 않는다. IP HMAC별 유효 요청을 10분에 20회로 제한하며,
+  모든 replica가 중앙 PostgreSQL의 같은 제한 상태를 사용한다.
 - PostgreSQL 조회 실패가 Notion 게시글 렌더링을 막지 않도록 장애를 격리한다. 초기 조회가
   실패하면 조회수만 unavailable로 처리하고, POST 실패도 본문 탐색에 영향을 주지 않는다.
 
@@ -908,25 +912,17 @@ standalone HTTP smoke가 통과했다. 첫 webhook version과 `web-app-r2` Secre
 - hydration 뒤 POST하고 `post_id`별 localStorage 기록으로 30분 중복을 막는 Client Counter 구현
 - `/log/[slug]` 상단에 `오늘 N · 누적 N`을 표시하고 DB 장애는 본문과 격리
 - 잘못된 JSON·요청 schema, 응답 계약, bigint 변환과 30분 경계 단위 테스트 추가
-- typecheck, lint, 전체 29개 테스트와 Next 16 webpack production build 통과
+- 1차 구현은 typecheck, lint, 전체 29개 테스트와 Next 16 webpack production build 통과
 - 기본 Turbopack build는 실행 환경의 worker port binding 제한으로 검증하지 못했다.
-- `main` 최신 변경은 브랜치에 반영했다. PR review, main merge와 운영 배포는 아직 하지 않았다.
+- PR #1을 main에 병합했고 release `3821862`의 운영 배포를 완료했다.
+- 보안 검토에서 browser-only 중복 방지는 반복 POST 조작과 Notion/DB 부하를 막지 못한다는
+  medium finding을 확인했다.
+- main 작업 트리에 `002` migration, HMAC identity, DB-backed 10분 요청 제한, 서버측 30분
+  중복 방지와 4KB body 제한을 구현했다. typecheck, lint와 전체 33개 테스트가 통과했다.
+- 보호 version은 로컬 main에 구현·검증했으며, 운영 DB migration·Secret 설정·push·배포 전이다.
 
-#### 다른 PC에서 이어서 작업
-
-```bash
-git fetch origin
-git switch feat/log-view-counter
-git pull --ff-only
-npm ci
-npm run typecheck
-npm run lint
-npm test
-```
-
-로컬에서 DB 연결이 필요한 단계가 되면 Git에 포함되지 않는 `.env.local`에
-`DATABASE_URL`을 설정한다. 운영 migration `000`, `001`은 이미 적용됐으므로 다시 실행하지
-않고 `database/README.md`의 확인 쿼리로 적용 이력만 확인한다.
+운영 migration `000`, `001`은 다시 실행하지 않는다. 보호 version 배포 전 `002`만 적용하고
+`default/web-app-db`에 최소 32자의 `LOG_VIEW_HASH_SECRET`을 추가한다.
 
 ---
 
@@ -950,12 +946,19 @@ Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 
 Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. `feat/log-view-counter`의 Phase 13 변경을 review한 뒤 PR로 main에 병합한다.
-2. 운영 배포 후 공개 글 최초 방문에서 `오늘 N · 누적 N`이 증가하는지 확인한다.
-3. 같은 브라우저에서 30분 안에 다시 열었을 때 증가하지 않고, 다른 글은 독립적으로
+1. 운영 DB에 `002_protect_log_view_counts.sql`을 적용한다.
+2. `default/web-app-db` Secret에 모든 replica가 공유할 `LOG_VIEW_HASH_SECRET`을 추가한다.
+3. `ddongmy_app` 계정으로 요청 제한·방문자 중복 방지 테이블의 권한과 rollback smoke를
+   확인한다.
+4. 보호 version의 로컬 main commit을 push해 운영 배포한다.
+5. 공개 글 최초 방문에서 `오늘 N · 누적 N`이 증가하는지 확인한다.
+6. localStorage를 지우고 같은 IP·User-Agent로 30분 안에 다시 요청해 `duplicate`가 반환되고
+   조회수가 증가하지 않는지 확인한다.
+7. 10분 안에 허용량을 초과한 요청이 `429`와 `Retry-After`를 반환하는지 확인한다.
+8. 다른 글은 독립적으로
    집계되는지 확인한다.
-4. PostgreSQL 장애 시 조회수만 unavailable이 되고 Notion 본문은 계속 표시되는지 확인한다.
-5. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
-6. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
+9. PostgreSQL 장애 시 조회수만 unavailable이 되고 Notion 본문은 계속 표시되는지 확인한다.
+10. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
+11. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
    뒤 대상별 `get` 권한과 공개 key를 추가한다.
-7. Search Console에서 색인과 검색 유입을 계속 관찰한다.
+12. Search Console에서 색인과 검색 유입을 계속 관찰한다.

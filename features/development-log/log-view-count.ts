@@ -4,7 +4,7 @@ export type DevelopmentLogViewStats = {
 }
 
 export type IncrementDevelopmentLogViewResponse = {
-  status: 'counted'
+  status: 'counted' | 'duplicate'
   viewStats: DevelopmentLogViewStats
 }
 
@@ -20,7 +20,11 @@ export function parseIncrementDevelopmentLogViewResponse(
   if (!value || typeof value !== 'object') return undefined
 
   const response = value as Record<string, unknown>
-  if (response.status !== 'counted' || !response.viewStats || typeof response.viewStats !== 'object') {
+  if (
+    (response.status !== 'counted' && response.status !== 'duplicate') ||
+    !response.viewStats ||
+    typeof response.viewStats !== 'object'
+  ) {
     return undefined
   }
 
@@ -30,7 +34,7 @@ export function parseIncrementDevelopmentLogViewResponse(
   }
 
   return {
-    status: 'counted',
+    status: response.status,
     viewStats: {
       todayViews: viewStats.todayViews,
       totalViews: viewStats.totalViews,
