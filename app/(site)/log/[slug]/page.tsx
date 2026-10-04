@@ -3,7 +3,10 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { siteConfig } from '@/config/site'
 import DevelopmentLogBody from '@/features/development-log/components/DevelopmentLogBody'
+import DevelopmentLogViewCounter from '@/features/development-log/components/DevelopmentLogViewCounter'
 import { developmentLogSlugSchema } from '@/features/development-log/development-log'
+import type { DevelopmentLogViewStats } from '@/features/development-log/log-view-count'
+import { getDevelopmentLogViewStats } from '@/features/development-log/log-view-stats.server'
 import { getDevelopmentLog } from '@/features/development-log/notion-development-logs.server'
 
 export const dynamic = 'force-dynamic'
@@ -59,6 +62,15 @@ export default async function DevelopmentLogEntryPage({ params }: DevelopmentLog
 
   if (!log) notFound()
 
+  let initialViewStats: DevelopmentLogViewStats | null = null
+  if (log.status === 'published') {
+    try {
+      initialViewStats = await getDevelopmentLogViewStats(log.notionPageId)
+    } catch (error) {
+      console.error('[log-views] Failed to read development log view stats', error)
+    }
+  }
+
   const canonicalUrl = `${siteConfig.url}/log/${log.slug}`
   const articleJsonLd = {
     '@context': 'https://schema.org',
@@ -101,6 +113,13 @@ export default async function DevelopmentLogEntryPage({ params }: DevelopmentLog
         </p>
         <h1 className="text-balance text-4xl font-bold text-white sm:text-5xl">{log.title}</h1>
         <p className="text-lg leading-relaxed text-slate-300">{log.summary}</p>
+        {log.status === 'published' && (
+          <DevelopmentLogViewCounter
+            postId={log.notionPageId}
+            postSlug={log.slug}
+            initialViewStats={initialViewStats}
+          />
+        )}
         <ul className="flex flex-wrap gap-2" aria-label="태그">
           {log.tags.map((tag) => (
             <li key={tag} className="rounded bg-slate-800 px-3 py-1 text-sm text-slate-300">
