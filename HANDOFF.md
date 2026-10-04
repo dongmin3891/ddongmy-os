@@ -839,7 +839,7 @@ NetworkPolicy도 `k8s/status-exporter.yaml`에 정의했다.
 `web-app`은 `automountServiceAccountToken: false`로 실행한다. Kubernetes API 권한과
 ServiceAccount token은 exporter에만 남아 있다.
 
-### Phase 12 — R2 cover pipeline 기반 구현 중
+### Phase 12 — 완료
 
 Notion-hosted cover의 1시간 서명 URL, us-west-2 원본 다운로드, Pod별 Sharp 변환과
 2 replicas의 분리된 cache 때문에 발생하는 최초 이미지 지연을 운영에서 측정했다.
@@ -853,24 +853,19 @@ R2 bucket과 custom domain의 공개 조회는 확인했다. application에는 R
 immutable cover upload 함수, CDN `Image fill unoptimized` 표시 경로와 Notion webhook cover sync를
 추가했다. AWS SDK 실제 upload와 CDN의 WebP content type, immutable cache header, `MISS` 후 `HIT`
 전환을 확인했다. 13개 단위 테스트, typecheck, lint, Next 16 webpack production build와 webhook
-standalone HTTP smoke가 통과했다. 기본 Turbopack build는 실행 환경의 worker port binding 제한으로
-검증하지 못했다. 첫 webhook version과 `web-app-r2` Secret은 운영에 배포했다. Notion subscription
-verification 요청에 signature가 포함되자 token 미설정 검사가 먼저 `503`을 반환한 문제를 운영에서
-발견했고, strict verification payload를 먼저 받도록 local hotfix와 회귀 테스트를 완료했다. 이
-hotfix는 아직 배포 전이며 subscription은 verification 대기 상태다.
+standalone HTTP smoke가 통과했다. 첫 webhook version과 `web-app-r2` Secret, signed verification
+요청 hotfix와 `page.content_updated` 처리를 운영에 배포했다. Notion subscription과 cover 자동화
+관련 개발은 완료된 상태로 정리한다.
 
-### 보류 — 방문자와 조회수
+### 보류 — 전체 방문자 지표
 
-전체 방문자, 오늘 방문자, 전체 조회수와 글별 조회수는 이번 운영 지표 작업에서 제외한다.
-나중에 구현할 때는 Pod 메모리·파일·SQLite를 사용하지 않고 중앙 PostgreSQL을 사용한다.
-익명 방문자와 유효 page view를 저장해 5분 중복을 DB 제약으로 막고, 필요해질 때만
-일별 집계나 Redis를 추가한다. Server Component는 같은 앱의 GET API를 다시 호출하지 않고
-server-only data-access 함수로 요약과 글별 조회수를 배치 조회한다.
+전체 방문자와 오늘 방문자 같은 사이트 단위 지표는 계속 보류한다. 정확한 unique visitor나
+사이트 전체 분석이 필요해질 때 익명 identity, DB 중복 방지와 일별 집계를 별도로 설계한다.
+글별 조회수는 아래 Phase 13의 단순 정책으로 구현한다.
 
-### Phase 13 — `/log/[slug]` 조회수 구현 중
+### Phase 13 — `/log/[slug]` 조회수 구현 완료, 배포 전
 
-위 `보류 — 방문자와 조회수`에 기록한 초기안 중 글별 조회수 정책을 구체화해 구현을
-시작했다. 현재 목표는 공개 개발 로그 상단에 `오늘 N · 누적 N`을 표시하는 것이다. Notion은
+글별 조회수 정책을 구체화해 공개 개발 로그 상단에 `오늘 N · 누적 N`을 표시한다. Notion은
 계속 제목·본문·태그·slug의 원본이고, PostgreSQL은 게시글별 KST 일자 조회수만 저장한다.
 
 #### 운영 준비 완료
@@ -898,16 +893,19 @@ server-only data-access 함수로 요약과 글별 조회수를 배치 조회한
 
 #### 구현 상태
 
-- STEP 1 — 완료: `pg`, `@types/pg` 추가와 server-only PostgreSQL Pool 구현
+- `pg`, `@types/pg` 추가와 server-only PostgreSQL Pool 구현
   - `DATABASE_URL`을 호출 시점에 검증
   - Pool `max: 5`, 연결 timeout 2초, idle timeout 30초, statement timeout 3초
   - 개발 HMR에서 `globalThis`로 Pool 중복 생성을 방지
   - idle client의 예기치 않은 오류를 서버 로그에 기록
-- STEP 2 — 다음 작업: `post_id` 기준 오늘/누적 조회와 atomic increment를 담당하는
-  server-only 조회수 SQL 모듈 구현
-- 이후 작업: POST API → Client Counter와 30분 중복 방지 → 단위·통합 테스트 → PR
-- 아직 조회수 SQL 모듈, POST API, Client Counter와 `/log/[slug]` UI는 구현하지 않았다.
-- `main` merge와 운영 배포는 이 브랜치에서 구현·검증과 PR review를 마친 뒤 진행한다.
+- `post_id` 기준 오늘/누적 조회와 KST 일자 atomic increment를 담당하는 server-only SQL 모듈 구현
+- 공개 Notion 글의 slug와 page ID가 일치할 때만 증가시키는 `POST /api/log-views` 구현
+- hydration 뒤 POST하고 `post_id`별 localStorage 기록으로 30분 중복을 막는 Client Counter 구현
+- `/log/[slug]` 상단에 `오늘 N · 누적 N`을 표시하고 DB 장애는 본문과 격리
+- 잘못된 JSON·요청 schema, 응답 계약, bigint 변환과 30분 경계 단위 테스트 추가
+- typecheck, lint, 전체 29개 테스트와 Next 16 webpack production build 통과
+- 기본 Turbopack build는 실행 환경의 worker port binding 제한으로 검증하지 못했다.
+- `main` 최신 변경은 브랜치에 반영했다. PR review, main merge와 운영 배포는 아직 하지 않았다.
 
 #### 다른 PC에서 이어서 작업
 
@@ -947,11 +945,12 @@ Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 
 Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. Notion Webhook subscription에 `page.content_updated`를 추가한다.
-2. `page.content_updated` 처리 hotfix를 운영에 배포한다.
-3. 운영에서 Notion cover 업로드만으로 R2 WebP 생성, external cover 교체와 두 번째 webhook
-   `already-synced` no-op이 이어지는지 확인한다.
-4. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
-5. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
+1. `feat/log-view-counter`의 Phase 13 변경을 review한 뒤 PR로 main에 병합한다.
+2. 운영 배포 후 공개 글 최초 방문에서 `오늘 N · 누적 N`이 증가하는지 확인한다.
+3. 같은 브라우저에서 30분 안에 다시 열었을 때 증가하지 않고, 다른 글은 독립적으로
+   집계되는지 확인한다.
+4. PostgreSQL 장애 시 조회수만 unavailable이 되고 Notion 본문은 계속 표시되는지 확인한다.
+5. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
+6. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
    뒤 대상별 `get` 권한과 공개 key를 추가한다.
-6. Search Console에서 색인과 검색 유입을 계속 관찰한다.
+7. Search Console에서 색인과 검색 유입을 계속 관찰한다.

@@ -160,6 +160,13 @@ async function readDevelopmentLogSummaries(): Promise<readonly DevelopmentLogSum
   return getPublishedDevelopmentLogs(config)
 }
 
+async function readDevelopmentLogSummary(slug: string) {
+  const config = getNotionConfig()
+  if (!config) return findDevelopmentLog(slug)
+
+  return getPublishedDevelopmentLog(config, slug)
+}
+
 async function readDevelopmentLog(slug: string): Promise<DevelopmentLogEntry | undefined> {
   const config = getNotionConfig()
   if (!config) return findDevelopmentLog(slug)
@@ -174,4 +181,5 @@ async function readDevelopmentLog(slug: string): Promise<DevelopmentLogEntry | u
 }
 
 export const getDevelopmentLogSummaries = cache(readDevelopmentLogSummaries)
+export const getDevelopmentLogSummary = cache(readDevelopmentLogSummary)
 export const getDevelopmentLog = cache(readDevelopmentLog)
