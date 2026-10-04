@@ -67,7 +67,6 @@ spec:
                 secretKeyRef:
                   name: web-app-db
                   key: LOG_VIEW_HASH_SECRET
-                  optional: true
             - name: NOTION_TOKEN
               valueFrom:
                 secretKeyRef:
