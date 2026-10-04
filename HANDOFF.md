@@ -876,6 +876,11 @@ standalone HTTP smoke가 통과했다. 첫 webhook version과 `web-app-r2` Secre
 - 저장소의 `k8s/deployment.yaml`에도 Secret 값 없이 `web-app-db`의 `DATABASE_URL` key
   참조만 기록
 - 실제 `DATABASE_URL`, 비밀번호와 인증정보는 Git에 기록하지 않음
+- 운영 DB 권한 및 atomic UPSERT smoke test 완료
+  - `default/web-app-db` Secret을 사용하는 임시 Pod와 `ddongmy_app` 계정으로 실행
+  - `BEGIN` 뒤 atomic UPSERT가 `INSERT 0 1`로 성공
+  - 조회 결과 `views = 1`, KST 일자 `2026-10-05` 확인
+  - `ROLLBACK` 뒤 관리자 조회에서 테스트 row `remaining_rows = 0` 확인
 
 #### 확정한 identity와 집계 정책
 
