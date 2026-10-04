@@ -1,9 +1,9 @@
 [
   {
-    "deployedAt": "2026-10-04T16:15:30.000Z",
+    "deployedAt": "2026-10-04T16:22:38.000Z",
     "serviceName": "web-app",
     "commitSha": "c81386dfb3a5dcb5397b5cc7c3a58b34d629d111",
-    "status": "running",
+    "status": "success",
     "stages": {
       "githubPush": {
         "status": "success",
@@ -11,9 +11,9 @@
         "completedAt": "2026-10-04T16:15:41.667Z"
       },
       "githubActions": {
-        "status": "running",
+        "status": "success",
         "startedAt": "2026-10-04T16:15:41.667Z",
-        "completedAt": null
+        "completedAt": "2026-10-04T16:22:49.938Z"
       },
       "ghcr": {
         "status": "success",
@@ -21,14 +21,14 @@
         "completedAt": "2026-10-04T16:17:55.944Z"
       },
       "argoCd": {
-        "status": "unavailable",
-        "startedAt": null,
-        "completedAt": null
+        "status": "success",
+        "startedAt": "2026-10-04T16:21:45.000Z",
+        "completedAt": "2026-10-04T16:21:46.000Z"
       },
       "k3sPodReady": {
-        "status": "unavailable",
-        "startedAt": null,
-        "completedAt": null
+        "status": "success",
+        "startedAt": "2026-10-04T16:21:46.000Z",
+        "completedAt": "2026-10-04T16:22:38.000Z"
       }
     }
   },
