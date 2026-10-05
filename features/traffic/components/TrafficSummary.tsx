@@ -33,9 +33,11 @@ export default function TrafficSummary() {
 
   if (!trafficStats || trafficStats.status === 'unavailable') return null
 
+  const hasTotalVisits = trafficStats.totalVisits !== null
+
   return (
     <div className="mt-5 border-y border-slate-800 py-4" aria-live="polite">
-      <dl className="grid grid-cols-2 gap-4">
+      <dl className={`grid grid-cols-2 gap-4 ${hasTotalVisits ? 'sm:grid-cols-3' : ''}`}>
         <div>
           <dt className="text-xs text-slate-500">오늘 방문</dt>
           <dd className="mt-1 font-mono text-lg font-bold text-white">
@@ -48,6 +50,14 @@ export default function TrafficSummary() {
             {visitNumberFormatter.format(trafficStats.lastSevenDaysVisits)}
           </dd>
         </div>
+        {trafficStats.totalVisits !== null && (
+          <div>
+            <dt className="text-xs text-slate-500">누적 방문</dt>
+            <dd className="mt-1 font-mono text-lg font-bold text-white">
+              {visitNumberFormatter.format(trafficStats.totalVisits)}
+            </dd>
+          </div>
+        )}
       </dl>
       <p className="mt-3 text-[11px] text-slate-600">Cloudflare visits · 10분 단위 갱신</p>
     </div>

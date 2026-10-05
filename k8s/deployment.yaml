@@ -127,6 +127,11 @@ spec:
                   name: web-app-cloudflare
                   key: CLOUDFLARE_ZONE_ID
                   optional: true
+            - name: SITE_TRAFFIC_FINALIZE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-traffic-finalizer
+                  key: SITE_TRAFFIC_FINALIZE_SECRET
           lifecycle:
             preStop:
               exec:

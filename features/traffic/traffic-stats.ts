@@ -4,6 +4,7 @@ const availableTrafficStatsSchema = z.object({
   status: z.literal('available'),
   todayVisits: z.number().int().nonnegative(),
   lastSevenDaysVisits: z.number().int().nonnegative(),
+  totalVisits: z.number().int().nonnegative().nullable(),
   checkedAt: z.iso.datetime(),
 })
 

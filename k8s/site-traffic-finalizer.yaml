@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: CronJob
+
+metadata:
+  name: site-traffic-finalizer
+  namespace: default
+
+spec:
+  schedule: "40 0 * * *"
+  timeZone: Asia/Seoul
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 300
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          containers:
+            - name: finalize
+              image: node:22-alpine
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+                seccompProfile:
+                  type: RuntimeDefault
+              command:
+                - node
+                - -e
+              args:
+                - |
+                  const endpoint = process.env.FINALIZE_ENDPOINT;
+                  const secret = process.env.SITE_TRAFFIC_FINALIZE_SECRET;
+                  if (!endpoint || !secret) {
+                    console.error('[traffic-finalize-cron] Required configuration is unavailable');
+                    process.exit(1);
+                  }
+                  fetch(endpoint, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${secret}` },
+                    signal: AbortSignal.timeout(60_000),
+                  }).then((response) => {
+                    if (!response.ok) {
+                      console.error(`[traffic-finalize-cron] Request failed with status ${response.status}`);
+                      process.exitCode = 1;
+                      return;
+                    }
+                    console.info('[traffic-finalize-cron] Request completed successfully');
+                  }).catch((error) => {
+                    console.error('[traffic-finalize-cron] Request failed', error);
+                    process.exitCode = 1;
+                  });
+              env:
+                - name: FINALIZE_ENDPOINT
+                  value: http://web-service/api/internal/traffic/finalize
+                - name: SITE_TRAFFIC_FINALIZE_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: web-app-traffic-finalizer
+                      key: SITE_TRAFFIC_FINALIZE_SECRET
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi

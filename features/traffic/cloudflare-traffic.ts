@@ -30,6 +30,26 @@ const cloudflareTrafficResponseSchema = z.object({
     .optional(),
 })
 
+const cloudflareYesterdayTrafficResponseSchema = z.object({
+  data: z.object({
+    viewer: z.object({
+      zones: z.array(
+        z.object({
+          yesterday: z.array(visitGroupSchema),
+        }),
+      ),
+    }),
+  }),
+  errors: z
+    .array(
+      z.object({
+        message: z.string(),
+      }),
+    )
+    .nullable()
+    .optional(),
+})
+
 export type TrafficQueryWindow = {
   todayStartsAt: string
   lastSevenDaysStartAt: string
@@ -39,6 +59,18 @@ export type TrafficQueryWindow = {
 export type CloudflareTrafficCounts = {
   todayVisits: number
   lastSevenDaysVisits: number
+}
+
+export type YesterdayTrafficQueryWindow = {
+  visitDate: string
+  startsAt: string
+  endsAt: string
+}
+
+export function getSeoulVisitDate(now: Date) {
+  if (!Number.isFinite(now.getTime())) throw new Error('Traffic query time must be valid')
+
+  return new Date(now.getTime() + SEOUL_UTC_OFFSET_MS).toISOString().slice(0, 10)
 }
 
 export function getSeoulTrafficQueryWindow(now: Date): TrafficQueryWindow {
@@ -53,6 +85,22 @@ export function getSeoulTrafficQueryWindow(now: Date): TrafficQueryWindow {
     todayStartsAt: new Date(todayStartsAtMs).toISOString(),
     lastSevenDaysStartAt: new Date(todayStartsAtMs - 6 * DAY_MS).toISOString(),
     endsAt: now.toISOString(),
+  }
+}
+
+export function getSeoulYesterdayTrafficQueryWindow(now: Date): YesterdayTrafficQueryWindow {
+  if (!Number.isFinite(now.getTime())) throw new Error('Traffic query time must be valid')
+
+  const seoulNow = new Date(now.getTime() + SEOUL_UTC_OFFSET_MS)
+  const todayStartsAtMs =
+    Date.UTC(seoulNow.getUTCFullYear(), seoulNow.getUTCMonth(), seoulNow.getUTCDate()) -
+    SEOUL_UTC_OFFSET_MS
+  const yesterdayStartsAtMs = todayStartsAtMs - DAY_MS
+
+  return {
+    visitDate: getSeoulVisitDate(new Date(yesterdayStartsAtMs)),
+    startsAt: new Date(yesterdayStartsAtMs).toISOString(),
+    endsAt: new Date(todayStartsAtMs).toISOString(),
   }
 }
 
@@ -73,6 +121,20 @@ export function parseCloudflareTrafficCounts(body: unknown): CloudflareTrafficCo
     todayVisits: sumVisits(zone.today),
     lastSevenDaysVisits: sumVisits(zone.lastSevenDays),
   }
+}
+
+export function parseCloudflareYesterdayVisits(body: unknown) {
+  const response = cloudflareYesterdayTrafficResponseSchema.parse(body)
+
+  if (response.errors && response.errors.length > 0) {
+    throw new Error('Cloudflare Analytics returned GraphQL errors')
+  }
+
+  if (response.data.viewer.zones.length !== 1) {
+    throw new Error('Cloudflare Analytics must return exactly one zone')
+  }
+
+  return sumVisits(response.data.viewer.zones[0].yesterday)
 }
 
 function sumVisits(groups: z.infer<typeof visitGroupSchema>[]) {
