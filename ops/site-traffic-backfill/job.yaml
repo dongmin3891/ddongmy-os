@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: Job
+
+metadata:
+  name: site-traffic-backfill
+  namespace: default
+
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 900
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app: site-traffic-backfill
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      containers:
+        - name: backfill
+          image: ghcr.io/dongmin3891/ddongmy-os:REPLACE_WITH_DEPLOYED_COMMIT_SHA
+          imagePullPolicy: Always
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          command:
+            - node
+            - --conditions=react-server
+            - --import
+            - tsx
+            - scripts/backfill-site-traffic.ts
+          env:
+            - name: HOME
+              value: /tmp
+            - name: TMPDIR
+              value: /tmp
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-db
+                  key: DATABASE_URL
+            - name: CLOUDFLARE_ANALYTICS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-cloudflare
+                  key: CLOUDFLARE_ANALYTICS_API_TOKEN
+            - name: CLOUDFLARE_ZONE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-cloudflare
+                  key: CLOUDFLARE_ZONE_ID
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

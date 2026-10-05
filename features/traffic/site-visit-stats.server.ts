@@ -41,6 +41,22 @@ const finalizeSiteVisitSnapshotSql = `
   WHERE site_visit_stats.observed_at <= EXCLUDED.observed_at
 `
 
+const backfillSiteVisitSnapshotSql = `
+  INSERT INTO public.site_visit_stats (
+    visit_date,
+    visits,
+    observed_at,
+    finalized_at
+  )
+  VALUES ($1, $2, $3, $3)
+  ON CONFLICT (visit_date)
+  DO UPDATE SET
+    visits = EXCLUDED.visits,
+    observed_at = EXCLUDED.observed_at,
+    finalized_at = COALESCE(site_visit_stats.finalized_at, EXCLUDED.finalized_at)
+  WHERE site_visit_stats.observed_at <= EXCLUDED.observed_at
+`
+
 type SaveSiteVisitSnapshotInput = {
   visitDate: string
   visits: number
@@ -48,6 +64,12 @@ type SaveSiteVisitSnapshotInput = {
 }
 
 export type FinalizeSiteVisitSnapshotInput = SaveSiteVisitSnapshotInput
+
+export type BackfillSiteVisitSnapshotsResult = {
+  queriedDays: number
+  upsertedDays: number
+  totalVisits: number
+}
 
 export function parseSiteVisitTotalRow(value: unknown) {
   const row = siteVisitTotalRowSchema.parse(value)
@@ -98,4 +120,49 @@ export async function finalizeSiteVisitSnapshot({
   observedAt,
 }: FinalizeSiteVisitSnapshotInput) {
   await getPostgresPool().query(finalizeSiteVisitSnapshotSql, [visitDate, visits, observedAt])
+}
+
+export async function backfillSiteVisitSnapshots(
+  snapshots: FinalizeSiteVisitSnapshotInput[],
+): Promise<BackfillSiteVisitSnapshotsResult> {
+  if (snapshots.length === 0) throw new Error('At least one site visit snapshot is required')
+
+  const client = await getPostgresPool().connect()
+
+  try {
+    await client.query('BEGIN')
+    let upsertedDays = 0
+    for (const snapshot of snapshots) {
+      const result = await client.query(backfillSiteVisitSnapshotSql, [
+        snapshot.visitDate,
+        snapshot.visits,
+        snapshot.observedAt,
+      ])
+      upsertedDays += result.rowCount ?? 0
+    }
+
+    const totalResult = await client.query(getSiteVisitTotalSql)
+    if (totalResult.rows.length !== 1) {
+      throw new Error(`Expected one site visit total row, received ${totalResult.rows.length}`)
+    }
+
+    const totalVisits = parseSiteVisitTotalRow(totalResult.rows[0])
+    await client.query('COMMIT')
+
+    return {
+      queriedDays: snapshots.length,
+      upsertedDays,
+      totalVisits,
+    }
+  } catch (error) {
+    try {
+      await client.query('ROLLBACK')
+    } catch (rollbackError) {
+      console.error('[traffic-backfill] Failed to roll back site visit snapshots', rollbackError)
+    }
+
+    throw error
+  } finally {
+    client.release()
+  }
 }

@@ -1,11 +1,14 @@
 import 'server-only'
 import { z } from 'zod'
 import {
+  getSeoulCompletedDayTrafficQueryWindows,
   getSeoulVisitDate,
   getSeoulTrafficQueryWindow,
   getSeoulYesterdayTrafficQueryWindow,
   parseCloudflareTrafficCounts,
+  parseCloudflareTrafficRetentionSeconds,
   parseCloudflareYesterdayVisits,
+  type CompletedDayTrafficQueryWindow,
 } from './cloudflare-traffic'
 import { saveSiteVisitSnapshotAndGetTotal } from './site-visit-stats.server'
 import type { PublicTrafficStats } from './traffic-stats'
@@ -13,6 +16,7 @@ import type { PublicTrafficStats } from './traffic-stats'
 const CLOUDFLARE_GRAPHQL_URL = 'https://api.cloudflare.com/client/v4/graphql'
 const TRAFFIC_HOSTNAME = 'ddongmy.com'
 const TRAFFIC_REQUEST_TIMEOUT_MS = 10_000
+const SITE_TRAFFIC_BACKFILL_DAYS = 30
 
 const cloudflareTrafficEnvironmentSchema = z.object({
   CLOUDFLARE_ANALYTICS_API_TOKEN: z.string().trim().min(1),
@@ -91,6 +95,21 @@ const yesterdayTrafficQuery = `
         ) {
           sum {
             visits
+          }
+        }
+      }
+    }
+  }
+`
+
+const trafficDatasetSettingsQuery = `
+  query TrafficDatasetSettings($zoneTag: string) {
+    viewer {
+      zones(filter: { zoneTag: $zoneTag }) {
+        settings {
+          httpRequestsAdaptiveGroups {
+            enabled
+            notOlderThan
           }
         }
       }
@@ -224,6 +243,81 @@ export async function getYesterdayCloudflareVisitSnapshot(
     visits: parseCloudflareYesterdayVisits(body),
     observedAt,
   }
+}
+
+export class CloudflareTrafficBackfillDateError extends Error {
+  constructor(
+    readonly visitDate: string,
+    options: ErrorOptions,
+  ) {
+    super(`Cloudflare Analytics backfill failed for ${visitDate}`, options)
+  }
+}
+
+export async function collectCloudflareTrafficBackfillSnapshots({
+  queryWindows,
+  observedAt,
+  getVisits,
+}: {
+  queryWindows: CompletedDayTrafficQueryWindow[]
+  observedAt: Date
+  getVisits: (queryWindow: CompletedDayTrafficQueryWindow) => Promise<number>
+}) {
+  const snapshots: CloudflareVisitSnapshot[] = []
+
+  for (const queryWindow of queryWindows) {
+    try {
+      snapshots.push({
+        visitDate: queryWindow.visitDate,
+        visits: await getVisits(queryWindow),
+        observedAt,
+      })
+    } catch (cause) {
+      throw new CloudflareTrafficBackfillDateError(queryWindow.visitDate, { cause })
+    }
+  }
+
+  return snapshots
+}
+
+export async function getCloudflareTrafficBackfillSnapshots(
+  observedAt = new Date(),
+): Promise<CloudflareVisitSnapshot[]> {
+  const config = getCloudflareTrafficConfig()
+  if (!config) throw new Error('Cloudflare Analytics configuration is required')
+
+  const settingsBody = await requestCloudflareAnalytics({
+    config,
+    query: trafficDatasetSettingsQuery,
+    variables: {},
+  })
+  const notOlderThanSeconds = parseCloudflareTrafficRetentionSeconds(settingsBody)
+  const queryWindows = getSeoulCompletedDayTrafficQueryWindows({
+    now: observedAt,
+    requestedDays: SITE_TRAFFIC_BACKFILL_DAYS,
+    notOlderThanSeconds,
+  })
+
+  if (queryWindows.length === 0) {
+    throw new Error('Cloudflare Analytics has no completed KST days available for backfill')
+  }
+
+  return collectCloudflareTrafficBackfillSnapshots({
+    queryWindows,
+    observedAt,
+    getVisits: async (queryWindow) => {
+      const body = await requestCloudflareAnalytics({
+        config,
+        query: yesterdayTrafficQuery,
+        variables: {
+          startsAt: queryWindow.startsAt,
+          endsAt: queryWindow.endsAt,
+        },
+      })
+
+      return parseCloudflareYesterdayVisits(body)
+    },
+  })
 }
 
 export const getCloudflareTrafficStats = readCloudflareTrafficStats

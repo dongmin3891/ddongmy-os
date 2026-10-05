@@ -48,6 +48,14 @@ COPY --chown=node:node --from=builder /app/package-lock.json ./package-lock.json
 COPY --chown=node:node --from=builder /app/next.config.mjs ./next.config.mjs
 COPY --chown=node:node --from=builder /app/config/notion-image-source.js ./config/notion-image-source.js
 COPY --chown=node:node --from=builder /app/config/r2-image-source.js ./config/r2-image-source.js
+COPY --chown=node:node --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --chown=node:node --from=builder /app/scripts/backfill-site-traffic.ts ./scripts/backfill-site-traffic.ts
+COPY --chown=node:node --from=builder /app/database/postgres.server.ts ./database/postgres.server.ts
+COPY --chown=node:node --from=builder /app/features/traffic/cloudflare-traffic.server.ts ./features/traffic/cloudflare-traffic.server.ts
+COPY --chown=node:node --from=builder /app/features/traffic/cloudflare-traffic.ts ./features/traffic/cloudflare-traffic.ts
+COPY --chown=node:node --from=builder /app/features/traffic/site-traffic-backfill.server.ts ./features/traffic/site-traffic-backfill.server.ts
+COPY --chown=node:node --from=builder /app/features/traffic/site-visit-stats.server.ts ./features/traffic/site-visit-stats.server.ts
+COPY --chown=node:node --from=builder /app/features/traffic/traffic-stats.ts ./features/traffic/traffic-stats.ts
 COPY --chown=node:node --from=builder /app/public ./public
 COPY --chown=node:node --from=builder /app/.next ./.next
 COPY --chown=node:node --from=deps /app/node_modules ./node_modules

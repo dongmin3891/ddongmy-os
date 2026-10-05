@@ -1,13 +1,20 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  getSeoulCompletedDayTrafficQueryWindows,
   getSeoulVisitDate,
   getSeoulTrafficQueryWindow,
   getSeoulYesterdayTrafficQueryWindow,
   parseCloudflareTrafficCounts,
+  parseCloudflareTrafficRetentionSeconds,
   parseCloudflareYesterdayVisits,
 } from './cloudflare-traffic'
+import {
+  CloudflareTrafficBackfillDateError,
+  collectCloudflareTrafficBackfillSnapshots,
+} from './cloudflare-traffic.server'
 import { finalizeYesterdaySiteVisits } from './site-visit-finalization.server'
+import { backfillSiteTraffic } from './site-traffic-backfill.server'
 import { parseSiteVisitTotalRow } from './site-visit-stats.server'
 import { hasValidTrafficFinalizeAuthorization } from './traffic-finalize-auth.server'
 import { publicTrafficStatsSchema } from './traffic-stats'
@@ -35,6 +42,36 @@ test('한국 시간 어제 하루의 닫힌 시작과 열린 종료 범위를 �
       endsAt: '2026-10-05T15:00:00.000Z',
     },
   )
+})
+
+test('Backfill은 오늘을 제외한 최근 30개 KST 완료 날짜를 만든다', () => {
+  const windows = getSeoulCompletedDayTrafficQueryWindows({
+    now: new Date('2026-10-05T12:00:00.000Z'),
+    requestedDays: 30,
+    notOlderThanSeconds: 31 * 24 * 60 * 60,
+  })
+
+  assert.equal(windows.length, 30)
+  assert.deepEqual(windows[0], {
+    visitDate: '2026-09-05',
+    startsAt: '2026-09-04T15:00:00.000Z',
+    endsAt: '2026-09-05T15:00:00.000Z',
+  })
+  assert.deepEqual(windows.at(-1), {
+    visitDate: '2026-10-04',
+    startsAt: '2026-10-03T15:00:00.000Z',
+    endsAt: '2026-10-04T15:00:00.000Z',
+  })
+})
+
+test('Backfill 범위는 Cloudflare의 실제 보존 기간으로 줄인다', () => {
+  const windows = getSeoulCompletedDayTrafficQueryWindows({
+    now: new Date('2026-10-05T12:00:00.000Z'),
+    requestedDays: 30,
+    notOlderThanSeconds: 2 * 24 * 60 * 60,
+  })
+
+  assert.deepEqual(windows.map((window) => window.visitDate), ['2026-10-04'])
 })
 
 test('Cloudflare의 오늘과 최근 7일 visits를 공개 값으로 합산한다', () => {
@@ -93,6 +130,53 @@ test('Cloudflare 어제 방문수를 그룹 합계로 변환한다', () => {
       },
     }),
     42,
+  )
+})
+
+test('Cloudflare settings에서 zone의 실제 보존 기간을 읽는다', () => {
+  assert.equal(
+    parseCloudflareTrafficRetentionSeconds({
+      data: {
+        viewer: {
+          zones: [
+            {
+              settings: {
+                httpRequestsAdaptiveGroups: {
+                  enabled: true,
+                  notOlderThan: 2_678_400,
+                },
+              },
+            },
+          ],
+        },
+      },
+      errors: null,
+    }),
+    2_678_400,
+  )
+})
+
+test('일별 Cloudflare Backfill 실패는 해당 KST 날짜와 함께 거부한다', async () => {
+  const observedAt = new Date('2026-10-05T12:00:00.000Z')
+  const queryWindows = getSeoulCompletedDayTrafficQueryWindows({
+    now: observedAt,
+    requestedDays: 2,
+    notOlderThanSeconds: 3 * 24 * 60 * 60,
+  })
+
+  await assert.rejects(
+    () =>
+      collectCloudflareTrafficBackfillSnapshots({
+        queryWindows,
+        observedAt,
+        getVisits: async (window) => {
+          if (window.visitDate === '2026-10-04') throw new Error('request failed')
+          return 10
+        },
+      }),
+    (error: unknown) =>
+      error instanceof CloudflareTrafficBackfillDateError &&
+      error.visitDate === '2026-10-04',
   )
 })
 
@@ -156,6 +240,50 @@ test('Cloudflare 조회가 실패하면 확정 DB 저장을 호출하지 않는�
     /Cloudflare unavailable/,
   )
   assert.equal(saveCallCount, 0)
+})
+
+test('Backfill 조회가 실패하면 DB 저장을 호출하지 않는다', async () => {
+  let saveCallCount = 0
+
+  await assert.rejects(
+    () =>
+      backfillSiteTraffic(new Date('2026-10-05T12:00:00.000Z'), {
+        getSnapshots: async () => {
+          throw new Error('daily query failed')
+        },
+        saveSnapshots: async () => {
+          saveCallCount += 1
+          return { queriedDays: 0, upsertedDays: 0, totalVisits: 0 }
+        },
+      }),
+    /daily query failed/,
+  )
+  assert.equal(saveCallCount, 0)
+})
+
+test('Backfill 결과는 처리 범위와 복원된 누적 방문수를 보고한다', async () => {
+  const observedAt = new Date('2026-10-05T12:00:00.000Z')
+
+  const result = await backfillSiteTraffic(observedAt, {
+    getSnapshots: async () => [
+      { visitDate: '2026-10-03', visits: 8, observedAt },
+      { visitDate: '2026-10-04', visits: 13, observedAt },
+    ],
+    saveSnapshots: async () => ({
+      queriedDays: 2,
+      upsertedDays: 2,
+      totalVisits: 101,
+    }),
+  })
+
+  assert.deepEqual(result, {
+    queriedDays: 2,
+    upsertedDays: 2,
+    totalVisits: 101,
+    startsOn: '2026-10-03',
+    endsOn: '2026-10-04',
+    observedAt: observedAt.toISOString(),
+  })
 })
 
 test('어제 절대 방문 snapshot을 그대로 확정 저장한다', async () => {

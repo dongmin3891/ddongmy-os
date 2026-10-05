@@ -47,3 +47,12 @@ export function getPostgresPool(): Pool {
 
   return postgresPool
 }
+
+export async function closePostgresPool() {
+  if (!postgresPool) return
+
+  const pool = postgresPool
+  postgresPool = undefined
+  globalForPostgres.__ddongmyPostgresPool = undefined
+  await pool.end()
+}
