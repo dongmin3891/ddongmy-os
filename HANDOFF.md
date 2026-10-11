@@ -857,13 +857,7 @@ standalone HTTP smoke가 통과했다. 첫 webhook version과 `web-app-r2` Secre
 요청 hotfix와 `page.content_updated` 처리를 운영에 배포했다. Notion subscription과 cover 자동화
 관련 개발은 완료된 상태로 정리한다.
 
-### 보류 — 전체 방문자 지표
-
-전체 방문자와 오늘 방문자 같은 사이트 단위 지표는 계속 보류한다. 정확한 unique visitor나
-사이트 전체 분석이 필요해질 때 익명 identity, DB 중복 방지와 일별 집계를 별도로 설계한다.
-글별 조회수는 아래 Phase 13의 단순 정책으로 구현한다.
-
-### Phase 13 — `/log/[slug]` 조회수 1차 배포 완료, 서버 보호 구현 중
+### Phase 13 — `/log/[slug]` 조회수와 서버 보호 배포 완료
 
 글별 조회수 정책을 구체화해 공개 개발 로그 상단에 `오늘 N · 누적 N`을 표시한다. Notion은
 계속 제목·본문·태그·slug의 원본이고, PostgreSQL은 게시글별 KST 일자 조회수와 서버측
@@ -916,12 +910,61 @@ standalone HTTP smoke가 통과했다. 첫 webhook version과 `web-app-r2` Secre
 - PR #1을 main에 병합했고 release `3821862`의 운영 배포를 완료했다.
 - 보안 검토에서 browser-only 중복 방지는 반복 POST 조작과 Notion/DB 부하를 막지 못한다는
   medium finding을 확인했다.
-- 로컬 main commit에 `002` migration, HMAC identity, DB-backed 10분 요청 제한, 서버측 30분
-  중복 방지와 4KB body 제한을 구현했다. typecheck, lint와 전체 33개 테스트가 통과했다.
-- 운영 DB migration과 Secret 설정을 완료했다. 보호 version은 push·배포 전이다.
+- `002` migration, HMAC identity, DB-backed 10분 요청 제한, 서버측 30분 중복 방지와
+  4KB body 제한을 구현했다. typecheck, lint와 전체 33개 테스트가 통과했다.
+- 운영 DB migration과 Secret 설정을 완료하고 보호 version을 운영에 배포했다.
 
 운영 migration `000`, `001`, `002`는 다시 실행하지 않는다. Secret 값은 출력하거나 Git에
 기록하지 않는다.
+
+### Phase 14 — 전체 방문자 지표 구현 및 운영 검증 완료
+
+Cloudflare Analytics의 일별 `visits`를 PostgreSQL snapshot으로 저장하고 `/api/traffic`에서
+오늘, 최근 7일과 총누적 방문수를 제공한다. 이 값은 Cloudflare가 제공하는 사이트 단위
+`visits`의 집계이며 정확한 unique visitor 수로 해석하지 않는다.
+
+#### 저장 및 집계 구조
+
+- 운영 DB에 `003_create_site_visit_stats.sql`을 적용하고 `schema_migrations` 이력을 확인했다.
+- `public.site_visit_stats`는 KST 날짜별 한 row를 저장한다.
+  - `visit_date`: KST 기준 날짜와 primary key
+  - `visits`: Cloudflare 일별 절대값이며 음수는 허용하지 않음
+  - `observed_at`: 마지막 관측 시각
+  - `finalized_at`: 종료된 날짜의 확정 시각, 오늘 row는 `NULL`
+- `/api/traffic`이 Cloudflare 조회에 성공하면 오늘 절대값을 UPSERT한다. 기존 값에 더하지
+  않으며 더 최신 `observed_at`만 반영하고 `finalized_at`은 변경하지 않는다.
+- UPSERT 후 `SUM(visits)`를 `totalVisits`로 반환한다. DB 장애 시 오늘과 최근 7일 값은
+  유지하고 총누적만 unavailable로 처리한다.
+- `ddongmy_app`에는 snapshot 저장과 합계 조회에 필요한 `SELECT`, `INSERT`, `UPDATE` 권한만
+  부여했다.
+
+#### 전날 확정과 일회성 Backfill
+
+- Kubernetes `site-traffic-finalizer` CronJob은 매일 KST 기준으로 종료된 전날 전체 방문수를
+  Cloudflare에서 다시 조회해 절대값으로 UPSERT하고 `finalized_at`을 채운다.
+- finalize endpoint는 별도 Secret 인증을 사용하며 공개 무인증 endpoint로 노출하지 않는다.
+- Finalizer Job 최근 3건이 모두 `Complete`인 것을 운영에서 확인했다.
+- 배포 image에는 일회성 Backfill 실행에 필요한 entrypoint와 최소 TypeScript source만 포함한다.
+  수동 Job manifest는 Argo CD가 감시하는 `k8s/` 밖의 `ops/site-traffic-backfill/`에 둔다.
+- Backfill은 오늘을 제외한 과거 KST 날짜의 절대값을 저장하고 기존 `finalized_at`을 보존하며,
+  같은 범위를 재실행해도 중복 증가하지 않는다.
+- 과거 Backfill Job의 성공 log는 확인하지 못했다. 실행 이력을 추정하지 않고 아래 운영 DB
+  조회 결과를 기준으로 과거 데이터가 존재하며 현재 재실행이 불필요하다고 판단한다.
+
+#### 2026-10-11 운영 검증
+
+- `site_visit_stats`: 37 rows
+- 날짜 범위: `2026-09-05` ~ `2026-10-11`
+- `SUM(visits)`: `4567`
+- 확정 데이터: 36 rows
+- 미확정 데이터: 오늘 날짜 1 row
+- 운영 `/api/traffic`의 `totalVisits=4567`과 DB 합계 일치
+- PostgreSQL Pod 정상 실행
+- R2 백업 Job 최근 3건 `Completed`
+
+최근 30일 대상이 포함된 과거 일별 데이터와 오늘 snapshot을 운영 DB에서 확인했다. 현재
+Backfill 재실행은 필요하지 않다. 운영 migration `003`도 다시 실행하지 않는다. 실제 DB,
+Cloudflare와 finalize 인증 Secret 값은 출력하거나 Git에 기록하지 않는다.
 
 ---
 
@@ -941,21 +984,14 @@ standalone HTTP smoke가 통과했다. 첫 webhook version과 `web-app-r2` Secre
 
 ## 13. 다음 작업
 
-Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 공개 글, SEO,
-Homelab 운영 기록과 Search Console 등록까지 완료했다. 다음 작업을 시작하면 루트
-`AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
+Next.js와 React 안정 버전 업그레이드, 기본 사이트 구조, Notion 공개 글, SEO, Homelab 운영
+기록, 글별 조회수 보호와 전체 방문자 지표의 구현·운영 검증까지 완료했다. 다음 작업을
+시작하면 루트 `AGENTS.md`에 따라 필요한 스킬만 선택해 읽는다.
 
-1. `ddongmy_app` 계정으로 요청 제한·방문자 중복 방지 테이블의 권한과 rollback smoke를
-   확인한다.
-2. 보호 version의 로컬 main commit을 push해 운영 배포한다.
-3. 공개 글 최초 방문에서 `오늘 N · 누적 N`이 증가하는지 확인한다.
-4. localStorage를 지우고 같은 IP·User-Agent로 30분 안에 다시 요청해 `duplicate`가 반환되고
-   조회수가 증가하지 않는지 확인한다.
-5. 10분 안에 허용량을 초과한 요청이 `429`와 `Retry-After`를 반환하는지 확인한다.
-6. 다른 글은 독립적으로
-   집계되는지 확인한다.
-7. PostgreSQL 장애 시 조회수만 unavailable이 되고 Notion 본문은 계속 표시되는지 확인한다.
-8. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
-9. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
+1. 일별 snapshot, 전날 Finalizer와 R2 백업 Job의 실패 여부를 운영에서 계속 관찰한다.
+2. PostgreSQL 장애 시 글별 조회수와 총누적 방문수만 unavailable이 되고 Notion 본문과
+   Cloudflare의 오늘·최근 7일 값은 계속 표시되는지 주기적으로 확인한다.
+3. exporter와 Netdata 장애 로그 및 `/lab` fallback을 운영에서 관찰한다.
+4. Argo CD·Traefik 상태가 실제로 공개할 가치가 생기면 정확한 kind·namespace·name을 확인한
    뒤 대상별 `get` 권한과 공개 key를 추가한다.
-10. Search Console에서 색인과 검색 유입을 계속 관찰한다.
+5. Search Console에서 색인과 검색 유입을 계속 관찰한다.
