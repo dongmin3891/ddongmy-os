@@ -86,6 +86,8 @@
   line-height: 1.45;
   letter-spacing: -0.04em;
   margin-top: 34px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 .intro {
   margin-top: 24px;
@@ -155,6 +157,16 @@
   font-weight: 750;
   margin-bottom: 26px;
   text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.headingMeta {
+  display: inline-block;
+  margin-left: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 .section .eyebrow {
   margin-bottom: 10px;
@@ -174,26 +186,31 @@
   font-size: 14px;
   word-break: keep-all;
 }
-.timeline {
+.skills {
   display: grid;
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid #dce1e8;
+  border-bottom: 1px solid #dce1e8;
 }
-.timeline > div {
-  border-left: 3px solid var(--accent);
-  padding: 14px 20px;
-  background: #f7f8fa;
+.skills > div {
+  padding: 20px 22px;
+  border-left: 1px solid #dce1e8;
 }
-.timeline h3 {
-  font-size: 17px;
+.skills > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.skills dt {
+  color: var(--accent);
+  font-size: 12px;
   font-weight: 700;
+  letter-spacing: 0.04em;
 }
-.timeline p {
+.skills dd {
+  margin-top: 6px;
   color: var(--muted);
   font-size: 14px;
-  margin: 5px 0;
-}
-.timeline span {
-  font-size: 13px;
+  word-break: keep-all;
 }
 .note {
   color: var(--muted);
@@ -215,6 +232,36 @@
   font-weight: 400;
   margin-top: 4px;
 }
+.experienceList > article {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 24px;
+  padding: 22px 0;
+  border-bottom: 1px solid #e3e7ed;
+}
+.experienceList h3 {
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 700;
+}
+.experienceList .period {
+  margin-top: 3px;
+  margin-bottom: 0;
+}
+.experienceList .role {
+  margin-top: 4px;
+  color: var(--ink);
+}
+.experienceDetail {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+.experienceList .tech {
+  margin-top: 7px;
+}
 .project {
   padding: 30px 0;
   border-bottom: 1px solid #e3e7ed;
@@ -224,6 +271,8 @@
   line-height: 1.5;
   letter-spacing: -0.025em;
   font-weight: 750;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 .period {
   font-size: 12px;
@@ -235,6 +284,15 @@
   font-size: 13px;
   color: var(--muted);
   margin-top: 10px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.ownership {
+  margin-top: 10px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 .tech {
   font-size: 12px;
@@ -263,26 +321,6 @@
   margin-top: 18px;
   font-size: 12px;
 }
-.cards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-.cards article {
-  border: 1px solid #e0e5ec;
-  padding: 24px;
-  border-radius: 4px;
-}
-.cards h3 {
-  font-size: 18px;
-  font-weight: 700;
-}
-.cards ul {
-  margin-top: 14px;
-}
-.cards li {
-  font-size: 13px;
-}
 .caseList {
   display: grid;
   gap: 0;
@@ -295,11 +333,15 @@
 .caseList strong {
   display: block;
   font-size: 16px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 .caseList span {
   display: block;
   font-size: 13px;
   color: var(--muted);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 .caseList small {
   display: none;
@@ -362,18 +404,35 @@
     font-size: 24px;
   }
   .strengths,
-  .cards {
+  .skills {
     grid-template-columns: 1fr;
   }
   .strengths {
     gap: 22px;
+  }
+  .skills > div,
+  .skills > div:first-child {
+    padding: 16px 0;
+    border-left: 0;
+    border-bottom: 1px solid #e3e7ed;
+  }
+  .skills > div:last-child {
+    border-bottom: 0;
+  }
+  .experienceList > article {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 20px 0;
+  }
+  .experienceList .period {
+    margin-top: 0;
   }
   .project h3 {
     font-size: 21px;
   }
   .resume li {
     font-size: 14px;
-    word-break: normal;
+    word-break: keep-all;
     overflow-wrap: anywhere;
   }
 }
@@ -443,6 +502,10 @@
   .section {
     margin-top: 28px;
   }
+  .section[aria-labelledby='experience'],
+  .section[aria-labelledby='personal'] {
+    break-before: page;
+  }
   .section > h2 {
     font-size: 17pt;
     margin-bottom: 14px;
@@ -457,15 +520,57 @@
   .strengths h3 {
     font-size: 10pt;
   }
-  .strengths p,
-  .timeline p {
+  .strengths p {
     font-size: 9pt;
   }
-  .timeline > div {
+  .skills {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     break-inside: avoid;
   }
+  .skills > div,
+  .skills > div:first-child {
+    padding: 12px 14px;
+    border-bottom: 0;
+    border-left: 1px solid #dce1e8;
+  }
+  .skills > div:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .skills dt,
+  .skills dd {
+    font-size: 8pt;
+  }
+  .experienceList > article {
+    grid-template-columns: 105px minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px 0;
+    break-inside: avoid;
+  }
+  .experienceList > article:nth-child(6) {
+    break-before: page;
+  }
+  .experienceList + .note {
+    break-inside: avoid;
+  }
+  .experienceList h3 {
+    font-size: 10pt;
+  }
+  .experienceDetail {
+    font-size: 8pt;
+  }
   .project {
-    padding: 20px 0;
+    padding: 18px 0;
+    break-inside: avoid;
+  }
+  .project > :is(.period, h3, .ownership, .role, .tech),
+  .project .note,
+  .project ul {
+    break-after: avoid;
+  }
+  .projectLinks {
+    break-before: avoid;
+    break-inside: avoid;
   }
   .project h3 {
     font-size: 14pt;
@@ -473,6 +578,7 @@
   .resume li {
     font-size: 9pt;
     line-height: 1.65;
+    margin-top: 6px;
     break-inside: avoid;
   }
   .resume ul {
@@ -488,14 +594,6 @@
   .role,
   .tech {
     font-size: 8pt;
-  }
-  .cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-  .cards article {
-    padding: 14px;
-    break-inside: avoid;
   }
   .caseList a {
     break-inside: avoid;
