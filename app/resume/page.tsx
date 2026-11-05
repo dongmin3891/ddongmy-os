@@ -16,101 +16,228 @@ export const metadata: Metadata = {
   },
 }
 
-const cases = [
-  {
-    title: '홈 성능 개선과 App Router 전환',
-    detail:
-      '선별 SSR 범위와 이미지 우선순위를 설계하고 Lighthouse·RUM을 분리 검증한 과정',
-    href: '/log/utv-mobile-home-performance-app-router',
-  },
-  {
-    title: 'SSR V8 Heap OOM과 캐시 생명주기',
-    detail:
-      'Pod 재시작 계측부터 QueryClient·gcTime 가설과 로컬 Heap 검증까지',
-    href: '/log/nextjs-ssr-queryclient-gctime-oom',
-  },
-  {
-    title: 'TanStack Query v5와 iOS 14 WebView',
-    detail:
-      'Query Key·SSR Prefetch·Infinite Query 동작을 보존하며 77개 파일을 전환한 기준',
-    href: '/log/moatv-tanstack-query-v5-ios14-webview',
-  },
-  {
-    title: 'MobX autorun 메모리 누수 개선',
-    detail:
-      'autorun 제거·복원 실험과 1,000회 재현으로 disposer 누적을 검증한 과정',
-    href: '/log/mobiletv-mobx-autorun-memory-leak',
-  },
-  {
-    title: 'Notion 커버의 첫 로딩 병목 개선',
-    detail:
-      '첫 요청 경로를 추적해 변환 시점을 옮기고 SSRF·경쟁 조건을 막은 설계',
-    href: '/log/notion-cover-r2-webhook-image-loading-retrospective',
-  },
-] as const
+type CareerRole = {
+  period: string
+  title: string
+  highlights: readonly string[]
+  tech: string
+}
 
-const representativeServiceRoles = [
+type ProjectLink = {
+  label: string
+  href: string
+}
+
+type ResumeProject = {
+  period: string
+  title: string
+  context: string
+  tech: string
+  highlights: readonly {
+    lead: string
+    detail: string
+  }[]
+  links?: readonly ProjectLink[]
+  note?: string
+}
+
+const careerRoles: readonly CareerRole[] = [
   {
-    name: 'U+tv모바일 전환 구축·출시·운영',
-    period: '2025.09–현재',
-    role: '서비스 전환·출시와 기존 U+모바일tv 고객 이관',
+    period: '2025.09 ~',
+    title: '미디어 서비스 / U+tv모바일 프론트엔드 개발자',
+    highlights: [
+      '정보성 서비스로 시작한 기존 U+모아tv의 U+tv모바일 전환 구축·출시·운영',
+      '기존 U+모바일tv의 단계적 종료에 맞춘 고객 이관과 SSR·WebView 운영 안정화',
+    ],
     tech: 'Next.js 16 · React 19 · TypeScript · TanStack Query · Zustand · EKS',
-    detail:
-      '정보성 서비스로 시작한 기존 U+모아tv를 확장·전환하고, 기존 U+모바일tv의 단계적 종료에 맞춰 고객 이관',
   },
   {
-    name: '기존 U+모아tv 정보성 서비스 운영·고도화',
-    period: '2023.09–2026.04',
-    role: '홈 성능·렌더링 전략·데이터 계층 전환 담당',
-    tech: 'Next.js 12 → 16 · React 18 → 19 · TanStack Query · Zustand',
-    detail:
-      '기존 U+모바일tv와 별도로 공존한 정보성 서비스 운영·고도화, 2025.09부터 U+tv모바일 전환 구축 병행',
+    period: '2023.09 ~ 2026.04',
+    title: '미디어 서비스 / 기존 U+모아tv 프론트엔드 개발자',
+    highlights: [
+      '기존 U+모바일tv와 별도로 공존한 정보성 서비스의 운영과 고도화',
+      '홈 성능 개선, App Router·FSD 구조 전환, React Query v3 → TanStack Query v5 이관',
+    ],
+    tech: 'Next.js 12 → 16 · React 18 → 19 · TypeScript · TanStack Query · Zustand',
   },
   {
-    name: '기존 U+모바일tv 운영·WebView 안정화',
-    period: '2022.05–2023.09',
-    role: 'Native Bridge·WebView 운영 장애 대응',
+    period: '2022.05 ~ 2023.09',
+    title: '미디어 서비스 / 기존 U+모바일tv 프론트엔드 개발자',
+    highlights: [
+      '모바일 Safari·Chrome·iOS WebView와 Native Bridge를 사용하는 레거시 서비스 운영',
+      '브라우저별 동작 차이와 MobX 구독 생명주기로 발생한 운영 장애 개선',
+    ],
     tech: 'Next.js 6 · React 16 · TypeScript · MobX · Express',
-    detail: '기존 U+모아tv와 별도로 공존한 레거시 모바일tv 서비스 운영',
   },
-] as const
+]
 
-const additionalProjectRoles = [
+const projects: readonly ResumeProject[] = [
   {
-    name: 'AI 학습 챗봇·RAG',
-    period: '2026.05',
-    role: '프론트엔드 개발·성능 검증 참여',
-    tech: 'Next.js · Python · Qdrant · KaTeX',
-    detail:
-      '수학 문항의 Markdown·LaTeX 렌더링과 Hybrid Retrieval 검색 품질·지연시간 비교',
+    period: '2025.09 ~',
+    title: 'U+tv모바일 전환 구축·출시와 고객 이관',
+    context: 'U+ 미디어 서비스 · 프론트엔드 개발·운영',
+    tech: 'Next.js 16 · React 19 · TypeScript · TanStack Query · Zustand · EKS',
+    highlights: [
+      {
+        lead: '담당 영역 구축·전환',
+        detail:
+          '기존 U+모아tv를 U+tv모바일로 전환하며 탐색·검색·콘텐츠 상세 영역을 App Router·FSD 구조로 이관·구축',
+      },
+      {
+        lead: '고객 이관·WebView 안정화',
+        detail:
+          '기존 U+모바일tv의 단계적 종료에 맞춰 고객 이동 흐름을 구현하고 iOS 뒤로가기·스크롤 복원·흑화 이슈 보완',
+      },
+      {
+        lead: 'SSR 메모리 안정화',
+        detail:
+          'SSR Prefetch 캐시 생명주기와 타이머를 계측·정리해 동일 로컬 반복 요청의 heapUsed 안정 구간을 154.8MB → 93.2MB로 낮춤',
+      },
+    ],
+    links: [
+      {
+        label: 'SSR V8 Heap 분석',
+        href: '/log/nextjs-ssr-queryclient-gctime-oom',
+      },
+    ],
+    note: '메모리 감소 수치는 동일 로컬 반복 요청의 Node.js heapUsed 안정 구간 비교입니다.',
   },
   {
-    name: '미래엔 Commerce V2',
-    period: '2025.01–2025.02',
-    role: '상품·구독 화면 담당',
-    tech: 'Vue 3 · TypeScript · Pinia',
-    detail: '상품 이용 상태와 구독 변경·철회 흐름, 사용자 입력 오류 안내 개선',
+    period: '2024.11 ~ 2024.12',
+    title: '미래엔 초코툰 뷰어·LCMS 개발',
+    context: '교육 콘텐츠 서비스 · 프론트엔드 개발',
+    tech: 'Next.js 14·15 · TypeScript · TanStack Query v5 · Zustand',
+    highlights: [
+      {
+        lead: '뷰어 상태 복원',
+        detail: '권 상세에서 뷰어로 이동한 뒤 돌아왔을 때 선택했던 권과 스와이프 상태 복원',
+      },
+      {
+        lead: 'LCMS 전시 관리',
+        detail:
+          '인기검색어·패키지·추천웹툰·하우스배너의 조회·검색·등록·수정과 날짜·URL·이미지 검증 흐름 구현',
+      },
+    ],
   },
   {
-    name: '미래엔 초코툰·LCMS',
-    period: '2024.11–2024.12',
-    role: '뷰어·전시 관리 담당',
-    tech: 'Next.js 14·15 · TanStack Query v5 · Zustand',
-    detail: '뷰어 위치 복원과 4개 LCMS 전시 영역의 검색·등록 흐름 공통화',
+    period: '2024.04 ~ 2024.11',
+    title: 'U+ITGO 라우팅·배차 관리 개발',
+    context: '물류 서비스 · 프론트엔드 개발',
+    tech: 'Next.js 14 · TypeScript · TanStack Query v5 · MUI',
+    highlights: [
+      {
+        lead: '배차 작업 규칙',
+        detail: '혼적 여부와 작업 완료 상태에 따른 배차내역 드래그·재배차 조건 구현',
+      },
+      {
+        lead: '배차 상태 동기화',
+        detail:
+          '재배차 완료 후 팝업을 종료하고 화물 목록 Query를 무효화해 배차내역과 목록 상태 동기화',
+      },
+      {
+        lead: '계정별 기능 제어',
+        detail: '운송사·가맹점·U+·ALFA 계정 조건에 따라 차주 관리 기능과 작업 버튼 노출 제어',
+      },
+    ],
   },
   {
-    name: 'U+ ITGO',
-    period: '2024.04–2024.11',
-    role: '라우팅·배차 UI·캐시 담당',
-    tech: 'Next.js 14 · TanStack Query v5 · MUI',
-    detail: '역할별 라우팅·배차 관리와 취소·재배차 후 캐시 정합성 개선',
+    period: '2023.09 ~ 2026.04',
+    title: '기존 U+모아tv 정보성 서비스 운영·고도화',
+    context: 'U+ 미디어 서비스 · 프론트엔드 개발·운영',
+    tech: 'Next.js 12 → 16 · React 18 → 19 · TypeScript · TanStack Query · Zustand',
+    highlights: [
+      {
+        lead: '홈 LCP 12.2초 → 1.3초',
+        detail:
+          'SSR Prefetch·Hydration과 초기 요청 범위를 조정해 2.7초, 첫 배너 요청 우선순위를 높여 1.3초까지 단축',
+      },
+      {
+        lead: 'App Router·FSD 전환',
+        detail: '담당 영역을 App Router로 옮기고 데이터·UI 책임을 기능 단위로 재구성',
+      },
+      {
+        lead: 'TanStack Query v5 이관',
+        detail:
+          '77개 파일의 Query Hook·SSR Prefetch·Infinite Query 동작을 이관하고 iOS 14 WebView 빌드 호환 경로 확보',
+      },
+    ],
+    links: [
+      {
+        label: '홈 성능·App Router 전환',
+        href: '/log/utv-mobile-home-performance-app-router',
+      },
+      {
+        label: 'TanStack Query v5 전환',
+        href: '/log/moatv-tanstack-query-v5-ios14-webview',
+      },
+    ],
+    note: 'LCP는 개발·QA 환경의 Lighthouse 단계별 개선 기록입니다.',
   },
   {
-    name: 'LG U+ SOHO',
-    period: '2021.06–2022.04',
-    role: '고객·매장 관리 화면 담당',
+    period: '2022.05 ~ 2023.09',
+    title: '기존 U+모바일tv 운영·WebView 안정화',
+    context: 'U+ 미디어 서비스 · 프론트엔드 개발·운영',
+    tech: 'Next.js 6 · React 16 · TypeScript · MobX · Express',
+    highlights: [
+      {
+        lead: 'WebView 운영 대응',
+        detail:
+          'iOS 버전별 성인인증 callback, YouTube·FAQ 이동, 하드웨어 백키·스크롤 복원 등 브라우저·Native Bridge 차이 대응',
+      },
+      {
+        lead: 'MobX 메모리 누수 개선',
+        detail:
+          '공통 컴포넌트의 autorun disposer 누락을 찾아 unmount 시 reaction이 해제되도록 수정',
+      },
+      {
+        lead: '독립 환경 1,000회 검증',
+        detail: '잔존 reaction·callback 1,000개 → 0개와 GC 후 Heap 기준선 회복 확인',
+      },
+    ],
+    links: [
+      {
+        label: 'MobX 메모리 누수 분석',
+        href: '/log/mobiletv-mobx-autorun-memory-leak',
+      },
+    ],
+    note: '1,000회 반복 수치는 서비스 종료 후 동일 패턴을 재현한 독립 검증 결과입니다.',
+  },
+  {
+    period: '2021.06 ~ 2022.04',
+    title: 'LG U+ SOHO·500TF WebView 화면 개발',
+    context: '소상공인 서비스 · 프론트엔드 개발·운영',
     tech: 'React 17 · JavaScript · MobX 6',
-    detail: '고객·매장 관리와 매장 전환 시 이전 매장 데이터가 남는 문제 해결',
+    highlights: [
+      {
+        lead: 'SOHO 운영 기능',
+        detail:
+          '인터넷전화·메시지·자동로그인·매장 전환 흐름을 개발하고 매장 변경 후 관련 API와 화면 상태 갱신',
+      },
+      {
+        lead: '500TF 주문 화면',
+        detail:
+          '메뉴·메뉴 상세·장바구니·주문 화면을 구현하고 WebView 백키·스크롤·팝업 종료 시 상태 초기화 문제 대응',
+      },
+    ],
+  },
+]
+
+const skills = [
+  {
+    name: 'Languages',
+    items: 'TypeScript · JavaScript · HTML/CSS',
+  },
+  {
+    name: 'Frameworks & Libraries',
+    items: 'React · Next.js · Vue 3 · NestJS',
+  },
+  {
+    name: 'Data & State',
+    items: 'TanStack Query · Zustand · MobX · Pinia',
+  },
+  {
+    name: 'Runtime & Delivery',
+    items: 'WebView · Node.js · Docker · Kubernetes · GitHub Actions · Argo CD',
   },
 ] as const
 
@@ -128,25 +255,15 @@ export default function ResumePage() {
         <header className={styles.hero}>
           <p className={styles.eyebrow}>KIM DONGMIN / FRONTEND ENGINEER</p>
           <h1>
-            김동민<span>Frontend Engineer</span>
+            김동민<span>Frontend Engineer · Web &amp; WebView</span>
           </h1>
-          <p className={styles.headline}>
-            대규모 상용 서비스의
-            <br className={styles.desktopBreak} /> 성능·전환·운영 문제를
-            해결합니다.
-          </p>
-          <p className={styles.intro}>
-            6명 규모 스타트업에 합류해 5년간 재직하며 40명 이상의 조직으로
-            성장하는 과정을 경험했습니다. 미디어·물류·커머스·교육의
-            사용자·운영자 서비스를 개발하고, 작은 팀의 제품 구축부터 대규모 상용
-            서비스의 성능 개선과 전환까지 함께했습니다.
-          </p>
           <address className={styles.contacts}>
             <a href="mailto:rlaehdals224@gmail.com">rlaehdals224@gmail.com</a>
             <a href="https://github.com/dongmin3891">GitHub ↗</a>
             <Link href="/log">기술 기록 ↗</Link>
           </address>
         </header>
+
         <section aria-label="핵심 수치" className={styles.metrics}>
           <div>
             <p className={styles.metricValue}>
@@ -183,71 +300,70 @@ export default function ResumePage() {
             </small>
           </div>
         </section>
-        <section className={styles.section} aria-labelledby="strengths">
-          <p className={styles.eyebrow}>STRENGTHS</p>
-          <h2 id="strengths">문제를 재현하고, 결과로 설명합니다.</h2>
+
+        <section className={styles.section} aria-labelledby="introduce">
+          <h2 className={styles.eyebrow} id="introduce">
+            INTRODUCE
+          </h2>
+          <div className={styles.introduction}>
+            <p>
+              6명 규모 스타트업에 합류해 5년간 재직하며 40명 이상의 조직으로
+              성장하는 과정을 경험했습니다. 미디어·물류·커머스·교육의
+              사용자·운영자 서비스를 개발하며 상용 서비스의 성능·전환·운영 문제를
+              해결해왔습니다.
+            </p>
+            <p>
+              운영 중인 서비스를 중단 없이 전환하고, 브라우저와 WebView의 동작
+              차이를 좁히며, 성능과 메모리 문제를 측정 가능한 결과로 검증하는 데
+              강점이 있습니다.
+            </p>
+          </div>
+          <p className={styles.updatedAt}>Latest Updated 2026. 11. 06</p>
           <div className={styles.strengths}>
             <div>
               <h3>성능을 수치로 개선</h3>
               <p>
-                Lighthouse·메모리 계측으로 병목을 좁히고, 환경과 측정 조건을
-                구분해 결과를 검증합니다.
+                Lighthouse·메모리 계측으로 병목을 좁히고 측정 조건을 구분해 결과를
+                검증합니다.
               </p>
             </div>
             <div>
               <h3>운영 중인 서비스를 전환</h3>
               <p>
-                Pages Router → App Router·FSD, React Query v3 → TanStack Query
-                v5 전환에 참여했습니다.
+                서비스 이관과 App Router·TanStack Query 전환을 운영과 병행했습니다.
               </p>
             </div>
             <div>
-              <h3>다양한 브라우저·WebView 환경 대응</h3>
+              <h3>브라우저·WebView 환경 대응</h3>
               <p>
-                모바일 Safari·Chrome·iOS WebView 등 다양한 실행 환경에서
-                서비스를 개발하고, 브라우저별 호환성과 동작 차이에 대응했습니다.
+                모바일 Safari·Chrome·iOS WebView의 호환성과 동작 차이에
+                대응했습니다.
               </p>
             </div>
           </div>
         </section>
+
         <section className={styles.section} aria-labelledby="experience">
-          <p className={styles.eyebrow}>EXPERIENCE</p>
-          <h2 id="experience">
-            대표 경력 <span className={styles.headingMeta}>총 5년 5개월</span>
+          <h2 className={styles.eyebrow} id="experience">
+            EXPERIENCE
           </h2>
+          <p className={styles.sectionLead}>총 5년 5개월</p>
           <p className={styles.company}>
-            KIINS · Frontend Engineer{' '}
-            <span>2021.06–현재 · 상용 웹·WebView 개발·운영</span>
+            KIINS (키인스) · Frontend Engineer
+            <span>2021.06 ~ 현재 · 재직 중 5년 5개월</span>
           </p>
-          <h3 className={styles.experienceGroupTitle}>대표 서비스</h3>
           <div className={styles.experienceList}>
-            {representativeServiceRoles.map((item) => (
-              <article key={`${item.period}-${item.name}`}>
-                <p className={styles.period}>{item.period}</p>
+            {careerRoles.map((role) => (
+              <article key={`${role.period}-${role.title}`}>
+                <p className={styles.period}>{role.period}</p>
                 <div>
-                  <h3>{item.name}</h3>
-                  <p className={styles.role}>{item.role}</p>
-                  <p className={styles.experienceDetail}>{item.detail}</p>
-                  <p className={styles.tech}>{item.tech}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-          <p className={`${styles.note} ${styles.serviceLineage}`}>
-            기존 U+모바일tv와 기존 U+모아tv는 별도 서비스로 공존했습니다.
-            정보성 서비스로 시작한 기존 U+모아tv를 U+tv모바일로 전환 구축했고,
-            출시에 맞춰 기존 U+모바일tv를 단계적으로 종료하며 고객을 이관했습니다.
-          </p>
-          <h3 className={styles.experienceGroupTitle}>기타 상용 프로젝트</h3>
-          <div className={`${styles.experienceList} ${styles.additionalExperienceList}`}>
-            {additionalProjectRoles.map((item) => (
-              <article key={`${item.period}-${item.name}`}>
-                <p className={styles.period}>{item.period}</p>
-                <div>
-                  <h3>{item.name}</h3>
-                  <p className={styles.role}>{item.role}</p>
-                  <p className={styles.experienceDetail}>{item.detail}</p>
-                  <p className={styles.tech}>{item.tech}</p>
+                  <h3>{role.title}</h3>
+                  <ul className={styles.experienceBullets}>
+                    {role.highlights.map((highlight) => (
+                      <li key={highlight}>{highlight}</li>
+                    ))}
+                  </ul>
+                  <p className={styles.tech}>{role.tech}</p>
                 </div>
               </article>
             ))}
@@ -256,168 +372,122 @@ export default function ResumePage() {
             기간은 개인 참여 기준이며 프로젝트를 병행한 구간이 있습니다.
           </p>
         </section>
+
         <section className={styles.section} aria-labelledby="projects">
-          <p className={styles.eyebrow}>SELECTED PROJECTS</p>
-          <h2 id="projects">서비스의 운영·전환 흐름과 결과.</h2>
-          <article className={styles.project}>
-            <p className={styles.period}>
-              2025.09–현재 · 기존 U+모아tv 전환 구축·명칭 변경
-            </p>
-            <h3>U+tv모바일 전환 구축·출시·운영</h3>
-            <p className={styles.role}>
-              기존 U+모아tv의 서비스 확장·전환과 기존 U+모바일tv 고객 이관
-            </p>
-            <p className={styles.tech}>
-              Next.js 16 · React 19 · TypeScript · TanStack Query · Zustand · EKS
-            </p>
-            <ul>
-              <li>
-                정보성 서비스로 시작한 기존 U+모아tv를 U+tv모바일로 확장·전환하고,
-                출시에 맞춰 공존하던 기존 U+모바일tv를 단계적으로 종료하며 고객
-                이관.
-              </li>
-              <li>
-                <strong>SSR 운영 장애 계측:</strong> Pod 재시작과 Ready 상태 변화를
-                V8 Heap과 함께 확인하고 QueryClient 요청 단위 격리·서버 캐시
-                생명주기 개선.
-              </li>
-              <li>
-                <strong>로컬 반복 요청 검증:</strong> heapUsed 안정 구간 154.8MB →
-                93.2MB, 약 39.8% 감소 확인.
-              </li>
-            </ul>
-            <p className={styles.note}>
-              QueryClient 공유 가능성과 캐시 timer는 주요 원인 후보이며 단일
-              원인으로 단정하지 않습니다.
-            </p>
-            <div className={styles.projectLinks}>
-              <Link href={cases[1].href}>SSR 메모리 분석 ↗</Link>
-            </div>
-          </article>
-          <article className={styles.project}>
-            <p className={styles.period}>
-              2023.09–2026.04 · U+tv모바일 전환 구축과 병행
-            </p>
-            <h3>기존 U+모아tv 정보성 서비스 운영·고도화</h3>
-            <p className={styles.role}>
-              홈 성능·App Router 전환·데이터 계층 현대화
-            </p>
-            <p className={styles.tech}>
-              Next.js 12 → 16 · React 18 → 19 · TypeScript · TanStack Query
-            </p>
-            <ul>
-              <li>
-                <strong>LCP 12.2초 → 1.3초:</strong> 홈을 SSR
-                Prefetch·Hydration 구조로 전환하고 LCP 배너의 요청 우선순위 개선.
-              </li>
-              <li>
-                <strong>초기 요청 범위·실패 격리:</strong> 상단 패널만 SSR하고
-                나머지는 진입 직전에 조회했으며, 일부 API 실패가 홈 전체를 막지
-                않도록 분리. 담당 영역은 App Router·FSD 구조로 전환.
-              </li>
-              <li>
-                <strong>React Query v3 → TanStack Query v5:</strong> 77개 파일의
-                Query Hook·SSR Prefetch·Infinite Query 동작을 이관하고 기존 import
-                0건 확인. iOS 14 WebView 빌드 호환 경로도 확보.
-              </li>
-            </ul>
-            <p className={styles.note}>
-              LCP는 개발·QA Lighthouse의 단계별 개선 기록입니다.
-            </p>
-            <div className={styles.projectLinks}>
-              <Link href={cases[0].href}>홈 성능·구조 전환 ↗</Link>
-              <Link href={cases[2].href}>TanStack Query 전환 ↗</Link>
-            </div>
-          </article>
-          <article className={styles.project}>
-            <p className={styles.period}>
-              2022.05–2023.09 · 기존 U+모아tv와 별도 서비스로 공존
-            </p>
-            <h3>기존 U+모바일tv 운영·WebView 안정화</h3>
-            <p className={styles.role}>
-              Native Bridge·WebView 운영 장애 대응
-            </p>
-            <p className={styles.tech}>
-              Next.js 6 · React 16 · TypeScript · MobX · Express
-            </p>
-            <ul>
-              <li>
-                모바일 Safari·Chrome·iOS WebView와 Native Bridge의 이벤트·화면
-                복원 시점 차이를 구분해 운영 이슈 대응.
-              </li>
-              <li>
-                반복 생성되는 공통 컴포넌트에서 MobX autorun disposer 누락과
-                reaction 누적을 확인하고, unmount 시 구독을 해제하도록 개선.
-              </li>
-              <li>
-                서비스 종료 후 동일 패턴의 독립 환경에서 1,000회 반복 검증해 잔존
-                reaction·callback 1,000개 → 0개와 GC 후 Heap 기준선 회복 확인.
-              </li>
-            </ul>
-            <p className={styles.note}>
-              1,000회 반복·1,000개 → 0개는 서비스 종료 후 독립 재현 결과이며
-              운영 환경의 측정값이 아닙니다.
-            </p>
-            <div className={styles.projectLinks}>
-              <Link href={cases[3].href}>MobX 메모리 분석 ↗</Link>
-            </div>
-          </article>
+          <h2 className={styles.eyebrow} id="projects">
+            PROJECT
+          </h2>
+          <div className={styles.projectList}>
+            {projects.map((project) => (
+              <article className={styles.project} key={`${project.period}-${project.title}`}>
+                <p className={styles.period}>{project.period}</p>
+                <h3>{project.title}</h3>
+                <p className={styles.role}>{project.context}</p>
+                <ul>
+                  {project.highlights.map((highlight) => (
+                    <li key={highlight.lead}>
+                      <strong>{highlight.lead}:</strong> {highlight.detail}
+                    </li>
+                  ))}
+                </ul>
+                <p className={styles.tech}>{project.tech}</p>
+                {project.note ? <p className={styles.note}>{project.note}</p> : null}
+                {project.links?.length ? (
+                  <div className={styles.projectLinks}>
+                    {project.links.map((link) => (
+                      <Link href={link.href} key={link.href}>
+                        {link.label} ↗
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </article>
+            ))}
+          </div>
         </section>
+
         <section className={styles.section} aria-labelledby="skills">
-          <p className={styles.eyebrow}>CORE SKILLS</p>
-          <h2 id="skills">실무에서 검증한 기술을 중심으로.</h2>
+          <h2 className={styles.eyebrow} id="skills">
+            SKILL
+          </h2>
           <dl className={styles.skills}>
-            <div>
-              <dt>Frontend</dt>
-              <dd>React · Next.js · TypeScript</dd>
-            </div>
-            <div>
-              <dt>Data &amp; State</dt>
-              <dd>TanStack Query · Zustand · MobX</dd>
-            </div>
-            <div>
-              <dt>Runtime &amp; Platform</dt>
-              <dd>SSR · WebView · Node.js · EKS</dd>
-            </div>
+            {skills.map((skill) => (
+              <div key={skill.name}>
+                <dt>{skill.name}</dt>
+                <dd>{skill.items}</dd>
+              </div>
+            ))}
           </dl>
         </section>
-        <section className={styles.section} aria-labelledby="personal">
-          <p className={styles.eyebrow}>OPEN SOURCE &amp; PERSONAL</p>
-          <h2 id="personal">실무의 문제를 도구와 제품으로 확장합니다.</h2>
+
+        <section className={styles.section} aria-labelledby="side-project">
+          <h2 className={styles.eyebrow} id="side-project">
+            SIDE PROJECT
+          </h2>
+          <article className={styles.project}>
+            <p className={styles.period}>2025.11 ~</p>
+            <h3>ddongmy-os — Notion CMS·GitOps 홈서버 운영</h3>
+            <p className={styles.role}>
+              1인 설계·개발·운영 · 콘텐츠·배포·클러스터 관측 파이프라인 구축
+            </p>
+            <ul>
+              <li>
+                <strong>배포 완료 기준 확장:</strong> GitHub Actions에서 GHCR 이미지와
+                manifest를 갱신한 뒤 동일 commit SHA의 Argo CD 반영과 K3s Pod Ready까지
+                확인해야 workflow를 성공 처리.
+              </li>
+              <li>
+                <strong>Notion 이미지 사전 처리:</strong> 요청 시 변환하던 약 1.52MB
+                커버를 Webhook에서 약 50KB WebP로 변환해 R2에 저장.
+              </li>
+              <li>
+                <strong>클러스터 조회 권한 분리:</strong> 특정 Deployment만 조회하는 내부
+                status-exporter가 공개 DTO를 전달하도록 책임 분리.
+              </li>
+            </ul>
+            <p className={styles.tech}>
+              Next.js · TypeScript · Notion CMS · GitHub Actions · GHCR · Argo CD ·
+              K3s · Cloudflare R2
+            </p>
+            <div className={styles.projectLinks}>
+              <Link href="/projects/ddongmy-os">상세 사례 ↗</Link>
+              <Link href="/log/notion-cover-r2-webhook-image-loading-retrospective">
+                이미지 처리 회고 ↗
+              </Link>
+              <a href="https://github.com/dongmin3891/ddongmy-os">GitHub ↗</a>
+            </div>
+          </article>
+
           <article className={styles.project}>
             <p className={styles.period}>
-              2023.10–2024.04 개발 · 2026.09 운영·고도화
+              2023.10 ~ 2024.04 개발 · 2026.09 운영·고도화
             </p>
             <h3>IWTC 백엔드 전환과 서비스 성능·운영 자동화</h3>
             <p className={styles.role}>
               2인 프로젝트 · 프론트엔드 전담 → AI 도구를 활용해 Java Spring
               백엔드를 NestJS로 전환·운영
             </p>
-            <p className={styles.tech}>
-              Next.js 13 · React 18 · NestJS · TanStack Query · React Spring · K3s
-              · Argo CD · Codex · MCP
-            </p>
             <ul>
               <li>
-                <strong>Java Spring → NestJS:</strong> AI 도구를 활용해 기존
-                API·도메인 로직을 분석하고 백엔드를 NestJS로 재구축.
+                <strong>Java Spring → NestJS:</strong> AI 도구와 함께 기존
+                API·도메인 로직을 분석하고 백엔드를 재구축.
               </li>
               <li>
                 <strong>추가 미디어 요청 최대 40회 → 0회:</strong> 목록 응답에
                 미디어를 포함하도록 API 계약과 화면 매핑 개선.
               </li>
               <li>
-                <strong>고정 대기 1,000ms → 약 336–342ms:</strong> 실제 Spring
+                <strong>고정 대기 1,000ms → 약 336–342ms:</strong> 실제 애니메이션
                 완료 시점에 다음 대결로 전환하고 WebKit 렌더 회귀 수정.
               </li>
               <li>
                 <strong>콘텐츠 운영 자동화:</strong> 하루 1개 월드컵·후보 16개를
-                생성하고 PRIVATE → VERIFY → PUBLIC 검증 후 Telegram으로 결과
-                알림.
+                생성하고 검증 후 Telegram으로 결과 알림.
               </li>
             </ul>
-            <p className={styles.note}>
-              수치는 2026.09 프로젝트 문서의 검증 기록 기준입니다.
+            <p className={styles.tech}>
+              Next.js 13 · React 18 · NestJS · TanStack Query · K3s · Argo CD ·
+              Codex · MCP
             </p>
             <div className={styles.projectLinks}>
               <a href="https://iwtc.ddongmy.com">서비스 ↗</a>
@@ -427,6 +497,41 @@ export default function ResumePage() {
               </a>
             </div>
           </article>
+
+          <article className={styles.project}>
+            <p className={styles.period}>2025.04 ~ 2026.06</p>
+            <h3>FTM — 남성 그루밍 콘텐츠·커뮤니티 서비스</h3>
+            <p className={styles.role}>
+              PM·기획/디자인·백엔드와 협업 · 프론트엔드 공동 개발
+            </p>
+            <ul>
+              <li>
+                <strong>콘텐츠 작성·수정:</strong> Tiptap 기반 게시글 작성·수정·삭제와
+                본문 이미지·추천 상품 등록 흐름 구현.
+              </li>
+              <li>
+                <strong>이미지 변경 정합성:</strong> 기존·신규·기본 상품 이미지를 구분해
+                잘못된 이미지 삭제와 초기 콘텐츠 주입 전 빈 본문 저장 방지.
+              </li>
+              <li>
+                <strong>탐색·반응형 UX:</strong> 태그 필터·무한스크롤과 좋아요·북마크
+                상태 갱신을 구현하고 모바일 바텀시트·반응형 화면 대응.
+              </li>
+            </ul>
+            <p className={styles.tech}>
+              Next.js 14 · React 18 · TypeScript · TanStack Query v5 · Zustand ·
+              Tiptap · Tailwind CSS
+            </p>
+            <div className={styles.projectLinks}>
+              <a href="https://github.com/FitTheMan/ftm-client-web">GitHub ↗</a>
+            </div>
+          </article>
+        </section>
+
+        <section className={styles.section} aria-labelledby="open-source">
+          <h2 className={styles.eyebrow} id="open-source">
+            OPEN SOURCE
+          </h2>
           <article className={styles.project}>
             <h3>
               next-manual-
@@ -437,28 +542,27 @@ export default function ResumePage() {
               Owner &amp; Maintainer · 설계·개발·문서화
             </p>
             <p className={styles.role}>
-              U+tv모바일의 다양한 브라우저·WebView 환경에서 일관된 스크롤 복원을
-              구현하고, App Router용 Hook으로 분리·공개
-            </p>
-            <p className={styles.tech}>
-              TypeScript · React · Next.js App Router · MIT
+              U+tv모바일 운영 중 다룬 스크롤 복원 문제를 Next.js App Router용 Hook으로
+              일반화해 공개
             </p>
             <ul>
               <li>
-                <strong>Pages Router → App Router 전환 대응:</strong> 기존
-                router.events 기반 처리를 대체해 History API에서 이동 직전 위치를
-                저장하고, 진입·뒤로가기·쿼리 변경별 복원 정책을 분리.
+                <strong>Pages Router → App Router 대응:</strong> History API에서 이동
+                직전 위치를 저장하고 진입·뒤로가기·쿼리 변경별 복원 정책 분리.
               </li>
               <li>
-                <strong>iOS의 렌더링·복원 시점 불일치 보완:</strong> 콘텐츠가
-                준비되기 전 복원을 시도하는 문제를 ResizeObserver 기반 문서 높이
-                감지와 제한 시간 내 재시도로 대응.
+                <strong>iOS 렌더링·복원 시점 보완:</strong> ResizeObserver 기반 문서
+                높이 감지와 제한 시간 내 재시도로 대응.
               </li>
               <li>
-                경로별 복원 정책과 저장소 교체 인터페이스, LRU 보관 한도, 다음
-                탐색의 스크롤 유지 API를 제공해 서비스별 요구 대응.
+                경로별 정책, 저장소 교체 인터페이스, LRU 보관 한도와 다음 탐색의
+                스크롤 유지 API 제공.
               </li>
+              <li>단위 테스트 30개와 E2E 시나리오 3개로 핵심 이동 정책 검증.</li>
             </ul>
+            <p className={styles.tech}>
+              TypeScript · React · Next.js App Router · MIT
+            </p>
             <div className={styles.projectLinks}>
               <a href="https://github.com/dongmin3891/next-manual-scroll-restoration">
                 GitHub · 소스 코드 ↗
@@ -468,59 +572,8 @@ export default function ResumePage() {
               </a>
             </div>
           </article>
-          <article className={styles.project}>
-            <h3>ddongmy-os — Notion CMS·GitOps 홈서버 운영</h3>
-            <p className={styles.role}>
-              1인 설계·개발·운영 · 콘텐츠·배포·클러스터 관측 파이프라인 구축
-            </p>
-            <p className={styles.tech}>
-              Next.js · TypeScript · Notion CMS · GitHub Actions · GHCR · Argo CD ·
-              K3s · Cloudflare R2
-            </p>
-            <ul>
-              <li>
-                <strong>빌드·배포 자동화:</strong> main 반영 시 GitHub Actions가
-                웹·status-exporter 이미지를 빌드해 commit SHA로 GHCR에 올리고
-                Kubernetes manifest를 갱신.
-              </li>
-              <li>
-                <strong>GitOps 런타임 검증:</strong> Argo CD가 K3s의 2개 Pod를
-                maxUnavailable 0 RollingUpdate로 배포하고 상태 API가 반영 완료를
-                확인해야 workflow를 성공 처리.
-              </li>
-              <li>
-                <strong>요청 시 이미지 변환 → 변경 시 변환:</strong> 약 1.52MB
-                Notion 커버를 Webhook에서 약 50KB WebP로 변환해 R2에 저장하고 방문
-                요청에서 Notion 원본 다운로드와 Sharp 변환을 제거.
-              </li>
-              <li>
-                <strong>공개 앱의 클러스터 조회 권한 제거:</strong> 내부
-                status-exporter가 공개 DTO만 전달하도록 수집 책임 분리.
-              </li>
-            </ul>
-            <div className={styles.projectLinks}>
-              <Link href="/projects/ddongmy-os">상세 사례 ↗</Link>
-              <Link href={cases[4].href}>이미지 처리 회고 ↗</Link>
-              <a href="https://github.com/dongmin3891/ddongmy-os">GitHub ↗</a>
-            </div>
-          </article>
         </section>
-        <section className={styles.section} aria-labelledby="cases">
-          <p className={styles.eyebrow}>ENGINEERING NOTES</p>
-          <h2 id="cases">문제 분석과 검증 기록</h2>
-          <p className={styles.note}>
-            성과 수치의 측정 조건과 문제를 좁혀간 과정을 자세히 기록했습니다.
-          </p>
-          <div className={styles.caseList}>
-            {cases.map((item) => (
-              <Link href={item.href} key={item.href}>
-                <strong>{item.title} ↗</strong>
-                <span>{item.detail}</span>
-                <small>ddongmy.com{item.href}</small>
-              </Link>
-            ))}
-          </div>
-        </section>
+
         <footer className={styles.footer}>
           <span>김동민 · Frontend Engineer</span>
           <a href="mailto:rlaehdals224@gmail.com">rlaehdals224@gmail.com</a>
