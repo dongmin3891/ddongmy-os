@@ -185,10 +185,10 @@ export default function ResumePage() {
               </p>
             </div>
             <div>
-              <h3>작은 조직에서 대규모 서비스까지</h3>
+              <h3>다양한 브라우저·WebView 환경 대응</h3>
               <p>
-                소규모 팀의 구축과 상용 WebView 운영을 경험하며
-                화면·데이터·Native의 경계를 조율합니다.
+                모바일 Safari·Chrome·iOS WebView 등 다양한 실행 환경에서
+                서비스를 개발하고, 브라우저별 호환성과 동작 차이에 대응했습니다.
               </p>
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function ResumePage() {
             <div>
               <h3>기존 U+모바일tv</h3>
               <p>별도 레거시 앱 · 운영 당시 Google Play 1,000만+ 다운로드</p>
-              <span>운영·WebView 안정화 → 이후 단계적 종료</span>
+              <span>운영·WebView 안정화 → 단계적 종료·U+tv모바일로 고객 이관</span>
             </div>
             <div>
               <h3>기존 U+모아tv → U+tv모바일</h3>
@@ -237,6 +237,10 @@ export default function ResumePage() {
             <p className={styles.tech}>
               Next.js 12 → 16 · React 18 → 19 · TypeScript · TanStack Query ·
               Zustand · EKS
+            </p>
+            <p className={styles.role}>
+              기존 U+모바일tv의 단계적 종료에 맞춰 U+tv모바일로 고객 이관을
+              담당했습니다.
             </p>
             <ul>
               <li>
