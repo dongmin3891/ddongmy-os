@@ -5,6 +5,7 @@ const navigation = [
   { href: '/log', label: 'Dev Log' },
   { href: '/lab', label: 'Home Lab' },
   { href: '/about', label: 'About' },
+  { href: '/resume', label: 'Resume' },
 ]
 
 export default function SiteHeader() {
