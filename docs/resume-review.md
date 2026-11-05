@@ -34,3 +34,9 @@
 
 - 기존 U+모바일tv 종료 과정에서 U+tv모바일로 고객을 이관한 업무를 직접 담당했다는 사용자 확인을 반영. 계정·데이터 이관 방식이나 전환 인원·전환율은 제공되지 않아 기재하지 않음. 개인 참여 기간은 기존 기록 유지.
 - 핵심 역량의 세 번째 항목은 다양한 실행 환경 대응으로 변경. 사용자가 명시한 모바일 Safari·Chrome·iOS WebView 개발 경험을 반영하며 브라우저별 호환성과 동작 차이 대응을 강조. 조직 규모 경험은 첫 소개에 유지.
+
+## 인원 표기 정리·오픈소스 추가 (2026-11-05)
+
+- 상용·사이드 프로젝트의 팀 인원수 삭제. 소개의 6명→40명 이상 조직 경험, 프론트엔드 전담·1인 개발 등 책임 범위는 유지. 성과·기존 상세 사례 링크 유지.
+- [next-manual-scroll-restoration](https://github.com/dongmin3891/next-manual-scroll-restoration)의 README·package.json·src/index.ts·controller·position-store·restore 구현을 대조하여 오픈소스 섹션 추가. 탐색 유형별 정책, ResizeObserver 기반 비동기 복원, 확장 가능한 저장소·LRU·명령형 API를 소개.
+- 공개 저장소의 기능과 MIT 라이선스만 기술. npm 배포 여부·다운로드·Star·도입 서비스 수·성능 개선율은 확인 없이 추가하지 않음.

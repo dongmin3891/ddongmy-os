@@ -48,7 +48,7 @@ const otherProjects = [
   {
     name: 'AI 학습 챗봇·RAG',
     period: '2026.05',
-    role: '개발 4명 · 프론트엔드 개발·성능 검증 참여',
+    role: '프론트엔드 개발·성능 검증 참여',
     tech: 'Next.js · Python · Qdrant · KaTeX',
     bullets: [
       '수학 문항의 Markdown·LaTeX를 정규화하고 KaTeX로 렌더링.',
@@ -58,7 +58,7 @@ const otherProjects = [
   {
     name: '미래엔 Commerce V2',
     period: '2025.01–2025.02',
-    role: '프론트엔드 5명 · 구매·정기결제 담당',
+    role: '구매·정기결제 담당',
     tech: 'Vue 3 · TypeScript · Pinia',
     bullets: [
       '구매·구독 변경·철회 흐름을 결제 상태 기준으로 정리.',
@@ -68,7 +68,7 @@ const otherProjects = [
   {
     name: '미래엔 초코툰·LCMS',
     period: '2024.11–2024.12',
-    role: '프론트엔드 누적 12명 · 뷰어·전시 관리 담당',
+    role: '뷰어·전시 관리 담당',
     tech: 'Next.js 14·15 · TanStack Query v5 · Zustand',
     bullets: [
       '뷰어 복귀 시 선택한 권과 슬라이드 위치를 복원.',
@@ -78,7 +78,7 @@ const otherProjects = [
   {
     name: 'U+ ITGO',
     period: '2024.04–2024.11',
-    role: '프론트엔드 5명 · 라우팅·배차 UI·캐시 담당',
+    role: '라우팅·배차 UI·캐시 담당',
     tech: 'Next.js 14 · TanStack Query v5 · MUI',
     bullets: [
       '권한별 라우팅과 드래그앤드롭 배차 관리 흐름 구현.',
@@ -88,7 +88,7 @@ const otherProjects = [
   {
     name: 'LG U+ SOHO',
     period: '2021.06–2022.04',
-    role: '프론트엔드 6명 · 인증·매장 전환 담당',
+    role: '인증·매장 전환 담당',
     tech: 'React 17 · JavaScript · MobX 6',
     bullets: [
       '계정 상태별 인증 흐름과 고객·매장 관리 기능 구현.',
@@ -200,7 +200,9 @@ export default function ResumePage() {
             <div>
               <h3>기존 U+모바일tv</h3>
               <p>별도 레거시 앱 · 운영 당시 Google Play 1,000만+ 다운로드</p>
-              <span>운영·WebView 안정화 → 단계적 종료·U+tv모바일로 고객 이관</span>
+              <span>
+                운영·WebView 안정화 → 단계적 종료·U+tv모바일로 고객 이관
+              </span>
             </div>
             <div>
               <h3>기존 U+모아tv → U+tv모바일</h3>
@@ -230,8 +232,6 @@ export default function ResumePage() {
               U+tv모바일 전환 구축·운영
             </h3>
             <p className={styles.role}>
-              모아tv: 프론트엔드 누적 10명 / 차세대: 5명
-              <br />
               담당: 홈 성능·데이터 계층·WebView 호환성·SSR 메모리 분석
             </p>
             <p className={styles.tech}>
@@ -281,8 +281,7 @@ export default function ResumePage() {
             <p className={styles.period}>2022.05–2023.09</p>
             <h3>기존 U+모바일tv 운영 및 WebView 안정화</h3>
             <p className={styles.role}>
-              프론트엔드 누적 10명 · 담당: Native Bridge·인증·결제·운영 장애
-              대응
+              담당: Native Bridge·인증·결제·운영 장애 대응
             </p>
             <p className={styles.tech}>
               Next.js 6 · React 16 · TypeScript · MobX · Express · Native Bridge
@@ -345,7 +344,7 @@ export default function ResumePage() {
             </p>
             <h3>IWTC 이상형 월드컵</h3>
             <p className={styles.role}>
-              초기 2인 팀 프론트엔드 전담 → 홈서버 운영·배포·자동화 확장
+              프론트엔드 전담 → 홈서버 운영·배포·자동화 확장
             </p>
             <p className={styles.tech}>
               Next.js 13 · React 18 · TanStack Query · React Spring · K3s · Argo
@@ -398,6 +397,45 @@ export default function ResumePage() {
               <Link href="/projects/ddongmy-os">상세 사례 ↗</Link>
               <Link href={cases[4].href}>이미지 처리 회고 ↗</Link>
               <a href="https://github.com/dongmin3891/ddongmy-os">GitHub ↗</a>
+            </div>
+          </article>
+        </section>
+        <section className={styles.section} aria-labelledby="open-source">
+          <p className={styles.eyebrow}>OPEN SOURCE</p>
+          <h2 id="open-source">실무의 문제를 재사용 가능한 도구로.</h2>
+          <article className={styles.project}>
+            <h3>
+              next-manual-
+              <wbr />
+              scroll-restoration
+            </h3>
+            <p className={styles.role}>
+              Next.js App Router용 수동 스크롤 복원 Hook 개발·공개
+            </p>
+            <p className={styles.tech}>
+              TypeScript · React · Next.js App Router · MIT
+            </p>
+            <ul>
+              <li>
+                History API에서 이동 직전 위치와 탐색 유형을 기록하고, 신규 경로
+                진입·뒤로가기·쿼리 변경별 스크롤 정책을 분리.
+              </li>
+              <li>
+                ResizeObserver로 문서 높이 변화를 감지해 데이터·이미지가 늦게
+                렌더링되는 화면에서도 제한 시간 내 스크롤 복원 재시도.
+              </li>
+              <li>
+                경로별 복원 정책과 저장소 교체 인터페이스, LRU 보관 한도, 다음
+                탐색의 스크롤 유지 API를 제공해 서비스별 요구 대응.
+              </li>
+            </ul>
+            <div className={styles.projectLinks}>
+              <a href="https://github.com/dongmin3891/next-manual-scroll-restoration">
+                GitHub · 소스 코드 ↗
+              </a>
+              <a href="https://github.com/dongmin3891/next-manual-scroll-restoration/blob/main/README.ko.md">
+                사용법·지원 범위 ↗
+              </a>
             </div>
           </article>
         </section>
