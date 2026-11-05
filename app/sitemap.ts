@@ -12,6 +12,7 @@ const staticRoutes: MetadataRoute.Sitemap = [
   { url: `${siteConfig.url}/lab`, changeFrequency: 'monthly' },
   { url: `${siteConfig.url}/lab/architecture`, changeFrequency: 'monthly' },
   { url: `${siteConfig.url}/about`, changeFrequency: 'yearly' },
+  { url: `${siteConfig.url}/resume`, changeFrequency: 'monthly' },
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
