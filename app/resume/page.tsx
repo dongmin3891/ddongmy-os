@@ -49,7 +49,33 @@ const cases = [
   },
 ] as const
 
-const experienceRoles = [
+const representativeServiceRoles = [
+  {
+    name: 'U+tv모바일 전환 구축·출시·운영',
+    period: '2025.09–현재',
+    role: '서비스 전환·출시와 기존 U+모바일tv 고객 이관',
+    tech: 'Next.js 16 · React 19 · TypeScript · TanStack Query · Zustand · EKS',
+    detail:
+      '정보성 서비스로 시작한 기존 U+모아tv를 확장·전환하고, 기존 U+모바일tv의 단계적 종료에 맞춰 고객 이관',
+  },
+  {
+    name: '기존 U+모아tv 정보성 서비스 운영·고도화',
+    period: '2023.09–2026.04',
+    role: '홈 성능·렌더링 전략·데이터 계층 전환 담당',
+    tech: 'Next.js 12 → 16 · React 18 → 19 · TanStack Query · Zustand',
+    detail:
+      '기존 U+모바일tv와 별도로 공존한 정보성 서비스 운영·고도화, 2025.09부터 U+tv모바일 전환 구축 병행',
+  },
+  {
+    name: '기존 U+모바일tv 운영·WebView 안정화',
+    period: '2022.05–2023.09',
+    role: 'Native Bridge·WebView 운영 장애 대응',
+    tech: 'Next.js 6 · React 16 · TypeScript · MobX · Express',
+    detail: '기존 U+모아tv와 별도로 공존한 레거시 모바일tv 서비스 운영',
+  },
+] as const
+
+const additionalProjectRoles = [
   {
     name: 'AI 학습 챗봇·RAG',
     period: '2026.05',
@@ -59,18 +85,11 @@ const experienceRoles = [
       '수학 문항의 Markdown·LaTeX 렌더링과 Hybrid Retrieval 검색 품질·지연시간 비교',
   },
   {
-    name: 'U+tv모바일 전환 구축·운영',
-    period: '2025.09–현재',
-    role: '홈 성능·데이터 계층·WebView 호환성·SSR 메모리 분석과 고객 이관',
-    tech: 'Next.js 16 · React 19 · TypeScript · TanStack Query · Zustand · EKS',
-    detail: '기존 U+모아tv의 차세대 전환 구축과 U+tv모바일 출시·운영',
-  },
-  {
     name: '미래엔 Commerce V2',
     period: '2025.01–2025.02',
-    role: '구매·정기결제 담당',
+    role: '상품·구독 화면 담당',
     tech: 'Vue 3 · TypeScript · Pinia',
-    detail: '구매·구독 변경·철회 흐름과 결제 서버·사용자 입력 오류 안내 분리',
+    detail: '상품 이용 상태와 구독 변경·철회 흐름, 사용자 입력 오류 안내 개선',
   },
   {
     name: '미래엔 초코툰·LCMS',
@@ -84,29 +103,14 @@ const experienceRoles = [
     period: '2024.04–2024.11',
     role: '라우팅·배차 UI·캐시 담당',
     tech: 'Next.js 14 · TanStack Query v5 · MUI',
-    detail: '권한별 라우팅·배차 관리와 취소·재배차 후 캐시 정합성 개선',
-  },
-  {
-    name: '기존 U+모아tv 운영·고도화',
-    period: '2023.09–2026.04',
-    role: '홈 성능·렌더링 전략·데이터 계층 전환 담당',
-    tech: 'Next.js 12 → 16 · React 18 → 19 · TanStack Query · Zustand',
-    detail:
-      '운영·고도화와 App Router·TanStack Query 전환, 2025.09부터 차세대 구축 병행',
-  },
-  {
-    name: '기존 U+모바일tv 운영·WebView 안정화',
-    period: '2022.05–2023.09',
-    role: 'Native Bridge·WebView 운영 장애 대응',
-    tech: 'Next.js 6 · React 16 · TypeScript · MobX · Express',
-    detail: '별도 레거시 앱 운영과 단계적 종료, U+tv모바일로 고객 이관',
+    detail: '역할별 라우팅·배차 관리와 취소·재배차 후 캐시 정합성 개선',
   },
   {
     name: 'LG U+ SOHO',
     period: '2021.06–2022.04',
-    role: '인증·매장 전환 담당',
+    role: '고객·매장 관리 화면 담당',
     tech: 'React 17 · JavaScript · MobX 6',
-    detail: '계정 상태별 인증과 고객·매장 관리, 이전 매장 데이터 잔존 해결',
+    detail: '고객·매장 관리와 매장 전환 시 이전 매장 데이터가 남는 문제 해결',
   },
 ] as const
 
@@ -206,6 +210,159 @@ export default function ResumePage() {
             </div>
           </div>
         </section>
+        <section className={styles.section} aria-labelledby="experience">
+          <p className={styles.eyebrow}>EXPERIENCE</p>
+          <h2 id="experience">
+            대표 경력 <span className={styles.headingMeta}>총 5년 5개월</span>
+          </h2>
+          <p className={styles.company}>
+            KIINS · Frontend Engineer{' '}
+            <span>2021.06–현재 · 상용 웹·WebView 개발·운영</span>
+          </p>
+          <h3 className={styles.experienceGroupTitle}>대표 서비스</h3>
+          <div className={styles.experienceList}>
+            {representativeServiceRoles.map((item) => (
+              <article key={`${item.period}-${item.name}`}>
+                <p className={styles.period}>{item.period}</p>
+                <div>
+                  <h3>{item.name}</h3>
+                  <p className={styles.role}>{item.role}</p>
+                  <p className={styles.experienceDetail}>{item.detail}</p>
+                  <p className={styles.tech}>{item.tech}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className={`${styles.note} ${styles.serviceLineage}`}>
+            기존 U+모바일tv와 기존 U+모아tv는 별도 서비스로 공존했습니다.
+            정보성 서비스로 시작한 기존 U+모아tv를 U+tv모바일로 전환 구축했고,
+            출시에 맞춰 기존 U+모바일tv를 단계적으로 종료하며 고객을 이관했습니다.
+          </p>
+          <h3 className={styles.experienceGroupTitle}>기타 상용 프로젝트</h3>
+          <div className={`${styles.experienceList} ${styles.additionalExperienceList}`}>
+            {additionalProjectRoles.map((item) => (
+              <article key={`${item.period}-${item.name}`}>
+                <p className={styles.period}>{item.period}</p>
+                <div>
+                  <h3>{item.name}</h3>
+                  <p className={styles.role}>{item.role}</p>
+                  <p className={styles.experienceDetail}>{item.detail}</p>
+                  <p className={styles.tech}>{item.tech}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className={styles.note}>
+            기간은 개인 참여 기준이며 프로젝트를 병행한 구간이 있습니다.
+          </p>
+        </section>
+        <section className={styles.section} aria-labelledby="projects">
+          <p className={styles.eyebrow}>SELECTED PROJECTS</p>
+          <h2 id="projects">서비스의 운영·전환 흐름과 결과.</h2>
+          <article className={styles.project}>
+            <p className={styles.period}>
+              2025.09–현재 · 기존 U+모아tv 전환 구축·명칭 변경
+            </p>
+            <h3>U+tv모바일 전환 구축·출시·운영</h3>
+            <p className={styles.role}>
+              기존 U+모아tv의 서비스 확장·전환과 기존 U+모바일tv 고객 이관
+            </p>
+            <p className={styles.tech}>
+              Next.js 16 · React 19 · TypeScript · TanStack Query · Zustand · EKS
+            </p>
+            <ul>
+              <li>
+                정보성 서비스로 시작한 기존 U+모아tv를 U+tv모바일로 확장·전환하고,
+                출시에 맞춰 공존하던 기존 U+모바일tv를 단계적으로 종료하며 고객
+                이관.
+              </li>
+              <li>
+                <strong>SSR 운영 장애 계측:</strong> Pod 재시작과 Ready 상태 변화를
+                V8 Heap과 함께 확인하고 QueryClient 요청 단위 격리·서버 캐시
+                생명주기 개선.
+              </li>
+              <li>
+                <strong>로컬 반복 요청 검증:</strong> heapUsed 안정 구간 154.8MB →
+                93.2MB, 약 39.8% 감소 확인.
+              </li>
+            </ul>
+            <p className={styles.note}>
+              QueryClient 공유 가능성과 캐시 timer는 주요 원인 후보이며 단일
+              원인으로 단정하지 않습니다.
+            </p>
+            <div className={styles.projectLinks}>
+              <Link href={cases[1].href}>SSR 메모리 분석 ↗</Link>
+            </div>
+          </article>
+          <article className={styles.project}>
+            <p className={styles.period}>
+              2023.09–2026.04 · U+tv모바일 전환 구축과 병행
+            </p>
+            <h3>기존 U+모아tv 정보성 서비스 운영·고도화</h3>
+            <p className={styles.role}>
+              홈 성능·App Router 전환·데이터 계층 현대화
+            </p>
+            <p className={styles.tech}>
+              Next.js 12 → 16 · React 18 → 19 · TypeScript · TanStack Query
+            </p>
+            <ul>
+              <li>
+                <strong>LCP 12.2초 → 1.3초:</strong> 홈을 SSR
+                Prefetch·Hydration 구조로 전환하고 LCP 배너의 요청 우선순위 개선.
+              </li>
+              <li>
+                <strong>초기 요청 범위·실패 격리:</strong> 상단 패널만 SSR하고
+                나머지는 진입 직전에 조회했으며, 일부 API 실패가 홈 전체를 막지
+                않도록 분리. 담당 영역은 App Router·FSD 구조로 전환.
+              </li>
+              <li>
+                <strong>React Query v3 → TanStack Query v5:</strong> 77개 파일의
+                Query Hook·SSR Prefetch·Infinite Query 동작을 이관하고 기존 import
+                0건 확인. iOS 14 WebView 빌드 호환 경로도 확보.
+              </li>
+            </ul>
+            <p className={styles.note}>
+              LCP는 개발·QA Lighthouse의 단계별 개선 기록입니다.
+            </p>
+            <div className={styles.projectLinks}>
+              <Link href={cases[0].href}>홈 성능·구조 전환 ↗</Link>
+              <Link href={cases[2].href}>TanStack Query 전환 ↗</Link>
+            </div>
+          </article>
+          <article className={styles.project}>
+            <p className={styles.period}>
+              2022.05–2023.09 · 기존 U+모아tv와 별도 서비스로 공존
+            </p>
+            <h3>기존 U+모바일tv 운영·WebView 안정화</h3>
+            <p className={styles.role}>
+              Native Bridge·WebView 운영 장애 대응
+            </p>
+            <p className={styles.tech}>
+              Next.js 6 · React 16 · TypeScript · MobX · Express
+            </p>
+            <ul>
+              <li>
+                모바일 Safari·Chrome·iOS WebView와 Native Bridge의 이벤트·화면
+                복원 시점 차이를 구분해 운영 이슈 대응.
+              </li>
+              <li>
+                반복 생성되는 공통 컴포넌트에서 MobX autorun disposer 누락과
+                reaction 누적을 확인하고, unmount 시 구독을 해제하도록 개선.
+              </li>
+              <li>
+                서비스 종료 후 동일 패턴의 독립 환경에서 1,000회 반복 검증해 잔존
+                reaction·callback 1,000개 → 0개와 GC 후 Heap 기준선 회복 확인.
+              </li>
+            </ul>
+            <p className={styles.note}>
+              1,000회 반복·1,000개 → 0개는 서비스 종료 후 독립 재현 결과이며
+              운영 환경의 측정값이 아닙니다.
+            </p>
+            <div className={styles.projectLinks}>
+              <Link href={cases[3].href}>MobX 메모리 분석 ↗</Link>
+            </div>
+          </article>
+        </section>
         <section className={styles.section} aria-labelledby="skills">
           <p className={styles.eyebrow}>CORE SKILLS</p>
           <h2 id="skills">실무에서 검증한 기술을 중심으로.</h2>
@@ -223,163 +380,6 @@ export default function ResumePage() {
               <dd>SSR · WebView · Node.js · EKS</dd>
             </div>
           </dl>
-        </section>
-        <section className={styles.section} aria-labelledby="experience">
-          <p className={styles.eyebrow}>EXPERIENCE</p>
-          <h2 id="experience">
-            대표 경력 <span className={styles.headingMeta}>총 5년 5개월</span>
-          </h2>
-          <p className={styles.company}>
-            KIINS · Frontend Engineer{' '}
-            <span>2021.06–현재 · 상용 웹·WebView 개발·운영</span>
-          </p>
-          <div className={styles.experienceList}>
-            {experienceRoles.map((item) => (
-              <article key={`${item.period}-${item.name}`}>
-                <p className={styles.period}>{item.period}</p>
-                <div>
-                  <h3>{item.name}</h3>
-                  <p className={styles.role}>{item.role}</p>
-                  <p className={styles.experienceDetail}>{item.detail}</p>
-                  <p className={styles.tech}>{item.tech}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-          <p className={styles.note}>
-            기간은 개인 참여 기준이며 프로젝트를 병행한 구간이 있습니다. 기존
-            U+모바일tv는 별도 레거시 앱이고, 기존 U+모아tv는 전환 구축 후
-            U+tv모바일로 명칭이 변경된 서비스입니다.
-          </p>
-        </section>
-        <section className={styles.section} aria-labelledby="projects">
-          <p className={styles.eyebrow}>SELECTED PROJECTS</p>
-          <h2 id="projects">성과와 판단 근거가 분명한 프로젝트.</h2>
-          <article className={styles.project}>
-            <p className={styles.period}>
-              2024.10–2026.05 · 기존 U+모아tv → U+tv모바일
-            </p>
-            <h3>홈 성능 개선과 App Router 전환</h3>
-            <p className={styles.role}>
-              홈 SSR·데이터 로딩 전략·담당 영역 구조 전환
-            </p>
-            <p className={styles.tech}>
-              Next.js 12 → 16 · React 18 → 19 · TypeScript · TanStack Query
-            </p>
-            <ul>
-              <li>
-                <strong>LCP 12.2초 → 1.3초:</strong> CSR → SSR
-                Prefetch·Hydration 구조로 전환하고 LCP 배너를 우선 요청.
-              </li>
-              <li>
-                <strong>초기 요청 범위 축소:</strong> 상단 4개 패널만 SSR하고
-                나머지는 뷰포트 진입 400px 전에 조회.
-              </li>
-              <li>
-                <strong>부분 실패 격리·구조 전환:</strong> Promise.allSettled로
-                일부 API 실패를 격리하고 담당 영역을 App Router·FSD 구조로 전환.
-              </li>
-            </ul>
-            <p className={styles.note}>
-              LCP는 개발·QA Lighthouse의 단계별 개선 기록입니다.
-            </p>
-            <div className={styles.projectLinks}>
-              <Link href={cases[0].href}>상세 기술 사례 ↗</Link>
-            </div>
-          </article>
-          <article className={styles.project}>
-            <p className={styles.period}>2025.04–2025.07 · 기존 U+모아tv</p>
-            <h3>React Query v3 → TanStack Query v5</h3>
-            <p className={styles.role}>
-              77개 파일의 Query Hook·SSR Prefetch·Infinite Query·캐시 동작 이관
-            </p>
-            <p className={styles.tech}>
-              TypeScript · TanStack Query v5 · SSR Hydration · Babel
-            </p>
-            <ul>
-              <li>
-                Query Key·enabled 조건·SSR Prefetch 재사용·Infinite Query 종료
-                조건·Mutation 무효화 동작을 유지하며 v5 API로 전환.
-              </li>
-              <li>
-                <strong>기존 react-query import 0건:</strong> TanStack Query를
-                사용하는 61개 소스 파일의 이관 완료를 확인.
-              </li>
-              <li>
-                패키지 Transpile·Babel 설정을 보완해 iOS 14 WebView 빌드 호환
-                경로 확보.
-              </li>
-            </ul>
-            <div className={styles.projectLinks}>
-              <Link href={cases[2].href}>상세 기술 사례 ↗</Link>
-            </div>
-          </article>
-          <article className={styles.project}>
-            <p className={styles.period}>U+tv모바일 · SSR 안정화</p>
-            <h3>SSR V8 Heap OOM 분석과 캐시 생명주기 개선</h3>
-            <p className={styles.role}>
-              재시작 계측·QueryClient 격리·서버 캐시 timer 분석
-            </p>
-            <p className={styles.tech}>
-              Next.js · Node.js · V8 · TanStack Query
-            </p>
-            <ul>
-              <li>
-                <strong>운영 장애 계측:</strong> 동일 Pod의 재시작이 0회 → 7회로
-                증가하고 Ready 상태가 1 → 0 → 1로 반복 전환되는 현상을 V8 Heap과
-                함께 확인.
-              </li>
-              <li>
-                <strong>캐시 생명주기 정리:</strong> QueryClient를 요청 단위로
-                격리하고 서버 캐시·Prefetch의 gcTime을 Infinity로 조정해 요청 간
-                참조와 timer 생명주기를 정리.
-              </li>
-              <li>
-                <strong>로컬 반복 요청 검증:</strong> heapUsed 안정 구간 154.8MB
-                → 93.2MB, 약 39.8% 감소 확인.
-              </li>
-            </ul>
-            <p className={styles.note}>
-              QueryClient 공유 가능성과 캐시 timer는 주요 원인 후보이며 단일
-              원인으로 단정하지 않습니다.
-            </p>
-            <div className={styles.projectLinks}>
-              <Link href={cases[1].href}>상세 기술 사례 ↗</Link>
-            </div>
-          </article>
-          <article className={styles.project}>
-            <p className={styles.period}>2022.10 · 기존 U+모바일tv</p>
-            <h3>반복 화면 전환 종료 원인 추적·MobX reaction 정리</h3>
-            <p className={styles.role}>
-              공통 컴포넌트의 구독 생명주기 분석·운영 장애 개선
-            </p>
-            <p className={styles.tech}>
-              Next.js 6 · React 16 · TypeScript · MobX
-            </p>
-            <ul>
-              <li>
-                <strong>반복 화면 전환 종료 원인 추적:</strong> 홈·상세에서 반복
-                생성되는 공통 컴포넌트의 autorun disposer 누락과 reaction 누적을
-                확인.
-              </li>
-              <li>
-                <strong>구독 생명주기 정리:</strong> autorun disposer를 보관하고
-                unmount 시 호출해 화면과 함께 reaction이 해제되도록 개선.
-              </li>
-              <li>
-                <strong>독립 환경 1,000회 검증:</strong> 서비스 종료 후 MobX
-                4.9.2 동일 패턴에서 잔존 reaction·callback 1,000개 → 0개, GC 후
-                Heap 기준선 회복 확인.
-              </li>
-            </ul>
-            <p className={styles.note}>
-              1,000회 반복·1,000개 → 0개는 서비스 종료 후 독립 재현 결과이며
-              운영 환경의 측정값이 아닙니다.
-            </p>
-            <div className={styles.projectLinks}>
-              <Link href={cases[3].href}>상세 기술 사례 ↗</Link>
-            </div>
-          </article>
         </section>
         <section className={styles.section} aria-labelledby="personal">
           <p className={styles.eyebrow}>OPEN SOURCE &amp; PERSONAL</p>
