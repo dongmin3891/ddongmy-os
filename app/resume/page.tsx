@@ -103,44 +103,6 @@ const projects: readonly ResumeProject[] = [
     note: '메모리 감소 수치는 동일 로컬 반복 요청의 Node.js heapUsed 안정 구간 비교입니다.',
   },
   {
-    period: '2024.11 ~ 2024.12',
-    title: '미래엔 초코툰 뷰어·LCMS 개발',
-    context: '교육 콘텐츠 서비스 · 프론트엔드 개발',
-    tech: 'Next.js 14·15 · TypeScript · TanStack Query v5 · Zustand',
-    highlights: [
-      {
-        lead: '뷰어 상태 복원',
-        detail: '권 상세에서 뷰어로 이동한 뒤 돌아왔을 때 선택했던 권과 스와이프 상태 복원',
-      },
-      {
-        lead: 'LCMS 전시 관리',
-        detail:
-          '인기검색어·패키지·추천웹툰·하우스배너의 조회·검색·등록·수정과 날짜·URL·이미지 검증 흐름 구현',
-      },
-    ],
-  },
-  {
-    period: '2024.04 ~ 2024.11',
-    title: 'U+ITGO 라우팅·배차 관리 개발',
-    context: '물류 서비스 · 프론트엔드 개발',
-    tech: 'Next.js 14 · TypeScript · TanStack Query v5 · MUI',
-    highlights: [
-      {
-        lead: '배차 작업 규칙',
-        detail: '혼적 여부와 작업 완료 상태에 따른 배차내역 드래그·재배차 조건 구현',
-      },
-      {
-        lead: '배차 상태 동기화',
-        detail:
-          '재배차 완료 후 팝업을 종료하고 화물 목록 Query를 무효화해 배차내역과 목록 상태 동기화',
-      },
-      {
-        lead: '계정별 기능 제어',
-        detail: '운송사·가맹점·U+·ALFA 계정 조건에 따라 차주 관리 기능과 작업 버튼 노출 제어',
-      },
-    ],
-  },
-  {
     period: '2023.09 ~ 2026.04',
     title: '기존 U+모아tv 정보성 서비스 운영·고도화',
     context: 'U+ 미디어 서비스 · 프론트엔드 개발·운영',
@@ -201,6 +163,44 @@ const projects: readonly ResumeProject[] = [
       },
     ],
     note: '1,000회 반복 수치는 서비스 종료 후 동일 패턴을 재현한 독립 검증 결과입니다.',
+  },
+  {
+    period: '2024.04 ~ 2024.11',
+    title: 'U+ITGO 라우팅·배차 관리 개발',
+    context: '물류 서비스 · 프론트엔드 개발',
+    tech: 'Next.js 14 · TypeScript · TanStack Query v5 · MUI',
+    highlights: [
+      {
+        lead: '배차 작업 규칙',
+        detail: '혼적 여부와 작업 완료 상태에 따른 배차내역 드래그·재배차 조건 구현',
+      },
+      {
+        lead: '배차 상태 동기화',
+        detail:
+          '재배차 완료 후 팝업을 종료하고 화물 목록 Query를 무효화해 배차내역과 목록 상태 동기화',
+      },
+      {
+        lead: '계정별 기능 제어',
+        detail: '운송사·가맹점·U+·ALFA 계정 조건에 따라 차주 관리 기능과 작업 버튼 노출 제어',
+      },
+    ],
+  },
+  {
+    period: '2024.11 ~ 2024.12',
+    title: '미래엔 초코툰 뷰어·LCMS 개발',
+    context: '교육 콘텐츠 서비스 · 프론트엔드 개발',
+    tech: 'Next.js 14·15 · TypeScript · TanStack Query v5 · Zustand',
+    highlights: [
+      {
+        lead: '뷰어 상태 복원',
+        detail: '권 상세에서 뷰어로 이동한 뒤 돌아왔을 때 선택했던 권과 스와이프 상태 복원',
+      },
+      {
+        lead: 'LCMS 전시 관리',
+        detail:
+          '인기검색어·패키지·추천웹툰·하우스배너의 조회·검색·등록·수정과 날짜·URL·이미지 검증 흐름 구현',
+      },
+    ],
   },
   {
     period: '2021.06 ~ 2022.04',
@@ -286,15 +286,14 @@ export default function ResumePage() {
               서비스를 개발하며 상용 서비스의 성능·전환·운영 문제를 해결해왔습니다.
             </p>
             <p>
-              접근 권한이 제한된 SI 온프레미스 환경에서는 배포 이후의 문제를 직접
-              확인하기 어려웠습니다. 그래서 비슷한 환경을 홈서버에 구축해 문제를
-              재현하고 해결됐는지까지 확인했습니다.
+              운영 중 발생한 버그를 직접 확인할 수 없는 게 답답했습니다. 그래서
+              홈서버에 비슷한 환경을 만들고, 문제가 생긴 조건을 다시 만들어 수정
+              결과까지 확인했습니다.
             </p>
             <p>
               업무에서 반복해 겪은 스크롤 복원 문제는 Next.js App Router용
-              오픈소스로 정리해 공개했습니다. 사이드 프로젝트에서는 프론트엔드에만
-              선을 긋지 않았습니다. Java Spring 백엔드를 NestJS로 옮기고 GitOps 배포
-              환경까지 직접 구성했습니다.
+              오픈소스로 정리해 공개했습니다. 회사 밖에서도 기획자·디자이너·백엔드
+              개발자와 함께 제품을 만들어보고 싶어 사이드 프로젝트에 참여했습니다.
             </p>
           </div>
           <p className={styles.updatedAt}>Latest Updated 2026. 11. 06</p>
