@@ -253,53 +253,26 @@ export default function ResumePage() {
       </div>
       <main id="resume-content" className={styles.sheet}>
         <header className={styles.hero}>
-          <p className={styles.eyebrow}>KIM DONGMIN / FRONTEND ENGINEER</p>
-          <h1>
-            김동민<span>Frontend Engineer · Web &amp; WebView</span>
-          </h1>
-          <address className={styles.contacts}>
-            <a href="mailto:rlaehdals224@gmail.com">rlaehdals224@gmail.com</a>
-            <a href="https://github.com/dongmin3891">GitHub ↗</a>
-            <Link href="/log">기술 기록 ↗</Link>
-          </address>
+          <div className={styles.heroContent}>
+            <p className={styles.eyebrow}>KIM DONGMIN / FRONTEND ENGINEER</p>
+            <h1>
+              김동민<span>Frontend Engineer · Web &amp; WebView</span>
+            </h1>
+            <address className={styles.contacts}>
+              <a href="mailto:rlaehdals224@gmail.com">rlaehdals224@gmail.com</a>
+              <a href="https://github.com/dongmin3891">GitHub ↗</a>
+              <Link href="/log">기술 기록 ↗</Link>
+            </address>
+          </div>
+          <div
+            aria-label="김동민 프로필 사진 자리"
+            className={styles.profilePhoto}
+            role="img"
+          >
+            <span>KDM</span>
+            <small>PROFILE PHOTO</small>
+          </div>
         </header>
-
-        <section aria-label="핵심 수치" className={styles.metrics}>
-          <div>
-            <p className={styles.metricValue}>
-              50만<span>+</span>
-            </p>
-            <h2>U+tv모바일 다운로드</h2>
-            <p>현재 Google Play 누적 다운로드</p>
-            <a href="https://play.google.com/store/apps/details?id=com.lguplus.remocon&hl=ko">
-              서비스 규모 · 2026.11 확인 ↗
-            </a>
-          </div>
-          <div>
-            <p className={styles.metricValue}>
-              89<span>%</span>
-            </p>
-            <h2>LCP 단축</h2>
-            <p>12.2초 → 1.3초</p>
-            <small>
-              기존 U+모아tv · 개발·QA 환경
-              <br />
-              Lighthouse 단계별 개선 기록
-            </small>
-          </div>
-          <div>
-            <p className={styles.metricValue}>
-              약 40<span>%</span>
-            </p>
-            <h2>JS Heap 감소</h2>
-            <p>154.8MB → 93.2MB</p>
-            <small>
-              U+tv모바일 · 동일 로컬 반복 요청
-              <br />
-              Node.js heapUsed 안정 구간 비교
-            </small>
-          </div>
-        </section>
 
         <section className={styles.section} aria-labelledby="introduce">
           <h2 className={styles.eyebrow} id="introduce">
@@ -308,36 +281,43 @@ export default function ResumePage() {
           <div className={styles.introduction}>
             <p>
               6명 규모 스타트업에 합류해 5년간 재직하며 40명 이상의 조직으로
-              성장하는 과정을 경험했습니다. 미디어·물류·커머스·교육의
-              사용자·운영자 서비스를 개발하며 상용 서비스의 성능·전환·운영 문제를
-              해결해왔습니다.
+              성장하는 과정을 경험했습니다. 현재는 U+tv모바일의 프론트엔드 개발과
+              운영을 맡고 있습니다. 미디어·물류·커머스·교육의 사용자·운영자
+              서비스를 개발하며 상용 서비스의 성능·전환·운영 문제를 해결해왔습니다.
             </p>
             <p>
-              운영 중인 서비스를 중단 없이 전환하고, 브라우저와 WebView의 동작
-              차이를 좁히며, 성능과 메모리 문제를 측정 가능한 결과로 검증하는 데
-              강점이 있습니다.
+              접근 권한이 제한된 SI 온프레미스 환경에서는 배포 이후의 문제를 직접
+              확인하기 어려웠습니다. 그래서 비슷한 환경을 홈서버에 구축해 문제를
+              재현하고 해결됐는지까지 확인했습니다.
+            </p>
+            <p>
+              업무에서 반복해 겪은 스크롤 복원 문제는 Next.js App Router용
+              오픈소스로 정리해 공개했습니다. 사이드 프로젝트에서는 프론트엔드에만
+              선을 긋지 않았습니다. Java Spring 백엔드를 NestJS로 옮기고 GitOps 배포
+              환경까지 직접 구성했습니다.
             </p>
           </div>
           <p className={styles.updatedAt}>Latest Updated 2026. 11. 06</p>
           <div className={styles.strengths}>
             <div>
-              <h3>성능을 수치로 개선</h3>
+              <h3>운영하며 전환했습니다</h3>
               <p>
-                Lighthouse·메모리 계측으로 병목을 좁히고 측정 조건을 구분해 결과를
-                검증합니다.
+                U+모바일tv 고객을 이관하고 U+모아tv를 U+tv모바일로 전환하며 운영 중인
+                서비스의 구조와 기술을 바꿨습니다.
               </p>
             </div>
             <div>
-              <h3>운영 중인 서비스를 전환</h3>
+              <h3>문제는 재현부터</h3>
               <p>
-                서비스 이관과 App Router·TanStack Query 전환을 운영과 병행했습니다.
+                브라우저·WebView·SSR 문제를 직접 재현하고 Lighthouse와 메모리를
+                계측해 개선 전후를 확인했습니다.
               </p>
             </div>
             <div>
-              <h3>브라우저·WebView 환경 대응</h3>
+              <h3>필요하면 직접 만듭니다</h3>
               <p>
-                모바일 Safari·Chrome·iOS WebView의 호환성과 동작 차이에
-                대응했습니다.
+                업무에서 겪은 문제는 오픈소스로 정리했고, 사이드 프로젝트에서는
+                NestJS 백엔드와 GitOps 배포 환경까지 만들었습니다.
               </p>
             </div>
           </div>
@@ -404,20 +384,6 @@ export default function ResumePage() {
               </article>
             ))}
           </div>
-        </section>
-
-        <section className={styles.section} aria-labelledby="skills">
-          <h2 className={styles.eyebrow} id="skills">
-            SKILL
-          </h2>
-          <dl className={styles.skills}>
-            {skills.map((skill) => (
-              <div key={skill.name}>
-                <dt>{skill.name}</dt>
-                <dd>{skill.items}</dd>
-              </div>
-            ))}
-          </dl>
         </section>
 
         <section className={styles.section} aria-labelledby="side-project">
@@ -572,6 +538,20 @@ export default function ResumePage() {
               </a>
             </div>
           </article>
+        </section>
+
+        <section className={styles.section} aria-labelledby="skills">
+          <h2 className={styles.eyebrow} id="skills">
+            SKILL
+          </h2>
+          <dl className={styles.skills}>
+            {skills.map((skill) => (
+              <div key={skill.name}>
+                <dt>{skill.name}</dt>
+                <dd>{skill.items}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
         <footer className={styles.footer}>

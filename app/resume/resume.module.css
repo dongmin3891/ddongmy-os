@@ -66,6 +66,17 @@
   color: var(--accent);
   margin-bottom: 16px;
 }
+.hero {
+  display: grid;
+  grid-template-areas: 'photo content';
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 44px;
+  align-items: start;
+}
+.heroContent {
+  grid-area: content;
+  min-width: 0;
+}
 .hero h1 {
   font-size: 50px;
   line-height: 1.15;
@@ -80,6 +91,33 @@
   margin-top: 12px;
   color: var(--muted);
 }
+.profilePhoto {
+  grid-area: photo;
+  width: 132px;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  justify-self: start;
+  overflow: hidden;
+  border: 1px solid #d5dae2;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f8f9fb, #e9edf3);
+  color: var(--muted);
+}
+.profilePhoto span {
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.profilePhoto small {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
 .contacts {
   display: flex;
   flex-wrap: wrap;
@@ -87,49 +125,6 @@
   margin-top: 26px;
   font-style: normal;
   font-size: 14px;
-}
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 52px;
-  padding: 28px 0;
-  border-top: 2px solid var(--ink);
-  border-bottom: 1px solid #dce1e8;
-}
-.metrics > div {
-  padding: 0 22px;
-  border-left: 1px solid #dce1e8;
-}
-.metrics > div:first-child {
-  padding-left: 0;
-  border-left: 0;
-}
-.metricValue {
-  font-size: 48px;
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.05em;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-}
-.metricValue span {
-  font-size: 25px;
-  margin-left: 3px;
-}
-.metrics h2 {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 12px 0 4px;
-}
-.metrics p:not(.metricValue) {
-  font-size: 14px;
-}
-.metrics :is(small, a) {
-  display: block;
-  font-size: 11px;
-  line-height: 1.6;
-  margin-top: 10px;
-  color: var(--muted);
 }
 .section {
   margin-top: 64px;
@@ -348,26 +343,22 @@
   .hero h1 {
     font-size: 42px;
   }
+  .hero {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 18px;
+  }
+  .profilePhoto {
+    width: 92px;
+  }
+  .profilePhoto span {
+    font-size: 17px;
+  }
+  .profilePhoto small {
+    font-size: 6px;
+  }
   .contacts {
     font-size: 12px;
     gap: 8px 16px;
-  }
-  .metrics {
-    grid-template-columns: 1fr;
-    margin-top: 34px;
-    padding: 0;
-  }
-  .metrics > div,
-  .metrics > div:first-child {
-    padding: 22px 0;
-    border-left: 0;
-    border-bottom: 1px solid #e3e7ed;
-  }
-  .metrics > div:last-child {
-    border-bottom: 0;
-  }
-  .metricValue {
-    font-size: 44px;
   }
   .section {
     margin-top: 44px;
@@ -434,37 +425,16 @@
   .hero h1 {
     font-size: 30pt;
   }
+  .hero {
+    grid-template-columns: 30mm minmax(0, 1fr);
+    gap: 10mm;
+  }
+  .profilePhoto {
+    width: 30mm;
+  }
   .contacts {
     font-size: 9pt;
     margin-top: 14px;
-  }
-  .metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-top: 24px;
-    padding: 18px 0;
-    break-inside: avoid;
-  }
-  .metrics > div,
-  .metrics > div:first-child {
-    padding: 0 14px;
-    border-bottom: 0;
-    border-left: 1px solid #dce1e8;
-  }
-  .metrics > div:first-child {
-    padding-left: 0;
-    border-left: 0;
-  }
-  .metricValue {
-    font-size: 30pt;
-  }
-  .metrics h2 {
-    font-size: 10pt;
-  }
-  .metrics p:not(.metricValue) {
-    font-size: 9pt;
-  }
-  .metrics :is(small, a) {
-    font-size: 8pt;
   }
   .section {
     margin-top: 28px;
