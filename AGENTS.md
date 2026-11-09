@@ -25,6 +25,8 @@
 - Zustand client workflow·persist·SSR: `skills/zustand/SKILL.md`
 - Tailwind·shadcn/ui·Radix 스타일 구조: `skills/tailwind-ui/SKILL.md`
 - 단위·컴포넌트·E2E 테스트 층과 mock 경계: `skills/testing-ui/SKILL.md`
+- npm·Next.js·React 의존성 보안 감사·패치·회귀 검증:
+  `skills/dependency-security/SKILL.md`
 
 여러 층이 실제로 함께 바뀔 때만 스킬을 조합한다. 예를 들어 외부 API 연동은
 `readable-contracts`로 계약을 정하고, `schema-at-boundary`로 응답을 검증하며,
@@ -34,7 +36,7 @@
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 

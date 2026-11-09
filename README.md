@@ -10,7 +10,7 @@
 
 | 구분 | 기술 |
 | --- | --- |
-| Frontend | Next.js 16.3 (App Router), React 19.3, TypeScript |
+| Frontend | Next.js 16.4 (App Router), React 19.3, TypeScript |
 | Styling | Tailwind CSS 3, Pretendard |
 | Content | Notion API, React Markdown, Zod |
 | Container | Docker, GHCR |
@@ -81,6 +81,14 @@ npm run dev
 | `npm run start` | 프로덕션 서버 실행 |
 | `npm run lint` | ESLint 검사 |
 | `npm run typecheck` | TypeScript 타입 검사 |
+
+## 의존성 보안 점검
+
+Next.js·React와 npm 의존성은 설치 버전 확인, 공식 보안 권고 대조, 코드 노출 조건 분석,
+회귀 테스트, 운영 배포와 rollback 순서로 점검합니다.
+
+- [의존성 보안 점검 Runbook](docs/security/dependency-audit-runbook.md)
+- [2026-11-09 Next.js 의존성 보안 감사](docs/security/audits/2026-11-09.md)
 
 ## Docker 이미지 확인
 

@@ -14,6 +14,8 @@ function loadMermaid() {
       startOnLoad: false,
       securityLevel: 'strict',
       suppressErrorRendering: true,
+      layout: 'dagre',
+      look: 'classic',
       theme: 'dark',
       themeVariables: {
         background: '#020617',
