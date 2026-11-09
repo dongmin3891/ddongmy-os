@@ -1,5 +1,38 @@
 [
   {
+    "deployedAt": "2026-11-09T09:06:58.000Z",
+    "serviceName": "web-app",
+    "commitSha": "5427d357c3f4594a9d6683ccc499c586d201a6d2",
+    "status": "running",
+    "stages": {
+      "githubPush": {
+        "status": "success",
+        "startedAt": "2026-11-09T09:06:58.000Z",
+        "completedAt": "2026-11-09T09:08:31.261Z"
+      },
+      "githubActions": {
+        "status": "running",
+        "startedAt": "2026-11-09T09:08:31.261Z",
+        "completedAt": null
+      },
+      "ghcr": {
+        "status": "success",
+        "startedAt": "2026-11-09T09:08:41.356Z",
+        "completedAt": "2026-11-09T09:11:29.616Z"
+      },
+      "argoCd": {
+        "status": "unavailable",
+        "startedAt": null,
+        "completedAt": null
+      },
+      "k3sPodReady": {
+        "status": "unavailable",
+        "startedAt": null,
+        "completedAt": null
+      }
+    }
+  },
+  {
     "deployedAt": "2026-11-06T13:32:19.000Z",
     "serviceName": "web-app",
     "commitSha": "35eaa56b16049e399c840b5618d5a5f1033f103f",
