@@ -125,6 +125,10 @@ const projects: readonly ResumeProject[] = [
     ],
     links: [
       {
+        label: '선택적 SSR Prefetch ADR',
+        href: 'https://github.com/dongmin3891/ddongmy-os/blob/main/docs/adr/0001-home-selective-ssr-prefetch.md',
+      },
+      {
         label: '홈 성능·App Router 전환',
         href: '/log/utv-mobile-home-performance-app-router',
       },

@@ -102,6 +102,12 @@ Node.js 보안 패치를 올릴 때는 `.nvmrc`, `package.json`의 `engines`·`p
 | `npm run lint` | ESLint 검사 |
 | `npm run typecheck` | TypeScript 타입 검사 |
 
+## 아키텍처 의사결정
+
+서비스의 제약, 검토한 대안과 기술 선택의 결과는
+[`docs/adr`](docs/adr/README.md)에 기록합니다. 구현 과정과 시행착오는 Development Log에
+남기고, ADR에는 같은 결정을 다시 검토할 때 필요한 근거와 감수한 비용을 유지합니다.
+
 ## 의존성 보안 점검
 
 Next.js·React와 npm 의존성은 설치 버전 확인, 공식 보안 권고 대조, 코드 노출 조건 분석,
