@@ -71,13 +71,14 @@ export default function DevelopmentLogViewCounter({
   useEffect(() => {
     const storageKey = getLogViewStorageKey(postId)
     const nowTimestamp = Date.now()
+    const attemptedAt = String(nowTimestamp)
 
     try {
       if (wasDevelopmentLogRecentlyCounted(localStorage.getItem(storageKey), nowTimestamp)) {
         return
       }
 
-      localStorage.setItem(storageKey, String(nowTimestamp))
+      localStorage.setItem(storageKey, attemptedAt)
     } catch {
       // Storage can be unavailable in restricted browser contexts. Counting still remains usable.
     }
@@ -85,6 +86,14 @@ export default function DevelopmentLogViewCounter({
     countDevelopmentLogView({ postId, postSlug })
       .then((viewStats) => setCounterState({ status: 'available', viewStats }))
       .catch(() => {
+        try {
+          if (localStorage.getItem(storageKey) === attemptedAt) {
+            localStorage.removeItem(storageKey)
+          }
+        } catch {
+          // A failed request remains recoverable even when storage cleanup is unavailable.
+        }
+
         setCounterState((currentState) =>
           currentState.status === 'available' ? currentState : { status: 'unavailable' },
         )

@@ -98,6 +98,7 @@ Node.js 보안 패치를 올릴 때는 `.nvmrc`, `package.json`의 `engines`·`p
 | `npm run build:traffic-backfill` | 운영 이미지용 트래픽 백필 실행 파일 생성 |
 | `npm run start` | 프로덕션 서버 실행 |
 | `npm run check` | 테스트·타입 검사·lint 순차 실행 |
+| `npm run test:e2e` | Chromium에서 Playwright 브라우저 회귀 테스트 실행 |
 | `npm run lint` | ESLint 검사 |
 | `npm run typecheck` | TypeScript 타입 검사 |
 

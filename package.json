@@ -8,6 +8,7 @@
     "build": "next build",
     "build:traffic-backfill": "esbuild scripts/backfill-site-traffic.ts --bundle --platform=node --format=cjs --target=node22 --conditions=react-server --outfile=dist/backfill-site-traffic.cjs",
     "start": "next start",
+    "test:e2e": "playwright test",
     "traffic:backfill": "node --conditions=react-server --import tsx scripts/backfill-site-traffic.ts",
     "test": "node --conditions=react-server --import tsx --test features/development-log/*.test.ts features/homelab/*.test.ts features/traffic/*.test.ts",
     "check": "npm test && npm run typecheck && npm run lint",
@@ -35,6 +36,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@types/node": "22.20.2",
     "@types/pg": "^8.23.1",
     "@types/react": "19.3.0",

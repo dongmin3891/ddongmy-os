@@ -296,7 +296,7 @@ export default function ResumePage() {
               개발자와 함께 제품을 만들어보고 싶어 사이드 프로젝트에 참여했습니다.
             </p>
           </div>
-          <p className={styles.updatedAt}>Latest Updated 2026. 11. 06</p>
+          <p className={styles.updatedAt}>Latest Updated 2026. 11. 10</p>
           <div className={styles.strengths}>
             <div>
               <h3>운영하며 전환했습니다</h3>
@@ -409,16 +409,24 @@ export default function ResumePage() {
                 <strong>클러스터 조회 권한 분리:</strong> 특정 Deployment만 조회하는 내부
                 status-exporter가 공개 DTO를 전달하도록 책임 분리.
               </li>
+              <li>
+                <strong>Playwright 회귀 검증:</strong> 조회수 집계의 정상·API 실패 후
+                재시도·중복 실행을 브라우저 테스트 3개로 검증하고, 실패 기록이 30분간
+                재시도를 막던 문제를 발견·수정.
+              </li>
             </ul>
             <p className={styles.tech}>
               Next.js · TypeScript · Notion CMS · GitHub Actions · GHCR · Argo CD ·
-              K3s · Cloudflare R2
+              K3s · Cloudflare R2 · Playwright
             </p>
             <div className={styles.projectLinks}>
               <Link href="/projects/ddongmy-os">상세 사례 ↗</Link>
               <Link href="/log/notion-cover-r2-webhook-image-loading-retrospective">
                 이미지 처리 회고 ↗
               </Link>
+              <a href="https://github.com/dongmin3891/ddongmy-os/blob/main/docs/verification/playwright-log-view-regression.md">
+                Playwright 회귀 검증 ↗
+              </a>
               <a href="https://github.com/dongmin3891/ddongmy-os">GitHub ↗</a>
             </div>
           </article>

@@ -25,6 +25,8 @@
 - Zustand client workflow·persist·SSR: `skills/zustand/SKILL.md`
 - Tailwind·shadcn/ui·Radix 스타일 구조: `skills/tailwind-ui/SKILL.md`
 - 단위·컴포넌트·E2E 테스트 층과 mock 경계: `skills/testing-ui/SKILL.md`
+- Playwright E2E·browser 회귀 테스트의 locator·fixture·격리:
+  `skills/playwright-e2e/SKILL.md`
 - npm·Next.js·React 의존성 보안 감사·패치·회귀 검증:
   `skills/dependency-security/SKILL.md`
 
