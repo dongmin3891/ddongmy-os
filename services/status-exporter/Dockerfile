@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:22.23.4-alpine AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY services/status-exporter ./services/status-exporter
 
 RUN ./node_modules/.bin/tsc --project services/status-exporter/tsconfig.json
 
-FROM node:22-alpine AS runner
+FROM node:22.23.4-alpine AS runner
 
 WORKDIR /app
 

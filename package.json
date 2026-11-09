@@ -2,6 +2,7 @@
   "name": "ddongmy-os",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "npm@10.9.9",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,11 +10,13 @@
     "start": "next start",
     "traffic:backfill": "node --conditions=react-server --import tsx scripts/backfill-site-traffic.ts",
     "test": "node --conditions=react-server --import tsx --test features/development-log/*.test.ts features/homelab/*.test.ts features/traffic/*.test.ts",
+    "check": "npm test && npm run typecheck && npm run lint",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
-    "node": ">=22.13.0"
+    "node": "22.23.4",
+    "npm": "10.9.9"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1131.0",

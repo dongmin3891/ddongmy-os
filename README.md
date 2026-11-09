@@ -58,15 +58,32 @@ ddongmy-os/
 
 ### 요구 사항
 
-- Node.js 22.13 이상
-- npm
+- Node.js `22.23.4`
+- npm `10.9.9` (`22.23.4`에 포함)
+- nvm 사용 권장
 
 ### 실행 방법
 
 ```bash
+nvm install
+nvm use
 npm ci
+cp .env.example .env.local
 npm run dev
 ```
+
+`.nvmrc`, `package.json`의 `engines`·`packageManager`, Docker base image와 GitHub Actions가
+같은 Node.js·npm 조합을 사용합니다. `.npmrc`의 `engine-strict=true` 설정으로 지정한 버전과
+다른 Node.js·npm에서 의존성을 설치하면 즉시 실패합니다.
+
+일반적인 동기화와 CI에서는 lockfile을 변경하지 않는 `npm ci`를 사용합니다. 새 패키지를
+추가하거나 버전을 변경할 때만 `npm install <package>`을 사용하고, 변경된 `package.json`과
+`package-lock.json`을 함께 커밋합니다.
+
+Node.js 보안 패치를 올릴 때는 `.nvmrc`, `package.json`의 `engines`·`packageManager`,
+루트 `Dockerfile`과 `services/status-exporter/Dockerfile`을 같은 버전으로 변경합니다. 이후
+`npm ci`, `npm run check`, `npm run build`와 Docker 이미지 빌드를 모두 통과시켜 로컬·CI·운영
+환경의 차이를 막습니다.
 
 브라우저에서 [http://localhost:3000](http://localhost:3000)으로 접속합니다. Notion의 공개
 개발 로그를 확인하려면 `.env.example`을 참고해 `.env.local`에 server-only 환경 변수를
@@ -80,6 +97,7 @@ npm run dev
 | `npm run build` | 프로덕션 빌드 생성 |
 | `npm run build:traffic-backfill` | 운영 이미지용 트래픽 백필 실행 파일 생성 |
 | `npm run start` | 프로덕션 서버 실행 |
+| `npm run check` | 테스트·타입 검사·lint 순차 실행 |
 | `npm run lint` | ESLint 검사 |
 | `npm run typecheck` | TypeScript 타입 검사 |
 
