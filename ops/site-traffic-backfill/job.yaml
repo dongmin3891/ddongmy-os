@@ -33,10 +33,7 @@ spec:
               type: RuntimeDefault
           command:
             - node
-            - --conditions=react-server
-            - --import
-            - tsx
-            - scripts/backfill-site-traffic.ts
+            - scripts/backfill-site-traffic.cjs
           env:
             - name: HOME
               value: /tmp

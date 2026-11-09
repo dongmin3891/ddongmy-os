@@ -78,6 +78,7 @@ npm run dev
 | --- | --- |
 | `npm run dev` | 개발 서버 실행 |
 | `npm run build` | 프로덕션 빌드 생성 |
+| `npm run build:traffic-backfill` | 운영 이미지용 트래픽 백필 실행 파일 생성 |
 | `npm run start` | 프로덕션 서버 실행 |
 | `npm run lint` | ESLint 검사 |
 | `npm run typecheck` | TypeScript 타입 검사 |
@@ -93,6 +94,9 @@ Next.js·React와 npm 의존성은 설치 버전 확인, 공식 보안 권고 �
 ## Docker 이미지 확인
 
 프로덕션 배포와 동일한 Dockerfile을 로컬에서 확인할 수 있습니다.
+최종 이미지는 전체 `node_modules` 대신 Next.js standalone 산출물과 정적 자산만 포함합니다.
+트래픽 백필 Job은 빌드 단계에서 만든 `scripts/backfill-site-traffic.cjs`를 실행하므로
+운영 이미지에 TypeScript·`tsx`가 필요하지 않습니다.
 
 ```bash
 docker build -t ddongmy-os:local .

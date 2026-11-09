@@ -32,6 +32,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Next.js 프로덕션 빌드
 RUN npm run build
 
+# 운영 이미지에서 tsx 없이 실행할 수 있도록 백필 스크립트를 단일 파일로 번들링
+RUN npm run build:traffic-backfill
+
 # 4. 실행 단계
 FROM base AS runner
 
@@ -42,26 +45,17 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# 실행에 필요한 파일들만 복사하고 non-root node 사용자 소유로 설정
-COPY --chown=node:node --from=builder /app/package.json ./package.json
-COPY --chown=node:node --from=builder /app/package-lock.json ./package-lock.json
-COPY --chown=node:node --from=builder /app/next.config.mjs ./next.config.mjs
-COPY --chown=node:node --from=builder /app/config/notion-image-source.js ./config/notion-image-source.js
-COPY --chown=node:node --from=builder /app/config/r2-image-source.js ./config/r2-image-source.js
-COPY --chown=node:node --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --chown=node:node --from=builder /app/scripts/backfill-site-traffic.ts ./scripts/backfill-site-traffic.ts
-COPY --chown=node:node --from=builder /app/database/postgres.server.ts ./database/postgres.server.ts
-COPY --chown=node:node --from=builder /app/features/traffic/cloudflare-traffic.server.ts ./features/traffic/cloudflare-traffic.server.ts
-COPY --chown=node:node --from=builder /app/features/traffic/cloudflare-traffic.ts ./features/traffic/cloudflare-traffic.ts
-COPY --chown=node:node --from=builder /app/features/traffic/site-traffic-backfill.server.ts ./features/traffic/site-traffic-backfill.server.ts
-COPY --chown=node:node --from=builder /app/features/traffic/site-visit-stats.server.ts ./features/traffic/site-visit-stats.server.ts
-COPY --chown=node:node --from=builder /app/features/traffic/traffic-stats.ts ./features/traffic/traffic-stats.ts
+# Next.js가 추적한 운영 파일과 정적 자산만 복사한다.
+# standalone에는 서버 실행에 필요한 최소 node_modules와 server.js가 포함된다.
+COPY --chown=node:node --from=builder /app/.next/standalone ./
+COPY --chown=node:node --from=builder /app/.next/static ./.next/static
 COPY --chown=node:node --from=builder /app/public ./public
-COPY --chown=node:node --from=builder /app/.next ./.next
-COPY --chown=node:node --from=deps /app/node_modules ./node_modules
+
+# 동일 이미지를 사용하는 일회성 백필 Job용 운영 artifact
+COPY --chown=node:node --from=builder /app/dist/backfill-site-traffic.cjs ./scripts/backfill-site-traffic.cjs
 
 USER node
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

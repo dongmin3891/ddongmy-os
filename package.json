@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:traffic-backfill": "esbuild scripts/backfill-site-traffic.ts --bundle --platform=node --format=cjs --target=node22 --conditions=react-server --outfile=dist/backfill-site-traffic.cjs",
     "start": "next start",
     "traffic:backfill": "node --conditions=react-server --import tsx scripts/backfill-site-traffic.ts",
     "test": "node --conditions=react-server --import tsx --test features/development-log/*.test.ts features/homelab/*.test.ts features/traffic/*.test.ts",
@@ -36,6 +37,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "autoprefixer": "^10.4.17",
+    "esbuild": "0.28.2",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.5",
     "postcss": "^8.4.33",
